@@ -126,3 +126,21 @@ var orders = from order in DB.Orders
 //
 // select * from Order o inner join Customer c on c.CustomerID=o.CustomerID where c.Name like 'A%'
 ```
+
+So what if a query can't be translated to SQL? In that case, any part of the query that can't be translated will be evaluated in code. This will hurt performance but it will still give you the results you need.
+
+For example, say you have a custom function to determine if a customer object should be included in a query, but you only want to select customers with a name starting with "A":
+
+```csharp
+
+var customers = from customer in DB.Customers 
+                where customer.Name.StartsWith("A") && CustomMethod(customer) 
+                select customer;
+
+// It's obvious that the call to CustomMethod(customer) can't be translated to SQL so Velox.DB will do the following:
+//
+//      select * from Customer where Name like 'A%'
+// Then the results will filtered in code:
+//      customers = customers.Where(c => CustomMethod(c))
+```
+Velox.DB will split the predicate and feed part of if to the database and part of it will be evaluated in code.
