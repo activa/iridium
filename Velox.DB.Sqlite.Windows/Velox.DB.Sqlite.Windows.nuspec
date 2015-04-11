@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>velox.db.sqlite.windows</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>Philippe Leybaert</authors>
+    <licenseUrl>http://github.com/velox/db/LICENSE</licenseUrl>
+    <projectUrl>http://github.com/velox/db</projectUrl>
+    <iconUrl>http://dstyler.com/vici/32x32/im-_IconPlain100-w32-h32.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Velox.DB data provider for Sqlite (Windows servers and desktops)</description>
+    <copyright>Copyright 2015</copyright>
+    <tags>velox db sqlite</tags>
+    <dependencies>
+      <dependency id="velox.bd" version="0.9" />
+      <dependency id="System.Data.SQLite.Core" version="1.0" />
+    </dependencies>
+  </metadata>
+</package>

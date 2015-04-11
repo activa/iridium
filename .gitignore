@@ -1,0 +1,10 @@
+bin
+obj
+Bin
+Obj
+TestResults
+*.user
+*.suo
+*.bak
+*.userprefs
+*.pidb
