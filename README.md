@@ -4,7 +4,7 @@ Portable lightweight .NET ORM for mobile, desktop and servers
 Velox.DB is a .NET ORM that can be used on any platform supported by .NET, Mono and Xamarin.
 
 Features:
-- Works on any .NET 4.5+ platform, including Xamarin and Mono
+- Works on any .NET 4.5+ platform, including Xamarin (iOS and Android), Windows Phone 8 and Windows 8
 - Lightweight (assembly is < 120K) and very fast
 - Full LINQ expression support, including complex expressions involving relations
 - Seamless support for relations (many-to-one and one-to-many)
