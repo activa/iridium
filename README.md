@@ -50,39 +50,57 @@ dbContext.CreateTable<Customer>();
 dbContext.CreateTable<Order>();
 ```
 
-Create some records in the database:
+Create a record in the database:
 
 ```csharp
+Customer customer = new Customer { Name = "John Doe" };
 
-Customer customer1 = new Customer { Name = "John Doe" };
+dbContext.DataSet<Customer>.Save(customer);
 
-dbContext.DataSet<Customer>.Save(customer1);
-
-Console.WriteLine("Created customer ID {0}", customer1.CustomerID");
+Console.WriteLine("Created customer ID {0}", customer.CustomerID");
 ```
+
+Ok, so having to use dbContext.DataSet<Customer>() may be a little too much typing...
+
+```csharp
+var DB = new {
+            Customers = dbContext.DataSet<Customer>(),
+            Orders = dbContext.DataSet<Order>()
+         };
+// This works because DataSets are immutable and lightweight objects that are bound to the data store
+
+// now it's a little easier (but there are other ways too)
+
+DB.Customers.Save(customer);
+```
+
 
 Add a related record:
 
 ```csharp
-Order order = new Order { Date = DateTime.Today, Customer = customer1 };
+Order order = new Order { Date = DateTime.Today, Customer = customer };
 
-dbContext.DataSet<Orders>.Save(order);
+DB.Orders.Save(order);
 ```
 
 Read relations:
 
 ```csharp
-Customer customer = dbContext.DataSet<Customer>().Read(1);
+Customer customer = DB.Customers.Read(1);
 
 foreach (Order order in customer.Orders)
    Console.WriteLine("Order ID = {0}" , order.OrderID);
+
+// The many-to-one relation was automatically (lazy) populated because it was declared as DataSet<T>
+// You can declare relations using any collection type, like IEnumerable<Order> or Order[] but you
+// would need to tell Velox.DB to read the relation by calling Vx.LoadRelations(...)
 ```
 
 LINQ queries:
 
 ```csharp
 
-var customers = from customer in dbContext.DataSet<Customer> 
+var customers = from customer in DB.Customers 
                    where customer.Orders.Any() 
                    order by customer.Name 
                    select customer;
@@ -99,7 +117,7 @@ LINQ queries:
 ```csharp
 
 // Get all orders belonging to customers whos name start with "A"
-var orders = from order in dbContext.DataSet<Order> 
+var orders = from order in DB.Orders 
                    where order.Customer.Name.StartsWith("A")
                    select order;
                    
