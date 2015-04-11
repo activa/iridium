@@ -5,11 +5,12 @@ Velox.DB is a .NET ORM that can be used on any platform supported by .NET, Mono 
 
 Features:
 - Works on any .NET 4.5+ platform, including Xamarin and Mono
-- Lightweight and very fast
+- Lightweight (assembly is < 120K) and very fast
 - Full LINQ expression support, including complex expressions involving relations
 - Seamless support for relations (many-to-one and one-to-many)
 - Uses POCO classes (no base class required)
-- Works with any storage backend, including non-relational databases and flat files (Json/Xml)
+- Works with any storage backend, including SQL databases and non-relational databases, in-memory storage and flat files (Json/Xml)
+- Built-in support for SQL Server, Sqlite and MySql with more to come. Adding other database providers is extremely easy.
 
 ### Velox.DB in action
 
