@@ -92,11 +92,12 @@ Customer customer = DB.Customers.Read(1);
 foreach (Order order in customer.Orders)
    Console.WriteLine("Order ID = {0}" , order.OrderID);
 
-// The many-to-one relation was automatically (lazy) populated because
+// The one-to-many relation was automatically (lazy) populated because
 // it was declared as DataSet<T>. You can declare relations using any 
 // collection type, like IEnumerable<Order> or Order[] but you
 // would need to tell Velox.DB explicitly to read the relation 
-// by calling Vx.LoadRelations(...)
+// by calling Vx.LoadRelations(...) - the same is true for
+// many-to-one relations
 ```
 
 LINQ queries:
