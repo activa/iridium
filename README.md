@@ -5,7 +5,7 @@ Velox.DB is a .NET ORM that can be used on any platform supported by .NET, Mono 
 
 Features:
 - Works on any .NET 4.5+ platform, including Xamarin (iOS and Android), Windows Phone 8 and Windows 8
-- Lightweight (assembly is < 120K) and very fast
+- Lightweight (assembly is < 120K), very fast and without any dependencies
 - Full LINQ expression support, including complex expressions involving relations
 - Seamless support for relations (many-to-one and one-to-many)
 - Uses POCO classes (no base class required)
@@ -132,12 +132,12 @@ So what if a query can't be translated to SQL? In that case, any part of the que
 For example, say you have a custom function to determine if a customer object should be included in a query, but you only want to select customers with a name starting with "A":
 
 ```csharp
-
 var customers = from customer in DB.Customers 
                 where customer.Name.StartsWith("A") && CustomMethod(customer) 
                 select customer;
 
-// It's obvious that the call to CustomMethod(customer) can't be translated to SQL so Velox.DB will do the following:
+// It's obvious that the call to CustomMethod(customer) can't be 
+// translated to SQL so Velox.DB will do the following:
 //
 //      select * from Customer where Name like 'A%'
 // Then the results will filtered in code:
