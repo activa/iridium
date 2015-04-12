@@ -151,3 +151,21 @@ var customers = from customer in DB.Customers
 //      customers = customers.Where(c => CustomMethod(c))
 ```
 Velox.DB will split the predicate and feed part of if to the database and part of it will be evaluated in code.
+
+##### Ad-Hoc SQL queries
+
+If your data provider supports it, you can send queries directly to the database and store the results in an object:
+
+```csharp
+public class CustomerInfo
+{
+    public int CustomerID;
+    public string CustomerName;
+    public int NumOrders;
+}
+
+var records = dbContext.Query<CustomerInfo>(
+                  "select c.CustomerID,c.Name as CustomerName, count(*) from Customer c " +
+                  "inner join Order o on o.CustomerID=c.CustomerID " +
+                  "group by c.CustomerID,c.Name");
+```
