@@ -25,39 +25,27 @@
 #endregion
 
 using System;
-using System.Linq.Expressions;
 
 namespace Velox.DB
 {
-    public static class VxExtensions
+    public static partial class Vx
     {
-        public static bool Save<T>(this T entity, bool saveRelations = false, bool? create = null) where T:IEntity
+        public class Configuration
         {
-            return Vx.DataSet<T>().Save(entity, saveRelations, create);
+            private NamingConvention _namingConvention = NamingConvention.Default;
+
+            public NamingConvention NamingConvention
+            {
+                get { return _namingConvention; }
+                set { _namingConvention = value; }
+            }
         }
 
-        public static bool Create<T>(this T entity, bool saveRelations = false) where T : IEntity
+        private static readonly Configuration _config = new Configuration();
+
+        public static Configuration Config
         {
-            return Vx.DataSet<T>().Create(entity, saveRelations);
+            get { return _config; }
         }
-
-        public static T Load<T>(this T obj, object key, params Expression<Func<T, object>>[] relationsToLoad) where T : IEntity
-        {
-            return Vx.DataSet<T>().Load(obj, key, relationsToLoad);
-        }
-
-        public static bool Delete<T>(this T entity) where T : IEntity
-        {
-            return Vx.DataSet<T>().Delete(entity);
-        }
-
-        public static T WithRelations<T>(this T entity, params Expression<Func<T, object>>[] relations) where T : IEntity
-        {
-            Vx.LoadRelations(entity, relations);
-
-            return entity;
-        }
-
-
     }
 }

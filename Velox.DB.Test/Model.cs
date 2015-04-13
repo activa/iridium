@@ -10,7 +10,7 @@ namespace Velox.DB.Test
 {
     public class Product
     {
-        [Column.PrimaryKey]
+        // This will be a primary key with autoincrement, by convention
         public string ProductID;
 
         [Column.Size(200)][Column.NotNull]

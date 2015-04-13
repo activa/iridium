@@ -25,39 +25,30 @@
 #endregion
 
 using System;
-using System.Linq.Expressions;
 
 namespace Velox.DB
 {
-    public static class VxExtensions
+    public abstract class NamingConvention
     {
-        public static bool Save<T>(this T entity, bool saveRelations = false, bool? create = null) where T:IEntity
+        private static DefaultNamingConvention _defaultNamingConvention = null;
+
+        public static DefaultNamingConvention Default
         {
-            return Vx.DataSet<T>().Save(entity, saveRelations, create);
+            get
+            {
+                return _defaultNamingConvention ?? (_defaultNamingConvention = new DefaultNamingConvention());
+            }
         }
 
-        public static bool Create<T>(this T entity, bool saveRelations = false) where T : IEntity
+        public class FieldProperties
         {
-            return Vx.DataSet<T>().Create(entity, saveRelations);
+            public bool? PrimaryKey { get; set; }
+            public bool? AutoIncrement { get; set; }
+            public bool? Indexed { get; set; }
+            public string MappedTo { get; set; }
+            public bool? Null { get; set; }
         }
 
-        public static T Load<T>(this T obj, object key, params Expression<Func<T, object>>[] relationsToLoad) where T : IEntity
-        {
-            return Vx.DataSet<T>().Load(obj, key, relationsToLoad);
-        }
-
-        public static bool Delete<T>(this T entity) where T : IEntity
-        {
-            return Vx.DataSet<T>().Delete(entity);
-        }
-
-        public static T WithRelations<T>(this T entity, params Expression<Func<T, object>>[] relations) where T : IEntity
-        {
-            Vx.LoadRelations(entity, relations);
-
-            return entity;
-        }
-
-
+        public abstract FieldProperties GetFieldProperties(OrmSchema schema, OrmSchema.Field field);
     }
 }

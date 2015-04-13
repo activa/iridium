@@ -34,7 +34,6 @@ using Velox.DB.Core;
 
 namespace Velox.DB
 {
-
     public partial class OrmSchema
     {
         private readonly string _mappedName;
@@ -73,39 +72,50 @@ namespace Velox.DB
 
                 var schemaField = new Field(field);
 
-                if (fieldInspector.HasAttribute<MapToAttribute>(false))
+                var fieldPropertiesFromConvention = Vx.Config.NamingConvention.GetFieldProperties(this, schemaField);
+
+                if (fieldPropertiesFromConvention.MappedTo != null)
+                    schemaField.MappedName = fieldPropertiesFromConvention.MappedTo;
+
+                if (fieldInspector.HasAttribute<MapToAttribute>())
                 {
-                    schemaField.MappedName = fieldInspector.GetAttribute<MapToAttribute>(false).Name;
+                    schemaField.MappedName = fieldInspector.GetAttribute<MapToAttribute>().Name;
                 }
 
-                if (fieldInspector.HasAttribute<Column.SizeAttribute>(false))
+                if (fieldInspector.HasAttribute<Column.SizeAttribute>())
                 {
-                    schemaField.ColumnSize = fieldInspector.GetAttribute<Column.SizeAttribute>(false).Size;
-                    schemaField.ColumnScale = fieldInspector.GetAttribute<Column.SizeAttribute>(false).Scale;
+                    schemaField.ColumnSize = fieldInspector.GetAttribute<Column.SizeAttribute>().Size;
+                    schemaField.ColumnScale = fieldInspector.GetAttribute<Column.SizeAttribute>().Scale;
                 }
                 else if (field.FieldType == typeof (string))
                 {
-                    if (fieldInspector.HasAttribute<Column.LargeTextAttribute>(false))
+                    if (fieldInspector.HasAttribute<Column.LargeTextAttribute>())
                         schemaField.ColumnSize = int.MaxValue;
                     else
                         schemaField.ColumnSize = 50;
                 }
 
-                if (fieldInspector.HasAttribute<Column.PrimaryKeyAttribute>(false))
+                if (fieldInspector.HasAttribute<Column.PrimaryKeyAttribute>())
                 {
                     schemaField.PrimaryKey = true;
-                    schemaField.AutoIncrement = fieldInspector.GetAttribute<Column.PrimaryKeyAttribute>(false).AutoIncrement;
+                    schemaField.AutoIncrement = fieldInspector.GetAttribute<Column.PrimaryKeyAttribute>().AutoIncrement;
+                }
+                else if (fieldPropertiesFromConvention.PrimaryKey ?? false)
+                {
+                    schemaField.PrimaryKey = true;
+
+                    if (fieldPropertiesFromConvention.AutoIncrement != null)
+                        schemaField.AutoIncrement = fieldPropertiesFromConvention.AutoIncrement.Value;
                 }
 
-                if (fieldInspector.HasAttribute<Column.NotNullAttribute>(false))
-                {
+                if (fieldPropertiesFromConvention.Null != null)
+                    schemaField.ColumnNullable = fieldPropertiesFromConvention.Null.Value;
+
+                if (fieldInspector.HasAttribute<Column.NotNullAttribute>())
                     schemaField.ColumnNullable = false;
-                }
 
-                if (fieldInspector.HasAttribute<Column.NullAttribute>(false))
-                {
+                if (fieldInspector.HasAttribute<Column.NullAttribute>())
                     schemaField.ColumnNullable = true;
-                }
 
                 _fields[schemaField.FieldName] = schemaField;
                 _mappedFields[schemaField.MappedName] = schemaField;
@@ -118,6 +128,7 @@ namespace Velox.DB
             _primaryKeys = _fieldList.Where(f => f.PrimaryKey).ToArray();
             _incrementKeys = _fieldList.Where(f => f.AutoIncrement).ToArray();
 
+            /*
             if (_primaryKeys.Length == 0) // add primary key based on convention naming
             {
                 var pkField = _fields[t.Name + "ID"] ?? _fields[t.Name + "Id"];
@@ -130,8 +141,7 @@ namespace Velox.DB
                     _incrementKeys = new[] {pkField};
                 }
             }
-
-            //AllSchemas[t] = this;
+             * */
         }
 
         private SafeDictionary<string,Relation> FindRelations()

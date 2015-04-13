@@ -1,4 +1,4 @@
-﻿#region License
+#region License
 //=============================================================================
 // Velox.DB - Portable .NET ORM 
 //
@@ -25,39 +25,30 @@
 #endregion
 
 using System;
-using System.Linq.Expressions;
+using Velox.DB.Core;
 
 namespace Velox.DB
 {
-    public static class VxExtensions
+    public class DefaultNamingConvention : NamingConvention
     {
-        public static bool Save<T>(this T entity, bool saveRelations = false, bool? create = null) where T:IEntity
+        public bool PkIncludesClassName { get; set; }
+        public bool PkIsAutoIncrement { get; set; }
+
+        public DefaultNamingConvention()
         {
-            return Vx.DataSet<T>().Save(entity, saveRelations, create);
+            PkIncludesClassName = true;
+            PkIsAutoIncrement = true;
         }
 
-        public static bool Create<T>(this T entity, bool saveRelations = false) where T : IEntity
+        public override FieldProperties GetFieldProperties(OrmSchema schema, OrmSchema.Field field)
         {
-            return Vx.DataSet<T>().Create(entity, saveRelations);
+            if (field.FieldName.EndsWith("ID", StringComparison.OrdinalIgnoreCase))
+            {
+                if ((!PkIncludesClassName && field.FieldName.Length == 2) || (PkIncludesClassName && field.FieldName.Substring(0, field.FieldName.Length - 2).Equals(schema.ObjectType.Name, StringComparison.OrdinalIgnoreCase)))
+                    return new FieldProperties() {PrimaryKey = true, AutoIncrement = PkIsAutoIncrement && field.FieldType.Inspector().Is(TypeFlags.Integer)};
+            }
+
+            return new FieldProperties();
         }
-
-        public static T Load<T>(this T obj, object key, params Expression<Func<T, object>>[] relationsToLoad) where T : IEntity
-        {
-            return Vx.DataSet<T>().Load(obj, key, relationsToLoad);
-        }
-
-        public static bool Delete<T>(this T entity) where T : IEntity
-        {
-            return Vx.DataSet<T>().Delete(entity);
-        }
-
-        public static T WithRelations<T>(this T entity, params Expression<Func<T, object>>[] relations) where T : IEntity
-        {
-            Vx.LoadRelations(entity, relations);
-
-            return entity;
-        }
-
-
     }
 }
