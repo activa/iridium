@@ -31,6 +31,17 @@ namespace Velox.DB
     public sealed class Column
     {
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+        public sealed class NameAttribute : Attribute
+        {
+            public string Name { get; private set; }
+
+            public NameAttribute(string name)
+            {
+                Name = name;
+            }
+        }
+
+        [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
         public sealed class NotMappedAttribute : Attribute
         {
         }
@@ -74,6 +85,4 @@ namespace Velox.DB
         {
         }
     }
-
-
 }

@@ -77,9 +77,9 @@ namespace Velox.DB
                 if (fieldPropertiesFromConvention.MappedTo != null)
                     schemaField.MappedName = fieldPropertiesFromConvention.MappedTo;
 
-                if (fieldInspector.HasAttribute<MapToAttribute>())
+                if (fieldInspector.HasAttribute<Column.NameAttribute>())
                 {
-                    schemaField.MappedName = fieldInspector.GetAttribute<MapToAttribute>().Name;
+                    schemaField.MappedName = fieldInspector.GetAttribute<Column.NameAttribute>().Name;
                 }
 
                 if (fieldInspector.HasAttribute<Column.SizeAttribute>())

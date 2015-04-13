@@ -14,8 +14,8 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyCulture("")]
 [assembly: NeutralResourcesLanguage("en")]
 
-[assembly: AssemblyVersion("0.9.16.*")]
-[assembly: AssemblyInformationalVersion("0.9.16")]
+[assembly: AssemblyVersion("0.9.17.*")]
+[assembly: AssemblyInformationalVersion("0.9.17")]
 
 [assembly: InternalsVisibleTo("Velox.DB.TextExpressions")]
 

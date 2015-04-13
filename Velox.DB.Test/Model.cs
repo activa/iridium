@@ -42,7 +42,7 @@ namespace Velox.DB.Test
 
         public int? SalesPersonID { get;set; }
 
-		[MapTo("Date")]
+		[Column.Name("Date")]
 		public DateTime OrderDate { get; set; }
 
 		public string Remark { get; set; }
@@ -73,7 +73,7 @@ namespace Velox.DB.Test
 
 	public class SalesPerson
 	{
-        [Column.PrimaryKeyAttribute(AutoIncrement = true)][MapTo("SalesPersonID")]
+        [Column.PrimaryKeyAttribute(AutoIncrement = true)][Column.Name("SalesPersonID")]
         public int ID;
 
 	    public string Name;

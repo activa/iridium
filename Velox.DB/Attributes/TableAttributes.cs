@@ -1,4 +1,4 @@
-﻿#region License
+#region License
 //=============================================================================
 // Velox.DB - Portable .NET ORM 
 //
@@ -28,14 +28,17 @@ using System;
 
 namespace Velox.DB
 {
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Class)]
-    public sealed class MapToAttribute : Attribute
+    public sealed class Table
     {
-        public string Name { get; private set; }
-
-        public MapToAttribute(string name)
+        [AttributeUsage(AttributeTargets.Class)]
+        public sealed class NameAttribute : Attribute
         {
-            Name = name;
+            public string Name { get; private set; }
+
+            public NameAttribute(string name)
+            {
+                Name = name;
+            }
         }
     }
 }

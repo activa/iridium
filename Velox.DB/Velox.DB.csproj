@@ -74,9 +74,9 @@
       <Link>Core\SmartConverter\StringConverter.cs</Link>
     </Compile>
     <Compile Include="Attributes\ColumnAttributes.cs" />
-    <Compile Include="Attributes\MapToAttribute.cs" />
     <Compile Include="Attributes\PreserveAttribute.cs" />
     <Compile Include="Attributes\RelationAttributes.cs" />
+    <Compile Include="Attributes\TableAttributes.cs" />
     <Compile Include="DataProviders\Sql\SqlDialect.cs" />
     <Compile Include="DataProviders\Sql\SqlExpressionBuilder.cs" />
     <Compile Include="DataProviders\Sql\ExpressionTranslator\SqlExpressionTranslator.cs" />
