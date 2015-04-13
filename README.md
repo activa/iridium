@@ -65,16 +65,16 @@ Ok, so having to use dbContext.DataSet<Customer>() may be a little too much typi
 
 ```csharp
 var DB = new {
-            Customers = dbContext.DataSet<Customer>(),
-            Orders = dbContext.DataSet<Order>()
-         };
-// This works because DataSets are immutable and lightweight objects that are bound to the data store
+                Customers = dbContext.DataSet<Customer>(),
+                Orders = dbContext.DataSet<Order>()
+             };
+// This works because DataSets are immutable and lightweight objects that are 
+// bound to the data store
 
-// now it's a little easier (but there are other ways too)
+// Now it's a little easier (but there are other ways too)
 
 DB.Customers.Save(customer);
 ```
-
 
 Add a related record:
 
@@ -92,9 +92,12 @@ Customer customer = DB.Customers.Read(1);
 foreach (Order order in customer.Orders)
    Console.WriteLine("Order ID = {0}" , order.OrderID);
 
-// The many-to-one relation was automatically (lazy) populated because it was declared as DataSet<T>
-// You can declare relations using any collection type, like IEnumerable<Order> or Order[] but you
-// would need to tell Velox.DB to read the relation by calling Vx.LoadRelations(...)
+// The one-to-many relation was automatically (lazy) populated because
+// it was declared as DataSet<T>. You can declare relations using any 
+// collection type, like IEnumerable<Order> or Order[] but you
+// would need to tell Velox.DB explicitly to read the relation 
+// by calling Vx.LoadRelations(...) - the same is true for
+// many-to-one relations
 ```
 
 LINQ queries:
@@ -106,14 +109,16 @@ var customers = from customer in DB.Customers
                    order by customer.Name 
                    select customer;
                    
-// This query is automatically translated to correct SQL if the data provider supports it:
+// This query is automatically translated to correct SQL 
+// if the data provider supports it (as all built-in
+// SQL providers do):
 //
-// select * from Customer c where exists (select * from Order o where o.CustomerID=c.CustomerID) order by c.Name
+// select * from Customer c 
+//     where exists (select * from Order o where o.CustomerID=c.CustomerID) 
+//     order by c.Name
 ```
 
 Complex cross-relation LINQ queries:
-
-LINQ queries:
 
 ```csharp
 
@@ -124,7 +129,9 @@ var orders = from order in DB.Orders
                    
 // Translates to:
 //
-// select * from Order o inner join Customer c on c.CustomerID=o.CustomerID where c.Name like 'A%'
+// select * from Order o 
+//          inner join Customer c on c.CustomerID=o.CustomerID 
+//          where c.Name like 'A%'
 ```
 
 So what if a query can't be translated to SQL? In that case, any part of the query that can't be translated will be evaluated in code. This will hurt performance but it will still give you the results you need.
@@ -144,3 +151,21 @@ var customers = from customer in DB.Customers
 //      customers = customers.Where(c => CustomMethod(c))
 ```
 Velox.DB will split the predicate and feed part of if to the database and part of it will be evaluated in code.
+
+##### Ad-Hoc SQL queries
+
+If your data provider supports it, you can send queries directly to the database and store the results in an object:
+
+```csharp
+public class CustomerInfo
+{
+    public int CustomerID;
+    public string CustomerName;
+    public int NumOrders;
+}
+
+var records = dbContext.Query<CustomerInfo>(
+                  "select c.CustomerID,c.Name as CustomerName, count(*) from Customer c " +
+                  "inner join Order o on o.CustomerID=c.CustomerID " +
+                  "group by c.CustomerID,c.Name");
+```
