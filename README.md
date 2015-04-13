@@ -38,7 +38,8 @@ public class Order
 }
 ```
 
-(note that you can use public fields or properties)
+- *Note 1: You can use public fields or properties*
+- *Note 2: There's actually no need to use the PrimaryKey attribute because you can define naming conventions for your classes. The default naming convention handles the case above.*
 
 Connect to a storage backend:
 
