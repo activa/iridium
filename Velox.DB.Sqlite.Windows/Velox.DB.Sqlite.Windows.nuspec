@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
-<package >
+<package>
   <metadata>
     <id>velox.db.sqlite.windows</id>
-    <version>$version$</version>
-    <title>$title$</title>
+    <version>0.9.16</version>
+    <title>Velox.DB.Sqlite.Windows</title>
     <authors>Philippe Leybaert</authors>
     <licenseUrl>http://github.com/velox/db/LICENSE</licenseUrl>
     <projectUrl>http://github.com/velox/db</projectUrl>
@@ -13,8 +13,11 @@
     <copyright>Copyright 2015</copyright>
     <tags>velox db sqlite</tags>
     <dependencies>
-      <dependency id="velox.bd" version="0.9" />
+      <dependency id="velox.db" version="0.9" />
       <dependency id="System.Data.SQLite.Core" version="1.0" />
     </dependencies>
   </metadata>
+  <files>
+    <file src="bin\Release\Velox.DB.Sqlite.Windows.dll" target="lib\net45" />
+  </files>
 </package>

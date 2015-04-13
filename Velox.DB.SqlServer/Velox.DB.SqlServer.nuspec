@@ -1,19 +1,22 @@
 <?xml version="1.0"?>
 <package>
   <metadata>
-    <id>velox.db</id>
+    <id>velox.db.sqlserver</id>
     <version>0.9.16</version>
-    <title>Velox.DB</title>
+    <title>Velox.DB.SqlServer</title>
     <authors>Philippe Leybaert</authors>
-    <projectUrl>http://github.com/velox/db</projectUrl>
     <licenseUrl>http://github.com/velox/db/LICENSE</licenseUrl>
+    <projectUrl>http://github.com/velox/db</projectUrl>
     <iconUrl>http://dstyler.com/vici/32x32/im-_IconPlain100-w32-h32.png</iconUrl>
-    <tags>velox db orm sql sqlite sqlserver</tags>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Lightweight multi-platform ORM for mobile, desktop and servers</description>
+    <description>Velox.DB data provider for SQL Server 2008+</description>
     <copyright>Copyright 2015</copyright>
+    <tags>velox db sqlserver</tags>
+    <dependencies>
+      <dependency id="velox.db" version="0.9" />
+    </dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\*.dll" target="lib\portable-net45+netcore45+wpa81+wp8" />
+    <file src="bin\Release\Velox.DB.SqlServer.dll" target="lib\net45" />
   </files>
 </package>
