@@ -30,8 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MySql.Data">
-      <HintPath>.\MySql.Data.dll</HintPath>
+    <Reference Include="MySql.Data, Version=6.9.6.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <HintPath>..\packages\MySql.Data.6.9.6\lib\net45\MySql.Data.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -55,12 +56,24 @@
       <Name>Velox.DB</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
+
   <Target Name="BeforeBuild">
   </Target>
   <Target Name="AfterBuild">
+    <GetAssemblyIdentity AssemblyFiles="bin/$(Configuration)/Velox.DB.MySql.dll">
+      <Output TaskParameter="Assemblies" ItemName="YourAssemblyInfo"/>
+    </GetAssemblyIdentity>
+    <XmlPoke
+        Namespaces="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+        XmlInputPath="Velox.DB.MySql.nuspec"
+        Query="package/metadata/version"
+        Value="%(YourAssemblyInfo.Version)"/>
+    <Exec Condition="'$(Configuration)' == 'Release'" Command="nuget.exe pack Velox.DB.MySql.nuspec" />
   </Target>
-  -->
+  
 </Project>

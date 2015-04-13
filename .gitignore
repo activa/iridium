@@ -8,3 +8,4 @@ TestResults
 *.bak
 *.userprefs
 *.pidb
+*.nupkg

@@ -7,15 +7,15 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTitle("VeloxDB")]
 [assembly: AssemblyDescription("Lightweight multi-platform ORM")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Philippe Leybaert")]
 [assembly: AssemblyProduct("VeloxDB")]
 [assembly: AssemblyCopyright("Copyright © 2015 Philippe Leybaert")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: NeutralResourcesLanguage("en")]
 
-[assembly: AssemblyVersion("0.9.15.411")]
-[assembly: AssemblyFileVersion("0.9.15.411")]
+[assembly: AssemblyVersion("0.9.16.*")]
+[assembly: AssemblyFileVersion("0.9.16")]
 
 [assembly: InternalsVisibleTo("Velox.DB.TextExpressions")]
 
