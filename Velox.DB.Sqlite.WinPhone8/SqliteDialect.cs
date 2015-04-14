@@ -26,26 +26,41 @@
 
 using System;
 
-namespace Velox.DB
+namespace Velox.DB.Sql.Sqlite
 {
-    public static partial class Vx
+    public class SqliteDialect : SqlDialect
     {
-        public class Configuration
+        public override string QuoteField(string fieldName)
         {
-            private NamingConvention _namingConvention = new NamingConvention();
-
-            public NamingConvention NamingConvention
-            {
-                get { return _namingConvention; }
-                set { _namingConvention = value; }
-            }
+            return "\"" + fieldName.Replace(".", "\".\"") + "\"";
         }
 
-        private static readonly Configuration _config = new Configuration();
-
-        public static Configuration Config
+        public override string QuoteTable(string tableName)
         {
-            get { return _config; }
+            return "\"" + tableName.Replace("\"", "\".\"") + "\"";
+        }
+
+        public override string CreateParameterExpression(string parameterName)
+        {
+            return "@" + parameterName;
+        }
+
+        public override string TruncateTableSql(string tableName)
+        {
+            return "DELETE FROM " + QuoteTable(tableName) + ";delete from sqlite_sequence where name='" + tableName + "'";
+        }
+
+        public override string GetLastAutoincrementIdSql(string columnName, string alias, string tableName)
+        {
+            return "select last_insert_rowid() as " + alias;
+        }
+
+        public override string DeleteSql(SqlTableNameWithAlias tableName, string sqlWhere)
+        {
+            if (tableName.Alias != null)
+                sqlWhere = sqlWhere.Replace(QuoteTable(tableName.Alias) + ".", "");
+            
+            return "delete from " + QuoteTable(tableName.TableName) + " where " + sqlWhere;
         }
     }
 }

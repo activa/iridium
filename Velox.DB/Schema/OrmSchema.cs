@@ -47,14 +47,15 @@ namespace Velox.DB
         private readonly Field[] _incrementKeys;
         private readonly Repository _repository;
 
-        private static readonly HashSet<Type> _mappableTypes;
+        private static readonly List<Func<TypeInspector,bool>> _mappableTypes;
 
         static OrmSchema()
         {
-            _mappableTypes = new HashSet<Type>(new[]
+            _mappableTypes = new List<Func<TypeInspector, bool>>()
             {
-                typeof(Boolean), typeof(Byte), typeof(SByte), typeof(UInt16), typeof(UInt32), typeof(UInt64), typeof(Int16), typeof(Int32), typeof(Int64), typeof(Single), typeof(Double), typeof(Decimal), typeof(string), typeof(DateTime), typeof(byte[])
-            });
+                t => t.Is(TypeFlags.Array | TypeFlags.Byte),
+                t => t.Is(TypeFlags.Numeric | TypeFlags.String | TypeFlags.DateTime | TypeFlags.Boolean) && !t.Is(TypeFlags.Array)
+            };
         }
 
         internal OrmSchema(Type t, Repository repository)
@@ -66,7 +67,7 @@ namespace Velox.DB
 
             var fieldList = new List<Field>();
 
-            foreach (var field in t.Inspector().GetFieldsAndProperties(BindingFlags.Instance|BindingFlags.Public).Where(f => _mappableTypes.Contains(f.FieldType.Inspector().RealType)))
+            foreach (var field in t.Inspector().GetFieldsAndProperties(BindingFlags.Instance|BindingFlags.Public).Where(field => _mappableTypes.Any(f => f(field.FieldType.Inspector()))))
             {
                 var fieldInspector = field.Inspector();
 
@@ -127,33 +128,23 @@ namespace Velox.DB
 
             _primaryKeys = _fieldList.Where(f => f.PrimaryKey).ToArray();
             _incrementKeys = _fieldList.Where(f => f.AutoIncrement).ToArray();
-
-            /*
-            if (_primaryKeys.Length == 0) // add primary key based on convention naming
-            {
-                var pkField = _fields[t.Name + "ID"] ?? _fields[t.Name + "Id"];
-
-                if (pkField != null)
-                {
-                    pkField.PrimaryKey = true;
-                    pkField.AutoIncrement = true;
-                    _primaryKeys = new[] {pkField};
-                    _incrementKeys = new[] {pkField};
-                }
-            }
-             * */
         }
 
         private SafeDictionary<string,Relation> FindRelations()
         {
             var relations = new SafeDictionary<string, Relation>();
 
-            foreach (var field in ObjectType.Inspector().GetFieldsAndProperties(BindingFlags.Instance | BindingFlags.Public).Where(f => !_mappableTypes.Contains(f.FieldType.Inspector().RealType)))
+            foreach (var field in ObjectType.Inspector().GetFieldsAndProperties(BindingFlags.Instance | BindingFlags.Public).Where(field => !_mappableTypes.Any(f => f(field.FieldType.Inspector()))))
             {
                 Type collectionType = field.FieldType.Inspector().GetInterfaces().FirstOrDefault(tI => tI.IsConstructedGenericType && tI.GetGenericTypeDefinition() == typeof (IEnumerable<>));
                 
-                if (field.Inspector().HasAttribute<Column.NotMappedAttribute>(false))
+                if (field.Inspector().HasAttribute<DB.Relation.IgnoreAttribute>())
                     continue;
+
+                Relation relation = new Relation(field)
+                {
+                    LocalSchema = this
+                };
 
                 if (collectionType != null)
                 {
@@ -169,19 +160,13 @@ namespace Velox.DB
                     if (foreignSchema == null)
                         continue;
 
-                    var localField = PrimaryKeys[0];
-                    var foreignField = foreignSchema.Fields[localField.FieldName];
+                    relation.RelationType = RelationType.OneToMany;
+                    relation.ForeignSchema = foreignSchema;
+                    relation.ElementType = elementType;
+                    relation.IsDataSet = isDataSet;
+                    relation.LocalField = PrimaryKeys[0];
 
-                    relations[field.Name] = new Relation(field)
-                    {
-                        RelationType = RelationType.OneToMany,
-                        ForeignSchema = foreignSchema,
-                        LocalSchema = this,
-                        LocalField = localField,
-                        ForeignField = foreignField,
-                        ElementType = elementType,
-                        IsDataSet = isDataSet
-                    };
+                    relation.ForeignField = Vx.Config.NamingConvention.GetRelationField(relation);
                 }
                 else
                 {
@@ -189,28 +174,36 @@ namespace Velox.DB
 
                     var foreignSchema = Repository.Context.GetSchema(objectType);
 
-                    var relationAttribute = field.Inspector().GetAttribute<DB.Relation.ManyToOneAttribute>(false) ?? new DB.Relation.ManyToOneAttribute();
+                    var relationAttribute = field.Inspector().GetAttribute<DB.Relation.ManyToOneAttribute>();
 
-                    if (foreignSchema == null || (foreignSchema.PrimaryKeys.Length != 1 && relationAttribute.ForeignKey == null))
+                    if (foreignSchema == null)
                         continue;
 
-                    var foreignField = (relationAttribute.ForeignKey != null) ? foreignSchema.Fields[relationAttribute.ForeignKey] : foreignSchema.PrimaryKeys[0];
-                    var localField = (relationAttribute.LocalKey != null) ? Fields[relationAttribute.LocalKey] : Fields[foreignField.FieldName];
+                    relation.RelationType = RelationType.ManyToOne;
+                    relation.ReadOnly = relationAttribute != null && relationAttribute.ReadOnly;
+                    relation.ForeignSchema = foreignSchema;
 
-                    if (localField == null || foreignField == null)
-                        continue; // TODO: throw exception
+                    var localField = Vx.Config.NamingConvention.GetRelationField(relation);
+                    var foreignField = foreignSchema.PrimaryKeys.Length == 1 ? foreignSchema.PrimaryKeys[0] : null;
 
-                    relations[field.Name] = new Relation(field)
+                    if (relationAttribute != null)
                     {
-                        ReadOnly = relationAttribute.ReadOnly,
-                        RelationType = RelationType.ManyToOne,
-                        ForeignSchema = foreignSchema,
-                        LocalSchema = this,
-                        LocalField = localField,
-                        ForeignField = foreignField
-                    };
+                        if (relationAttribute.ForeignKey != null)
+                            foreignField = foreignSchema.Fields[relationAttribute.ForeignKey];
 
+                        if (relationAttribute.LocalKey != null)
+                            localField = Fields[relationAttribute.LocalKey];
+                    }
+
+                    relation.LocalField = localField;
+                    relation.ForeignField = foreignField;
                 }
+
+                if (relation.ForeignField != null && relation.LocalField != null)
+                {
+                    relations[field.Name] = relation;
+                }
+
 
             }
 

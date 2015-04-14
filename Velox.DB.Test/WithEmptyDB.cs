@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Velox.DB.TextExpressions;
 
@@ -74,14 +75,16 @@ namespace Velox.DB.Test
         {
             const int numThreads = 20;
 
-            Thread[] threads = new Thread[numThreads];
+            Task[] tasks = new Task[numThreads];
 
             List<string> failedList = new List<string>();
             List<Customer> createdCustomers = new List<Customer>();
 
             for (int i = 0; i < numThreads; i++)
             {
-                threads[i] = new Thread((data) =>
+                var data = i;
+
+                tasks[i] = Task.Factory.StartNew(() =>
                 {
                     string name = "" + (char) (((int) data) + 'A');
 
@@ -102,13 +105,11 @@ namespace Velox.DB.Test
                     lock (createdCustomers)
                         createdCustomers.Add(customer);
                 });
-
-                threads[i].Start(i);
             }
 
-            foreach (var thread in threads)
+            foreach (var task in tasks)
             {
-                thread.Join();
+                task.Wait();
             }
 
             foreach (var fail in failedList)

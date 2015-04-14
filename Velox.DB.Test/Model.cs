@@ -73,7 +73,7 @@ namespace Velox.DB.Test
 
 	public class SalesPerson
 	{
-        [Column.PrimaryKeyAttribute(AutoIncrement = true)][Column.Name("SalesPersonID")]
+        [Column.PrimaryKeyAttribute(AutoIncrement = true), Column.Name("SalesPersonID")]
         public int ID;
 
 	    public string Name;

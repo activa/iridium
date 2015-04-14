@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 //=============================================================================
 // Velox.DB - Portable .NET ORM 
 //
@@ -25,30 +25,42 @@
 #endregion
 
 using System;
-using Velox.DB.Core;
 
-namespace Velox.DB
+namespace Velox.DB.Sql.Sqlite
 {
-    public class DefaultNamingConvention : NamingConvention
+    public class SqliteDialect : SqlDialect
     {
-        public bool PkIncludesClassName { get; set; }
-        public bool PkIsAutoIncrement { get; set; }
-
-        public DefaultNamingConvention()
+        public override string QuoteField(string fieldName)
         {
-            PkIncludesClassName = true;
-            PkIsAutoIncrement = true;
+            return "\"" + fieldName.Replace(".", "\".\"") + "\"";
         }
 
-        public override FieldProperties GetFieldProperties(OrmSchema schema, OrmSchema.Field field)
+        public override string QuoteTable(string tableName)
         {
-            if (field.FieldName.EndsWith("ID", StringComparison.OrdinalIgnoreCase))
-            {
-                if ((!PkIncludesClassName && field.FieldName.Length == 2) || (PkIncludesClassName && field.FieldName.Substring(0, field.FieldName.Length - 2).Equals(schema.ObjectType.Name, StringComparison.OrdinalIgnoreCase)))
-                    return new FieldProperties() {PrimaryKey = true, AutoIncrement = PkIsAutoIncrement && field.FieldType.Inspector().Is(TypeFlags.Integer)};
-            }
+            return "\"" + tableName.Replace("\"", "\".\"") + "\"";
+        }
 
-            return new FieldProperties();
+        public override string CreateParameterExpression(string parameterName)
+        {
+            return "@" + parameterName;
+        }
+
+        public override string TruncateTableSql(string tableName)
+        {
+            return "DELETE FROM " + QuoteTable(tableName) + ";delete from sqlite_sequence where name='" + tableName + "'";
+        }
+
+        public override string GetLastAutoincrementIdSql(string columnName, string alias, string tableName)
+        {
+            return "select last_insert_rowid() as " + alias;
+        }
+
+        public override string DeleteSql(SqlTableNameWithAlias tableName, string sqlWhere)
+        {
+            if (tableName.Alias != null)
+                sqlWhere = sqlWhere.Replace(QuoteTable(tableName.Alias) + ".", "");
+            
+            return "delete from " + QuoteTable(tableName.TableName) + " where " + sqlWhere;
         }
     }
 }

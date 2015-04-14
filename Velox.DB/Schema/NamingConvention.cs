@@ -1,4 +1,4 @@
-﻿#region License
+#region License
 //=============================================================================
 // Velox.DB - Portable .NET ORM 
 //
@@ -25,19 +25,53 @@
 #endregion
 
 using System;
+using Velox.DB.Core;
 
 namespace Velox.DB
 {
-    public abstract class NamingConvention
+    public class NamingConvention
     {
-        private static DefaultNamingConvention _defaultNamingConvention = null;
+        public string PrimaryKeyName { get; set; }
+        public string ManyToOneKeyName { get; set; }
+        public string OneToManyKeyName { get; set; }
 
-        public static DefaultNamingConvention Default
+        public bool UseAutoIncrement { get; set; }
+
+        public const string CLASS_NAME = "{Class.Name}";
+        public const string CLASS_PRIMARYKEY = "{Class.PrimaryKey}";
+        public const string RELATION_CLASS_NAME = "{Relation.Class.Name}";
+        public const string RELATION_CLASS_PRIMARYKEY = "{Relation.Class.PrimaryKey}";
+
+        public NamingConvention()
         {
-            get
-            {
-                return _defaultNamingConvention ?? (_defaultNamingConvention = new DefaultNamingConvention());
-            }
+            PrimaryKeyName = CLASS_NAME + "Id";
+            ManyToOneKeyName = RELATION_CLASS_PRIMARYKEY;
+            OneToManyKeyName = CLASS_PRIMARYKEY;
+            UseAutoIncrement = true;
+        }
+
+        public virtual FieldProperties GetFieldProperties(OrmSchema schema, OrmSchema.Field field)
+        {
+            string pkName = PrimaryKeyName.Replace(CLASS_NAME, schema.ObjectType.Name);
+
+            if (field.FieldName.Equals(pkName,StringComparison.OrdinalIgnoreCase))
+                return new FieldProperties() {PrimaryKey = true, AutoIncrement = UseAutoIncrement && field.FieldType.Inspector().Is(TypeFlags.Integer)};
+
+            return new FieldProperties();
+        }
+
+        public virtual OrmSchema.Field GetRelationField(OrmSchema.Relation relation)
+        {
+            if (relation.LocalSchema.PrimaryKeys.Length < 1 || relation.ForeignSchema.PrimaryKeys.Length < 1)
+                return null;
+
+            string relationKeyName = ((relation.RelationType == OrmSchema.RelationType.ManyToOne) ? ManyToOneKeyName : OneToManyKeyName)
+                .Replace(RELATION_CLASS_PRIMARYKEY, relation.ForeignSchema.PrimaryKeys[0].FieldName)
+                .Replace(RELATION_CLASS_NAME, relation.ForeignSchema.ObjectType.Name)
+                .Replace(CLASS_PRIMARYKEY, relation.LocalSchema.PrimaryKeys[0].FieldName)
+                .Replace(CLASS_NAME, relation.LocalSchema.ObjectType.Name);
+
+            return relation.RelationType == OrmSchema.RelationType.ManyToOne ? relation.LocalSchema.Fields[relationKeyName] : relation.ForeignSchema.Fields[relationKeyName];
         }
 
         public class FieldProperties
@@ -48,7 +82,5 @@ namespace Velox.DB
             public string MappedTo { get; set; }
             public bool? Null { get; set; }
         }
-
-        public abstract FieldProperties GetFieldProperties(OrmSchema schema, OrmSchema.Field field);
     }
 }

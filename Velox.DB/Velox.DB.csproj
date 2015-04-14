@@ -98,7 +98,6 @@
     <Compile Include="Aggregate.cs" />
     <Compile Include="Query\CodeQuerySpec.cs" />
     <Compile Include="LambdaExpressions\LambdaQueryExpression.cs" />
-    <Compile Include="Schema\DefaultNamingConvention.cs" />
     <Compile Include="Schema\NamingConvention.cs" />
     <Compile Include="Schema\OrmSchema.Field.cs" />
     <Compile Include="Schema\OrmSchema.cs" />
