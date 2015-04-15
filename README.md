@@ -170,3 +170,40 @@ var records = dbContext.Query<CustomerInfo>(
                   "inner join Order o on o.CustomerID=c.CustomerID " +
                   "group by c.CustomerID,c.Name");
 ```
+##### Async
+
+All methods can be used asynchronously, for example:
+
+```csharp
+
+// Create a table asynchronously
+await dbContext.CreateTableAsync<Customer>();
+
+// Asynchronously fetch a list of customers. Note that we have to use ToArray() or
+// ToList() because it's not possible to use IEnumerable<Customer> for asynchronous
+// operations
+var customers1 = await DB.Customers.Where(c => c.Name.StartsWith("A")).Async().ToArray();
+var customers2 = await DB.Customers.Async().Where(c => c.Name.StartsWith("A")).ToArray();
+
+var customers3 = await DB.Customers.Async().Count();
+
+var customer = await DB.Customers.Async().Read(1);
+```
+
+When you call Async() on a DataSet, all operations on the dataset that actually fetch data will be executed asynchronously. You can go back to a synchronous DataSet by calling Sync():
+
+```csharp
+
+var asyncCustomers = DB.Customers.Async();
+
+var numCustomers = await asyncCustomers.Count();
+var aCustomers = asyncCustomers.Where(c => c.Name.StartsWith("A"));
+
+var customerList = await aCustomers.ToArray(); // aCustomers is an async DataSet
+
+// go back to a synchronous DataSet
+foreach (Customer c in aCustomers.Sync())
+{
+   // We can synchronously enumerate over the DataSet again
+}
+```
