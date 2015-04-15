@@ -243,7 +243,7 @@ namespace Velox.DB
             get { return false; }
         }
 
-        public bool CreateOrUpdateTable(OrmSchema schema)
+        public bool CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes)
         {
             return true; // NOP
         }

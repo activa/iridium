@@ -49,6 +49,18 @@ namespace Velox.DB
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
         public sealed class IndexedAttribute : Attribute
         {
+            public string IndexName { get; private set; }
+            public int Position { get; set; }
+            public bool Descending { get; set; }
+
+            public IndexedAttribute()
+            {
+            }
+
+            public IndexedAttribute(string indexName)
+            {
+                IndexName = indexName;
+            }
         }
 
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]

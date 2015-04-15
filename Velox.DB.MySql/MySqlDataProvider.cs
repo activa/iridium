@@ -41,7 +41,7 @@ namespace Velox.DB.Sql.MySql
         }
 
 
-        public override bool CreateOrUpdateTable(OrmSchema schema)
+        public override bool CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes)
         {
             var columnMappings = new[]
             {
@@ -61,7 +61,7 @@ namespace Velox.DB.Sql.MySql
                 new {Flags = TypeFlags.DateTime, ColumnType = "DATETIME"}
             };
 
-            var existingColumns = ExecuteSqlReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=DATABASE() and TABLE_NAME=@name", new Dictionary<string, object>() { { "name", schema.MappedName } }).ToLookup(rec => rec["COLUMN_NAME"].ToString());
+            var existingColumns = ExecuteSqlReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=DATABASE() and TABLE_NAME=@name", new QueryParameterCollection( new { name = schema.MappedName } )).ToLookup(rec => rec["COLUMN_NAME"].ToString());
 
             var parts = new List<string>();
 
@@ -114,7 +114,7 @@ namespace Velox.DB.Sql.MySql
 
             try
             {
-                ExecuteSql(sql);
+                ExecuteSql(sql, null);
 
                 return true;
             }

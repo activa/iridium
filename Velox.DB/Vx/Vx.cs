@@ -25,6 +25,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 namespace Velox.DB
 {
@@ -55,6 +56,13 @@ namespace Velox.DB
         {
             ((DataSet<T>) dataSet).Repository.QueryCount = 0;
         }
+
+
+        // TODO: move this somewhere else
+
+        public static List<T> CreateEmptyList<T>(T templateValue) { return new List<T>(); }
+        public static Dictionary<TKey, TValue> CreateEmptyDictionary<TKey, TValue>(TKey keyTemplate, TValue valueTemplae) { return new Dictionary<TKey, TValue>(); }
+
 
     }
 }

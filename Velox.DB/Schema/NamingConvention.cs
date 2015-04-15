@@ -25,6 +25,7 @@
 #endregion
 
 using System;
+using System.Text.RegularExpressions;
 using Velox.DB.Core;
 
 namespace Velox.DB
@@ -32,8 +33,9 @@ namespace Velox.DB
     public class NamingConvention
     {
         public string PrimaryKeyName { get; set; }
-        public string ManyToOneKeyName { get; set; }
-        public string OneToManyKeyName { get; set; }
+        public string ManyToOneLocalKeyName { get; set; }
+        public string OneToManyForeignKeyName { get; set; }
+        public string IsFieldIndexedRegex { get; set; }
 
         public bool UseAutoIncrement { get; set; }
 
@@ -45,19 +47,28 @@ namespace Velox.DB
         public NamingConvention()
         {
             PrimaryKeyName = CLASS_NAME + "Id";
-            ManyToOneKeyName = RELATION_CLASS_PRIMARYKEY;
-            OneToManyKeyName = CLASS_PRIMARYKEY;
+            ManyToOneLocalKeyName = RELATION_CLASS_PRIMARYKEY;
+            OneToManyForeignKeyName = CLASS_PRIMARYKEY;
+            IsFieldIndexedRegex = "ID$";
             UseAutoIncrement = true;
         }
 
         public virtual FieldProperties GetFieldProperties(OrmSchema schema, OrmSchema.Field field)
         {
+            var fieldProperties = new FieldProperties();
+
+            if (Regex.IsMatch(field.FieldName, IsFieldIndexedRegex, RegexOptions.IgnoreCase))
+                fieldProperties.Indexed = true;
+
             string pkName = PrimaryKeyName.Replace(CLASS_NAME, schema.ObjectType.Name);
 
-            if (field.FieldName.Equals(pkName,StringComparison.OrdinalIgnoreCase))
-                return new FieldProperties() {PrimaryKey = true, AutoIncrement = UseAutoIncrement && field.FieldType.Inspector().Is(TypeFlags.Integer)};
+            if (field.FieldName.Equals(pkName, StringComparison.OrdinalIgnoreCase))
+            {
+                fieldProperties.PrimaryKey = true;
+                fieldProperties.AutoIncrement = UseAutoIncrement && field.FieldType.Inspector().Is(TypeFlags.Integer);
+            }
 
-            return new FieldProperties();
+            return fieldProperties;
         }
 
         public virtual OrmSchema.Field GetRelationField(OrmSchema.Relation relation)
@@ -65,7 +76,7 @@ namespace Velox.DB
             if (relation.LocalSchema.PrimaryKeys.Length < 1 || relation.ForeignSchema.PrimaryKeys.Length < 1)
                 return null;
 
-            string relationKeyName = ((relation.RelationType == OrmSchema.RelationType.ManyToOne) ? ManyToOneKeyName : OneToManyKeyName)
+            string relationKeyName = ((relation.RelationType == OrmSchema.RelationType.ManyToOne) ? ManyToOneLocalKeyName : OneToManyForeignKeyName)
                 .Replace(RELATION_CLASS_PRIMARYKEY, relation.ForeignSchema.PrimaryKeys[0].FieldName)
                 .Replace(RELATION_CLASS_NAME, relation.ForeignSchema.ObjectType.Name)
                 .Replace(CLASS_PRIMARYKEY, relation.LocalSchema.PrimaryKeys[0].FieldName)

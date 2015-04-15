@@ -84,7 +84,7 @@ namespace Velox.DB.Sql
                 numRecords: limit
                 );
 
-            var record = ExecuteSqlReader(sql, querySpec.SqlParameters == null ? null :  querySpec.SqlParameters.AsDictionary()).FirstOrDefault();
+            var record = ExecuteSqlReader(sql, querySpec.SqlParameters).FirstOrDefault();
 
             SqlNameGenerator.Reset();
 
@@ -112,7 +112,7 @@ namespace Velox.DB.Sql
                     sqlQuerySpec.Take
                     );
 
-                return from record in ExecuteSqlReader(sql, sqlQuerySpec.SqlParameters == null ? null : sqlQuerySpec.SqlParameters.AsDictionary())
+                return from record in ExecuteSqlReader(sql, sqlQuerySpec.SqlParameters)
                     select new SerializedEntity(fieldList.ToDictionary(c => c.Field.MappedName, c => record[c.Alias].Convert(c.Field.FieldType)));
             }
             finally
@@ -179,7 +179,7 @@ namespace Velox.DB.Sql
                     sqlQuerySpec.Take
                     );
 
-                var records = ExecuteSqlReader(sql, sqlQuerySpec.SqlParameters == null ? null : sqlQuerySpec.SqlParameters.AsDictionary()).ToArray();
+                var records = ExecuteSqlReader(sql, sqlQuerySpec.SqlParameters ?? null).ToArray();
 
                 relatedEntities  = records.Select(
                     rec => prefetchRelations.ToDictionary(
@@ -219,7 +219,7 @@ namespace Velox.DB.Sql
                 if (autoIncrementField != null)
                     sql += String.Format(";{0}", SqlDialect.GetLastAutoincrementIdSql(autoIncrementField.MappedName,autoincrementAlias,tableName));
 
-                var sqlResult = ExecuteSqlReader(sql, parameters).FirstOrDefault();
+                var sqlResult = ExecuteSqlReader(sql, new QueryParameterCollection(parameters)).FirstOrDefault();
 
                 if (autoIncrementField != null)
                 {
@@ -245,7 +245,7 @@ namespace Velox.DB.Sql
                                         String.Join(" AND ", pkParameters.Select(pk => SqlDialect.QuoteField(pk.Value.MappedName) + "=" + SqlDialect.CreateParameterExpression(pk.Key)))
                                     );
 
-                    ExecuteSql(sql, parameters);
+                    ExecuteSql(sql, new QueryParameterCollection(parameters));
                 }
                 else
                 {
@@ -273,7 +273,7 @@ namespace Velox.DB.Sql
                                         string.Join(" AND ", keyList.Select(k => SqlDialect.QuoteField(k.Field.MappedName) + "=" + SqlDialect.CreateParameterExpression(k.ParameterName)))
                                         );
 
-            var record = ExecuteSqlReader(sql, parameters).FirstOrDefault();
+            var record = ExecuteSqlReader(sql, new QueryParameterCollection(parameters)).FirstOrDefault();
 
             SqlNameGenerator.Reset();
 
@@ -294,7 +294,7 @@ namespace Velox.DB.Sql
                                         string.Join(" AND ", keyList.Select(k => SqlDialect.QuoteField(k.Field.MappedName) + "=" + SqlDialect.CreateParameterExpression(k.ParameterName)))
                                         );
 
-            var result = ExecuteSql(sql, parameters);
+            var result = ExecuteSql(sql, new QueryParameterCollection(parameters));
 
             SqlNameGenerator.Reset();
 
@@ -308,7 +308,7 @@ namespace Velox.DB.Sql
 
             string sql = SqlDialect.DeleteSql(new SqlTableNameWithAlias(tableName, querySpec.TableAlias),querySpec.FilterSql);
 
-            var result = ExecuteSql(sql, querySpec.SqlParameters == null ? null : querySpec.SqlParameters.AsDictionary());
+            var result = ExecuteSql(sql, querySpec.SqlParameters);
 
             SqlNameGenerator.Reset();
 
@@ -383,19 +383,18 @@ namespace Velox.DB.Sql
             get { return true; }
         }
 
-        public abstract bool CreateOrUpdateTable(OrmSchema schema);
+        public abstract bool CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes);
         public abstract int ExecuteSql(string sql, QueryParameterCollection parameters);
         public abstract IEnumerable<SerializedEntity> Query(string sql, QueryParameterCollection parameters);
         public abstract object QueryScalar(string sql, QueryParameterCollection parameters);
 
         public void Purge(OrmSchema schema)
         {
-            ExecuteSql(SqlDialect.TruncateTableSql(schema.MappedName));
+            ExecuteSql(SqlDialect.TruncateTableSql(schema.MappedName), null);
 
             SqlNameGenerator.Reset();
         }
 
-        protected abstract IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, Dictionary<string, object> parameters = null);
-        protected abstract int ExecuteSql(string sql, Dictionary<string, object> parameters = null);
+        protected abstract IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, QueryParameterCollection parameters);
     }
 }

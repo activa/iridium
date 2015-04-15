@@ -41,7 +41,7 @@ namespace Velox.DB.Sql.SqlServer
         {
         }
 
-        public override bool CreateOrUpdateTable(OrmSchema schema)
+        public override bool CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes)
         {
             var columnMappings = new[]
             {
@@ -62,7 +62,8 @@ namespace Velox.DB.Sql.SqlServer
             string tableSchemaName = tableNameParts.Length == 1 ? "dbo" : tableNameParts[0];
             string tableName = tableNameParts.Length == 1 ? tableNameParts[0] : tableNameParts[1];
 
-            var existingColumns = ExecuteSqlReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=@schema and TABLE_NAME=@name", new Dictionary<string, object>() {{"schema", tableSchemaName}, {"name", tableName}}).ToLookup(rec => rec["COLUMN_NAME"].ToString());
+            var existingColumns = ExecuteSqlReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=@schema and TABLE_NAME=@name", 
+                new QueryParameterCollection(new {schema = tableSchemaName, name = tableName})).ToLookup(rec => rec["COLUMN_NAME"].ToString());
 
             var parts = new List<string>();
 
@@ -75,7 +76,7 @@ namespace Velox.DB.Sql.SqlServer
                 if (columnMapping == null)
                     continue;
 
-                if (existingColumns.Contains(field.MappedName))
+                if (existingColumns.Contains(field.MappedName)  && !recreateTable)
                 {
                     createNew = false;
                     continue;
@@ -100,28 +101,55 @@ namespace Velox.DB.Sql.SqlServer
                 parts.Add(part);
             }
 
-            if (!parts.Any())
-                return true;
+            if (recreateTable)
+                ExecuteSql("DROP TABLE " + SqlDialect.QuoteTable(schema.MappedName), null);
 
-            string sql = (createNew ? "CREATE TABLE " : "ALTER TABLE ") + SqlDialect.QuoteTable(schema.MappedName);
-
-            sql += createNew ? " (" : " ADD ";
-
-            sql += string.Join(",", parts);
-
-            if (createNew)
-                sql += ")";
-
-            try
+            if (parts.Any())
             {
-                ExecuteSql(sql);
+                string sql = (createNew ? "CREATE TABLE " : "ALTER TABLE ") + SqlDialect.QuoteTable(schema.MappedName);
 
-                return true;
+                sql += createNew ? " (" : " ADD ";
+
+                sql += string.Join(",", parts);
+
+                if (createNew)
+                    sql += ")";
+
+                ExecuteSql(sql, null);
             }
-            catch(Exception ex)
+
+            var existingIndexes = ExecuteSqlReader("SELECT ind.name as IndexName FROM sys.indexes ind INNER JOIN sys.tables t ON ind.object_id = t.object_id WHERE ind.name is not null and ind.is_primary_key = 0 AND t.is_ms_shipped = 0 AND t.name=@tableName",
+                 new QueryParameterCollection(new { tableName } )).ToLookup(rec => rec["IndexName"].ToString());
+
+            foreach (var index in schema.Indexes)
             {
-                return false;
+                if (existingIndexes.Contains(index.Name))
+                {
+                    if (recreateIndexes)
+                        ExecuteSql("DROP INDEX " + SqlDialect.QuoteTable("IX_" + index.Name) + " ON " + SqlDialect.QuoteTable(schema.MappedName), null);
+                    else
+                        continue;
+                }
+
+                string createIndexSql = "CREATE INDEX " + SqlDialect.QuoteTable("IX_" + index.Name) + " ON " + SqlDialect.QuoteTable(schema.MappedName) + " (";
+                
+                createIndexSql += string.Join(",", index.FieldsWithOrder.Select(field => SqlDialect.QuoteField(field.Item1.MappedName) + " " + (field.Item2 == SortOrder.Ascending ? "ASC" : "DESC")));
+
+                createIndexSql += ")";
+
+                try
+                {
+                    ExecuteSql(createIndexSql, null);
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+
             }
+
+            return true;
+
         }
 
         public override void ClearConnectionPool()

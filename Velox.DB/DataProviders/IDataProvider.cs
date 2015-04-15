@@ -46,7 +46,7 @@ namespace Velox.DB
 
         bool SupportsRelationPrefetch { get; }
 
-        bool CreateOrUpdateTable(OrmSchema schema);
+        bool CreateOrUpdateTable(OrmSchema schema, bool recreateTable = false, bool recreateIndexes = false);
 
         int ExecuteSql(string sql, QueryParameterCollection parameters);
         IEnumerable<SerializedEntity> Query(string sql, QueryParameterCollection parameters);

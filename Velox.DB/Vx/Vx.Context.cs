@@ -94,9 +94,9 @@ namespace Velox.DB
                 return new DataSet<T>(GetRepository<T>());
             }
 
-            public void CreateTable<T>()
+            public void CreateTable<T>(bool recreateTable = false, bool recreateIndexes = false)
             {
-                DataProvider.CreateOrUpdateTable(GetRepository<T>().Schema);
+                DataProvider.CreateOrUpdateTable(GetRepository<T>().Schema, recreateTable, recreateIndexes);
             }
 
             public int Execute(string sql, object parameters)

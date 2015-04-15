@@ -43,7 +43,7 @@ namespace Velox.DB.Sql.Sqlite
         }
 
 
-        public override bool CreateOrUpdateTable(OrmSchema schema)
+        public override bool CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes)
         {
             var columnMappings = new[]
             {
@@ -55,7 +55,7 @@ namespace Velox.DB.Sql.Sqlite
                 new {Flags = TypeFlags.DateTime, ColumnType = "DATETIME"}
             };
 
-            var existingColumns = ExecuteSqlReader("pragma table_info(" + SqlDialect.QuoteTable(schema.MappedName) + ")").ToLookup(rec => rec["name"].ToString());
+            var existingColumns = ExecuteSqlReader("pragma table_info(" + SqlDialect.QuoteTable(schema.MappedName) + ")", null).ToLookup(rec => rec["name"].ToString());
 
             var parts = new List<string>();
 
@@ -98,13 +98,13 @@ namespace Velox.DB.Sql.Sqlite
 
             if (createNew)
             {
-                ExecuteSql("CREATE TABLE " + SqlDialect.QuoteTable(schema.MappedName) + " (" + string.Join(",", parts) + ")");
+                ExecuteSql("CREATE TABLE " + SqlDialect.QuoteTable(schema.MappedName) + " (" + string.Join(",", parts) + ")", null);
             }
             else
             {
                 foreach (var part in parts)
                 {
-                    ExecuteSql("ALTER TABLE " + SqlDialect.QuoteTable(schema.MappedName) + " ADD COLUMN " + part + ";");
+                    ExecuteSql("ALTER TABLE " + SqlDialect.QuoteTable(schema.MappedName) + " ADD COLUMN " + part + ";", null);
                 }
 
             }
@@ -127,12 +127,7 @@ namespace Velox.DB.Sql.Sqlite
             throw new NotImplementedException();
         }
 
-        protected override IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, Dictionary<string, object> parameters = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override int ExecuteSql(string sql, Dictionary<string, object> parameters = null)
+        protected override IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, QueryParameterCollection parameters)
         {
             throw new NotImplementedException();
         }

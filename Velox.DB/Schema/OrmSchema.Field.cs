@@ -190,5 +190,11 @@ namespace Velox.DB
 #endif
 
         }
+
+        public class Index
+        {
+            public string Name;
+            public Tuple<Field,SortOrder>[] FieldsWithOrder;
+        }
     }
 }

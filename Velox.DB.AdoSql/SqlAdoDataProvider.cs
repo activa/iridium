@@ -131,15 +131,13 @@ namespace Velox.DB.Sql
             return value;
         }
 
-
-
-        protected override IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, Dictionary<string, object> parameters = null)
+        protected override IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, QueryParameterCollection parameters)
         {
             Debug.WriteLine(string.Format("{0}", sql));
 
             List<Dictionary<string, object>> records = new List<Dictionary<string, object>>();
 
-            using (var cmd = CreateCommand(sql, parameters))
+            using (var cmd = CreateCommand(sql, parameters.AsDictionary()))
             {
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -165,29 +163,24 @@ namespace Velox.DB.Sql
             return records;
         }
 
-        protected override int ExecuteSql(string sql, Dictionary<string, object> parameters = null)
+        public override int ExecuteSql(string sql, QueryParameterCollection parameters)
         {
             Debug.WriteLine(string.Format("{0}", sql));
 
-            using (var cmd = CreateCommand(sql, parameters))
+            using (var cmd = CreateCommand(sql, parameters == null ? null : parameters.AsDictionary()))
             {
                 return cmd.ExecuteNonQuery();
             }
         }
 
-        public override int ExecuteSql(string sql, QueryParameterCollection parameters)
-        {
-            return ExecuteSql(sql, parameters == null ? null : parameters.AsDictionary());
-        }
-
         public override IEnumerable<SerializedEntity> Query(string sql, QueryParameterCollection parameters)
         {
-            return ExecuteSqlReader(sql, parameters.AsDictionary()).Select(rec => new SerializedEntity(rec));
+            return ExecuteSqlReader(sql, parameters).Select(rec => new SerializedEntity(rec));
         }
 
         public override object QueryScalar(string sql, QueryParameterCollection parameters)
         {
-            var result = ExecuteSqlReader(sql, parameters.AsDictionary()).FirstOrDefault();
+            var result = ExecuteSqlReader(sql, parameters).FirstOrDefault();
 
             if (result != null)
                 return result.First().Value;

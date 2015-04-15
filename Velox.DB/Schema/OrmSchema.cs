@@ -36,6 +36,7 @@ namespace Velox.DB
 {
     public partial class OrmSchema
     {
+
         private readonly string _mappedName;
         private readonly Type _objectType;
         private readonly SafeDictionary<string, Field> _fields = new SafeDictionary<string, Field>();
@@ -45,6 +46,8 @@ namespace Velox.DB
         private SafeDictionary<string, Relation> _relations;
         private readonly Field[] _primaryKeys;
         private readonly Field[] _incrementKeys;
+        private readonly Index[] _indexes;
+
         private readonly Repository _repository;
 
         private static readonly List<Func<TypeInspector,bool>> _mappableTypes;
@@ -64,6 +67,8 @@ namespace Velox.DB
             _repository = repository;
 
             _mappedName = t.Name;
+
+            var indexedFields = Vx.CreateEmptyList(new { IndexName = "", Position = 0, SortOrder = SortOrder.Ascending, Field = (Field)null });
 
             var fieldList = new List<Field>();
 
@@ -118,11 +123,46 @@ namespace Velox.DB
                 if (fieldInspector.HasAttribute<Column.NullAttribute>())
                     schemaField.ColumnNullable = true;
 
+                if (fieldInspector.HasAttribute<Column.IndexedAttribute>() || (fieldPropertiesFromConvention.Indexed ?? false))
+                {
+                    var indexAttribute = fieldInspector.GetAttribute<Column.IndexedAttribute>();
+
+                    if (indexAttribute != null)
+                    {
+                        indexedFields.Add(new
+                        {
+                            IndexName = indexAttribute.IndexName ?? MappedName + schemaField.MappedName,
+                            Position = indexAttribute.Position,
+                            SortOrder = indexAttribute.Descending ? SortOrder.Descending : SortOrder.Ascending,
+                            Field = schemaField
+                        });
+                    }
+                    else
+                    {
+                        indexedFields.Add(new
+                        {
+                            IndexName = MappedName + schemaField.MappedName,
+                            Position = 0,
+                            SortOrder = SortOrder.Ascending,
+                            Field = schemaField
+                        });
+                    }
+                }
+
                 _fields[schemaField.FieldName] = schemaField;
                 _mappedFields[schemaField.MappedName] = schemaField;
 
                 fieldList.Add(schemaField);
             }
+
+            _indexes = indexedFields
+                        .ToLookup(indexField => indexField.IndexName)
+                        .Select(item => new Index
+                                            {
+                                                Name = item.Key,
+                                                FieldsWithOrder = item.OrderBy(f => f.Position).Select(f => new Tuple<Field, SortOrder>(f.Field, f.SortOrder)).ToArray()
+                                            })
+                        .ToArray();
 
             _fieldList = fieldList.ToArray();
 
@@ -165,7 +205,6 @@ namespace Velox.DB
                     relation.ElementType = elementType;
                     relation.IsDataSet = isDataSet;
                     relation.LocalField = PrimaryKeys[0];
-
                     relation.ForeignField = Vx.Config.NamingConvention.GetRelationField(relation);
                 }
                 else
@@ -260,6 +299,11 @@ namespace Velox.DB
         }
 
         internal HashSet<Relation> DatasetRelations { get; private set; }
+
+        public Index[] Indexes
+        {
+            get { return _indexes; }
+        }
 
         internal object UpdateObject(object o, SerializedEntity entity)
         {
