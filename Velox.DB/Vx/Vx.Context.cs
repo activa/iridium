@@ -27,6 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Velox.DB.Core;
 
 namespace Velox.DB
@@ -119,7 +120,35 @@ namespace Velox.DB
                 return DataProvider.QueryScalar(sql, new QueryParameterCollection(parameters)).Convert<T>();
             }
 
+            public IAsyncDataSet<T> AsyncDataSet<T>()
+            {
+                return new AsyncDataSet<T>(new DataSet<T>(GetRepository<T>()));
+            }
 
+            public Task CreateTableAsync<T>(bool recreateTable = false, bool recreateIndexes = false)
+            {
+                return Task.Factory.StartNew(() => CreateTable<T>(recreateTable, recreateIndexes));
+            }
+
+            public Task<int> ExecuteAsync(string sql, object parameters)
+            {
+                return Task.Factory.StartNew(() => Execute(sql, parameters));
+            }
+
+            public Task<int> ExecuteAsync(string sql, QueryParameterCollection parameters = null)
+            {
+                return Task.Factory.StartNew(() => Execute(sql, parameters));
+            }
+
+            public Task<T[]> QueryAsync<T>(string sql, object parameters = null) where T : new()
+            {
+                return Task.Factory.StartNew(() => Query<T>(sql, parameters).ToArray());
+            }
+
+            public Task<T> QueryScalarAsync<T>(string sql, object parameters = null) where T : new()
+            {
+                return Task.Factory.StartNew(() => QueryScalar<T>(sql, parameters));
+            }
         }
     }
 }

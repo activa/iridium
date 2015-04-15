@@ -225,5 +225,10 @@ namespace Velox.DB
         {
             return Task.Factory.StartNew(() => _dataSet.ToList());
         }
+
+        public Task<T[]> ToArray()
+        {
+            return Task.Factory.StartNew(() => _dataSet.ToArray());
+        }
     }
 }

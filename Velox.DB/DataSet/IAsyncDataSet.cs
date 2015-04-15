@@ -58,7 +58,6 @@ namespace Velox.DB
         Task<TScalar> Average<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter);
         Task<bool> Any(Expression<Func<T, bool>> filter);
         Task<T> ElementAt(int index);
-        Task<List<T>> ToList();
         IAsyncDataSet<T> Where(Expression<Func<T, bool>> whereExpression);
         IAsyncDataSet<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector);
         IAsyncDataSet<T> OrderByDescending<TKey>(Expression<Func<T, TKey>> keySelector);
@@ -69,6 +68,9 @@ namespace Velox.DB
         IAsyncDataSet<T> Where(QueryExpression filterExpression);
         IAsyncDataSet<T> Skip(int n);
         IAsyncDataSet<T> Take(int n);
+
+        Task<List<T>> ToList();
+        Task<T[]> ToArray();
 
         IDataSet<T> Sync();
     }
