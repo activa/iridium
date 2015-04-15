@@ -86,7 +86,6 @@
     <Compile Include="sqlite3.cs" />
     <Compile Include="SqliteDataProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SqliteDialect.cs" />
   </ItemGroup>
   <ItemGroup>
     <SDKReference Include="SQLite.WP80, Version=3.8.9">

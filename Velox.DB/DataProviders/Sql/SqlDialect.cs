@@ -83,7 +83,7 @@ namespace Velox.DB.Sql
             return string.Join(" ", parts);
         }
 
-        public virtual string InnerJoinSql(SqlJoinDefinition join)
+        public virtual string JoinSql(SqlJoinDefinition join)
         {
             return string.Format("{0} join {1} {2} on {3}={4}",
                             join.Type == SqlJoinType.Inner ? "inner" : "left outer",
@@ -136,5 +136,6 @@ namespace Velox.DB.Sql
         }
 
         public abstract string GetLastAutoincrementIdSql(string columnName, string alias, string tableName);
+        public abstract void CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes, Func<string, QueryParameterCollection, IEnumerable<Dictionary<string, object>>> fnExecuteReader, Action<string, QueryParameterCollection> fnExecuteSql);
     }
 }

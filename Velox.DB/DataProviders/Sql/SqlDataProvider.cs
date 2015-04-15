@@ -383,7 +383,13 @@ namespace Velox.DB.Sql
             get { return true; }
         }
 
-        public abstract bool CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes);
+        public virtual bool CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes)
+        {
+            SqlDialect.CreateOrUpdateTable(schema, recreateTable, recreateIndexes, ExecuteSqlReader, (sql, parameters) => ExecuteSql(sql, parameters));
+
+            return true;
+        }
+
         public abstract int ExecuteSql(string sql, QueryParameterCollection parameters);
         public abstract IEnumerable<SerializedEntity> Query(string sql, QueryParameterCollection parameters);
         public abstract object QueryScalar(string sql, QueryParameterCollection parameters);

@@ -46,7 +46,7 @@ namespace Velox.DB.Sql
 
         public string ToSql(SqlDialect sqlDialect)
         {
-            return sqlDialect.InnerJoinSql(this);
+            return sqlDialect.JoinSql(this);
         }
 
         public override bool Equals(object obj)

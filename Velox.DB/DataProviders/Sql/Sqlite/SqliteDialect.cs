@@ -29,61 +29,58 @@ using System.Collections.Generic;
 using System.Linq;
 using Velox.DB.Core;
 
-namespace Velox.DB.Sql
+namespace Velox.DB.Sql.Sqlite
 {
-    public class MySqlDialect : SqlDialect
+    public class SqliteDialect : SqlDialect
     {
         public override string QuoteField(string fieldName)
         {
-            return "`" + fieldName.Replace(".", "`.`") + "`";
+            return "\"" + fieldName.Replace(".", "\".\"") + "\"";
         }
 
         public override string QuoteTable(string tableName)
         {
-            return "`" + tableName.Replace(".", "`.`") + "`";
+            return "\"" + tableName.Replace("\"", "\".\"") + "\"";
         }
 
         public override string CreateParameterExpression(string parameterName)
         {
-            return "?" + parameterName;
+            return "@" + parameterName;
+        }
+
+        public override string TruncateTableSql(string tableName)
+        {
+            return "DELETE FROM " + QuoteTable(tableName) + ";delete from sqlite_sequence where name='" + tableName + "'";
+        }
+
+        public override string GetLastAutoincrementIdSql(string columnName, string alias, string tableName)
+        {
+            return "select last_insert_rowid() as " + alias;
         }
 
         public override string DeleteSql(SqlTableNameWithAlias tableName, string sqlWhere)
         {
             if (tableName.Alias != null)
-                return "delete " + tableName.Alias + " from " + QuoteTable(tableName.TableName) + (tableName.Alias != null ? (" " + tableName.Alias + " ") : "") + " where " + sqlWhere;
-            else
-                return "delete from " + QuoteTable(tableName.TableName) + " where " + sqlWhere;
+                sqlWhere = sqlWhere.Replace(QuoteTable(tableName.Alias) + ".", "");
+            
+            return "delete from " + QuoteTable(tableName.TableName) + " where " + sqlWhere;
         }
 
-        public override string GetLastAutoincrementIdSql(string columnName, string alias, string tableName)
+        public override void CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes, Func<string, QueryParameterCollection, IEnumerable<Dictionary<string,object>>> fnExecuteReader, Action<string, QueryParameterCollection> fnExecuteSql)
         {
-            return "select last_insert_id() as " + alias;
-        }
-
-        public override void CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes, Func<string, QueryParameterCollection, IEnumerable<Dictionary<string, object>>> fnExecuteReader, Action<string, QueryParameterCollection> fnExecuteSql)
-        {
-            string longTextType = "LONGTEXT";
+            const string longTextType = "TEXT";
 
             var columnMappings = new[]
             {
-                new {Flags = TypeFlags.Byte, ColumnType = "TINYINT UNSIGNED"},
-                new {Flags = TypeFlags.SByte, ColumnType = "TINYINT"},
-                new {Flags = TypeFlags.Int16, ColumnType = "SMALLINT"},
-                new {Flags = TypeFlags.UInt16, ColumnType = "SMALLINT UNSIGNED"},
-                new {Flags = TypeFlags.Int32, ColumnType = "INT"},
-                new {Flags = TypeFlags.UInt32, ColumnType = "INT UNSIGNED"},
-                new {Flags = TypeFlags.Int64, ColumnType = "BIGINT"},
-                new {Flags = TypeFlags.UInt64, ColumnType = "BIGINT UNSIGNED"},
+                new {Flags = TypeFlags.Integer, ColumnType = "INTEGER"},
                 new {Flags = TypeFlags.Decimal, ColumnType = "DECIMAL({0},{1})"},
-                new {Flags = TypeFlags.Double, ColumnType = "DOUBLE"},
-                new {Flags = TypeFlags.Single, ColumnType = "FLOAT"},
+                new {Flags = TypeFlags.FloatingPoint, ColumnType = "REAL"},
                 new {Flags = TypeFlags.String, ColumnType = "VARCHAR({0})"},
                 new {Flags = TypeFlags.Array | TypeFlags.Byte, ColumnType = "LONGBLOB"},
                 new {Flags = TypeFlags.DateTime, ColumnType = "DATETIME"}
             };
 
-            var existingColumns = fnExecuteReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=DATABASE() and TABLE_NAME=@name", new QueryParameterCollection(new { name = schema.MappedName })).ToLookup(rec => rec["COLUMN_NAME"].ToString());
+            var existingColumns = fnExecuteReader("pragma table_info(" + QuoteTable(schema.MappedName) + ")", null).ToLookup(rec => rec["name"].ToString());
 
             var parts = new List<string>();
 
@@ -107,7 +104,7 @@ namespace Velox.DB.Sql
 
                 var part = string.Format("{0} {1}", QuoteField(field.MappedName), string.Format(columnMapping.ColumnType, field.ColumnSize, field.ColumnScale));
 
-                if (!field.ColumnNullable)
+                if (!field.ColumnNullable || field.PrimaryKey)
                     part += " NOT";
 
                 part += " NULL";
@@ -116,7 +113,7 @@ namespace Velox.DB.Sql
                     part += " PRIMARY KEY";
 
                 if (field.AutoIncrement)
-                    part += " AUTO_INCREMENT";
+                    part += " AUTOINCREMENT";
 
                 parts.Add(part);
             }
@@ -124,19 +121,19 @@ namespace Velox.DB.Sql
             if (!parts.Any())
                 return;
 
-            string sql = (createNew ? "CREATE TABLE " : "ALTER TABLE ") + QuoteTable(schema.MappedName);
-
-            sql += createNew ? " (" : " ADD COLUMN ";
-
-            sql += string.Join(",", parts);
-
             if (createNew)
-                sql += ")";
+            {
+                fnExecuteSql("CREATE TABLE " + QuoteTable(schema.MappedName) + " (" + string.Join(",", parts) + ")", null);
+            }
+            else
+            {
+                foreach (var part in parts)
+                {
+                    fnExecuteSql("ALTER TABLE " + QuoteTable(schema.MappedName) + " ADD COLUMN " + part + ";", null);
+                }
 
-
-            fnExecuteSql(sql, null);
-
-
+            }
         }
+
     }
 }

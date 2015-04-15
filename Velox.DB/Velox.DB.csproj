@@ -81,6 +81,7 @@
     <Compile Include="DataProviders\Sql\SqlExpressionBuilder.cs" />
     <Compile Include="DataProviders\Sql\ExpressionTranslator\SqlExpressionTranslator.cs" />
     <Compile Include="DataProviders\Sql\ExpressionTranslator\SqlExpressionTranslatorException.cs" />
+    <Compile Include="DataProviders\Sql\Sqlite\SqliteDialect.cs" />
     <Compile Include="DataProviders\Sql\SqlJoinDefinition.cs" />
     <Compile Include="DataProviders\Sql\SqlJoinPart.cs" />
     <Compile Include="DataProviders\Sql\SqlDataProvider.cs" />

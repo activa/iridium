@@ -137,7 +137,7 @@ namespace Velox.DB.Sql
 
             List<Dictionary<string, object>> records = new List<Dictionary<string, object>>();
 
-            using (var cmd = CreateCommand(sql, parameters.AsDictionary()))
+            using (var cmd = CreateCommand(sql, parameters == null ? null : parameters.AsDictionary()))
             {
                 using (var reader = cmd.ExecuteReader())
                 {
