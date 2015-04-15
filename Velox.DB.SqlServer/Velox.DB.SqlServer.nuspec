@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>velox.db.sqlserver</id>
-    <version>0.9.18</version>
+    <version>0.9.19</version>
     <title>Velox.DB.SqlServer</title>
     <authors>Philippe Leybaert</authors>
     <licenseUrl>http://github.com/velox/db/LICENSE</licenseUrl>
@@ -13,7 +13,7 @@
     <copyright>Copyright 2015</copyright>
     <tags>velox db sqlserver</tags>
     <dependencies>
-      <dependency id="velox.db" version="0.9" />
+      <dependency id="velox.db" version="0.9.19" />
     </dependencies>
   </metadata>
   <files>

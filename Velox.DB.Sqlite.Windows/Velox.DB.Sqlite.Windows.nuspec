@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>velox.db.sqlite.windows</id>
-    <version>0.9.18</version>
+    <version>0.9.19</version>
     <title>Velox.DB.Sqlite.Windows</title>
     <authors>Philippe Leybaert</authors>
     <licenseUrl>http://github.com/velox/db/LICENSE</licenseUrl>
@@ -13,7 +13,7 @@
     <copyright>Copyright 2015</copyright>
     <tags>velox db sqlite</tags>
     <dependencies>
-      <dependency id="velox.db" version="0.9" />
+      <dependency id="velox.db" version="0.9.19" />
       <dependency id="System.Data.SQLite.Core" version="1.0" />
     </dependencies>
   </metadata>

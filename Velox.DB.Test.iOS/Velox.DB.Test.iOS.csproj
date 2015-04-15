@@ -106,6 +106,7 @@
     <Compile Include="Tests\MyContext.cs" />
     <None Include="Info.plist" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\Default.png" />
@@ -121,16 +122,16 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
+    <Reference Include="Velox.Core, Version=0.9.15.406, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\velox.core.0.9.15.406\lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\Velox.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Xamarin.iOS" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Entitlements.plist" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Velox.Core\Velox.Core.csproj">
-      <Project>{f3df58d7-69ad-49f6-838f-6bdf02d3886a}</Project>
-      <Name>Velox.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Velox.DB.Sqlite.iOS\Velox.DB.Sqlite.iOS.csproj">
       <Project>{6b63aaaf-9664-4398-855c-bc98cf6f6195}</Project>
       <Name>Velox.DB.Sqlite.iOS</Name>
