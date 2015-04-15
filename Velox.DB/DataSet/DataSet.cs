@@ -77,6 +77,11 @@ namespace Velox.DB
             }
         }
 
+        public IAsyncDataSet<T> Async()
+        {
+            return new AsyncDataSet<T>(this);
+        }
+
         public Repository<T> Repository
         {
             get { return _repository; }
@@ -275,5 +280,4 @@ namespace Velox.DB
             return Skip(index).Take(1).FirstOrDefault();
         }
     }
-
 }

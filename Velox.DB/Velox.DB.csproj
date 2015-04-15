@@ -89,7 +89,9 @@
     <Compile Include="DataProviders\Sql\SqlQuerySpec.cs" />
     <Compile Include="DataProviders\Sql\SqlNameGenerator.cs" />
     <Compile Include="DataProviders\Sql\SqlNameWithAlias.cs" />
+    <Compile Include="DataSet\AsyncDataSet.cs" />
     <Compile Include="DataSet\DataSet.cs" />
+    <Compile Include="DataSet\IAsyncDataSet.cs" />
     <Compile Include="Query\FilterSpec.cs" />
     <Compile Include="DataSet\IDataSet.cs" />
     <Compile Include="LambdaExpressions\PartialEvaluator.cs" />

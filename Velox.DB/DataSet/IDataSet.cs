@@ -32,6 +32,8 @@ namespace Velox.DB
 {
     public interface IDataSet<T> : IEnumerable<T>
     {
+        IAsyncDataSet<T> Async();
+
         // Standard LINQ methods
         IDataSet<T> Where(Expression<Func<T, bool>> whereExpression);
         IDataSet<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector);

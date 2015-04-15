@@ -69,6 +69,53 @@ namespace Velox.DB.Test
 
         }
 
+        [Test]
+        public void AsyncInsert()
+        {
+            const int numThreads = 20;
+
+            List<string> failedList = new List<string>();
+            Task<bool>[] saveTasks = new Task<bool>[numThreads];
+            Customer[] customers = new Customer[numThreads];
+            List<Customer> createdCustomers = new List<Customer>();
+
+            for (int i = 0; i < numThreads; i++)
+            {
+                string name = "" + (char)(i + 'A');
+
+                Customer customer = new Customer { Name = name };
+
+                customers[i] = customer;
+                saveTasks[i] = DB.Customers.Async().Save(customer);
+
+                saveTasks[i].ContinueWith(t =>
+                {
+                    if (customer.CustomerID == 0)
+                        lock (failedList)
+                            failedList.Add("CustomerID == 0");
+
+                    createdCustomers.Add(customer);
+
+                    DB.Customers.Async().Read(customer.CustomerID).ContinueWith(tRead =>
+                    {
+                        if (customer.Name != tRead.Result.Name)
+                            lock (failedList)
+                                failedList.Add("Name == " + customer.Name);
+                    });
+                });
+            }
+
+
+            Task.WaitAll(saveTasks);
+
+            Assert.That(createdCustomers.Count, Is.EqualTo(numThreads));
+
+            foreach (var fail in failedList)
+            {
+                Assert.Fail(fail);
+            }
+        }
+
 
         [Test]
         public void ParallelTest1()
