@@ -17,6 +17,7 @@ namespace Velox.DB.Test
         public IDataSet<Product> Products;
         public IDataSet<PaymentMethod> PaymentMethods { get; set; }
         public IDataSet<CustomerPaymentMethodLink> CustomerPaymentMethodLinks { get; set; }
+        public IDataSet<RecordWithAllTypes> RecordsWithAllTypes;
 
         public MyContext(IDataProvider dataProvider) : base(dataProvider)
         {
@@ -40,6 +41,7 @@ namespace Velox.DB.Test
             Products.Purge();
             PaymentMethods.Purge();
             CustomerPaymentMethodLinks.Purge();
+            RecordsWithAllTypes.Purge();
         }
 
         public void CreateAllTables()
@@ -51,6 +53,7 @@ namespace Velox.DB.Test
             CreateTable<SalesPerson>();
             CreateTable<PaymentMethod>();
             CreateTable<CustomerPaymentMethodLink>();
+            CreateTable<RecordWithAllTypes>();
         }
 
         private static MyContext _instance;

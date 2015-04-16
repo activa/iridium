@@ -51,11 +51,13 @@ namespace Velox.DB.Sqlite
 
         public override string TruncateTableSql(string tableName)
         {
-            return "DELETE FROM " + QuoteTable(tableName) + ";delete from sqlite_sequence where name='" + tableName + "'";
+            throw new NotSupportedException(); // Is handled in DataProvider class
         }
 
         public override string GetLastAutoincrementIdSql(string columnName, string alias, string tableName)
         {
+            throw new NotSupportedException(); // Is handled in DataProvider class
+
             return "select last_insert_rowid() as " + alias;
         }
 

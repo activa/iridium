@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="ActiveRecordExtensions.cs" />
     <Compile Include="AssertHelper.cs" />
+    <Compile Include="FieldTypeTests.cs" />
     <Compile Include="Model.cs" />
     <Compile Include="MyContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

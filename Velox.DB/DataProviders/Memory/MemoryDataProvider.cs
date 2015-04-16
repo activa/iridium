@@ -271,5 +271,9 @@ namespace Velox.DB
             }
         }
 
+        public void Dispose()
+        {
+            _buckets.Clear();
+        }
     }
 }

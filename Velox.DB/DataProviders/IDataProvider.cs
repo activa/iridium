@@ -30,7 +30,7 @@ using System.Linq.Expressions;
 
 namespace Velox.DB
 {
-    public interface IDataProvider
+    public interface IDataProvider : IDisposable
     {
         object GetScalar(Aggregate aggregate, INativeQuerySpec nativeQuerySpec, OrmSchema schema);
         IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec filter, OrmSchema schema);

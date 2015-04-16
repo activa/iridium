@@ -9,6 +9,11 @@ namespace Velox.DB.Sqlite.API
             sqlite3.open_v2(fileName, out db, (int) openFlags, IntPtr.Zero);
         }
 
+        public SqliteReturnCode close(IntPtr db)
+        {
+            return (SqliteReturnCode) sqlite3.close(db);
+        }
+
         public SqliteReturnCode step(IntPtr stmt)
         {
             return (SqliteReturnCode) sqlite3.step(stmt);

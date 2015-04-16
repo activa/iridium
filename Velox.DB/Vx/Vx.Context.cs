@@ -34,7 +34,7 @@ namespace Velox.DB
 {
     public static partial class Vx
     {
-        public class Context
+        public class Context : IDisposable
         {
             private readonly SafeDictionary<Type, Repository> _repositories = new SafeDictionary<Type, Repository>();
 
@@ -148,6 +148,13 @@ namespace Velox.DB
             public Task<T> QueryScalarAsync<T>(string sql, object parameters = null) where T : new()
             {
                 return Task.Factory.StartNew(() => QueryScalar<T>(sql, parameters));
+            }
+
+            public void Dispose()
+            {
+                DataProvider.Dispose();
+
+                DataProvider = null;
             }
         }
     }

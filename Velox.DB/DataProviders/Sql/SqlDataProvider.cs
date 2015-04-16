@@ -451,5 +451,6 @@ namespace Velox.DB.Sql
             return sqlResult[fieldAlias].Convert<long>();
         }
 
+        public abstract void Dispose();
     }
 }

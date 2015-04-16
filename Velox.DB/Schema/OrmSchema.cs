@@ -100,6 +100,11 @@ namespace Velox.DB
                     else
                         schemaField.ColumnSize = 50;
                 }
+                else if (field.FieldType.Inspector().Is(TypeFlags.Decimal))
+                {
+                    schemaField.ColumnSize = 10;
+                    schemaField.ColumnScale = 5;
+                }
 
                 if (fieldInspector.HasAttribute<Column.PrimaryKeyAttribute>())
                 {

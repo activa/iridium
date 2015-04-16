@@ -6,6 +6,7 @@ namespace Velox.DB.Sqlite.API
     internal interface ISqliteAPI
     {
         void open_v2(string fileName, out IntPtr db, SqliteOpenFlags openFlags);
+        SqliteReturnCode close(IntPtr db);
         SqliteReturnCode step(IntPtr stmt);
         string errmsg(IntPtr dbHandle);
         int changes(IntPtr dbHandle);

@@ -50,7 +50,7 @@ namespace Velox.DB.Sql
     {
         private readonly string _connectionString;
 
-        private readonly ThreadLocal<DbConnection> _localConnection = new ThreadLocal<DbConnection>();
+        private readonly ThreadLocal<DbConnection> _localConnection = new ThreadLocal<DbConnection>(true);
 
         protected SqlAdoDataProvider(string connectionString)
         {
@@ -168,6 +168,14 @@ namespace Velox.DB.Sql
             using (var cmd = CreateCommand(sql, parameters == null ? null : parameters.AsDictionary()))
             {
                 return cmd.ExecuteNonQuery();
+            }
+        }
+
+        public override void Dispose()
+        {
+            foreach (var connection in _localConnection.Values)
+            {
+                connection.Dispose();
             }
         }
     }

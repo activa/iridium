@@ -26,6 +26,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using Velox.DB.Core;
 using Velox.DB.Sql;
@@ -48,7 +49,6 @@ namespace Velox.DB.Sqlite
 
         public SqliteDataProvider()
         {
-            
             _sqlite3 = new SqliteAPI();
         }
 
@@ -117,6 +117,8 @@ namespace Velox.DB.Sqlite
         private IntPtr CreateCommand(string sql, QueryParameterCollection parameters)
         {
             IntPtr stmt;
+
+            Debug.WriteLine("{0}",sql);
 
             SqliteReturnCode returnCode = _sqlite3.prepare_v2(DbHandle, sql, out stmt);
 
@@ -234,6 +236,17 @@ namespace Velox.DB.Sqlite
         public override long GetLastAutoIncrementValue(OrmSchema schema)
         {
             return _lastRowId.Value ?? 0;
+        }
+
+        public override void Dispose()
+        {
+            lock (this)
+            {
+                if (_db != null)
+                    _sqlite3.close(_db.Value);
+
+                _db = null;
+            }
         }
     }
 
