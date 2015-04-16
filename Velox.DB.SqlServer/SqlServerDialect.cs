@@ -28,8 +28,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Velox.DB.Core;
+using Velox.DB.Sql;
 
-namespace Velox.DB.Sql.SqlServer
+namespace Velox.DB.SqlServer
 {
     public class SqlServerDialect : SqlDialect
     {
@@ -104,7 +105,7 @@ namespace Velox.DB.Sql.SqlServer
             return "select SCOPE_IDENTITY() as " + alias;
         }
 
-        public override void CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes, Func<string, QueryParameterCollection, IEnumerable<Dictionary<string, object>>> fnExecuteReader, Action<string, QueryParameterCollection> fnExecuteSql)
+        public override void CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes, SqlDataProvider dataProvider)
         {
             const string longTextType = "TEXT";
 
@@ -127,7 +128,7 @@ namespace Velox.DB.Sql.SqlServer
             string tableSchemaName = tableNameParts.Length == 1 ? "dbo" : tableNameParts[0];
             string tableName = tableNameParts.Length == 1 ? tableNameParts[0] : tableNameParts[1];
 
-            var existingColumns = fnExecuteReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=@schema and TABLE_NAME=@name",
+            var existingColumns = dataProvider.ExecuteSqlReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=@schema and TABLE_NAME=@name",
                 new QueryParameterCollection(new { schema = tableSchemaName, name = tableName })).ToLookup(rec => rec["COLUMN_NAME"].ToString());
 
             var parts = new List<string>();
@@ -167,7 +168,7 @@ namespace Velox.DB.Sql.SqlServer
             }
 
             if (recreateTable)
-                fnExecuteSql("DROP TABLE " + QuoteTable(schema.MappedName), null);
+                dataProvider.ExecuteSql("DROP TABLE " + QuoteTable(schema.MappedName), null);
 
             if (parts.Any())
             {
@@ -180,10 +181,10 @@ namespace Velox.DB.Sql.SqlServer
                 if (createNew)
                     sql += ")";
 
-                fnExecuteSql(sql, null);
+                dataProvider.ExecuteSql(sql, null);
             }
 
-            var existingIndexes = fnExecuteReader("SELECT ind.name as IndexName FROM sys.indexes ind INNER JOIN sys.tables t ON ind.object_id = t.object_id WHERE ind.name is not null and ind.is_primary_key = 0 AND t.is_ms_shipped = 0 AND t.name=@tableName",
+            var existingIndexes = dataProvider.ExecuteSqlReader("SELECT ind.name as IndexName FROM sys.indexes ind INNER JOIN sys.tables t ON ind.object_id = t.object_id WHERE ind.name is not null and ind.is_primary_key = 0 AND t.is_ms_shipped = 0 AND t.name=@tableName",
                  new QueryParameterCollection(new { tableName })).ToLookup(rec => rec["IndexName"].ToString());
 
             foreach (var index in schema.Indexes)
@@ -191,7 +192,7 @@ namespace Velox.DB.Sql.SqlServer
                 if (existingIndexes["IX_" + index.Name].Any())
                 {
                     if (recreateIndexes)
-                        fnExecuteSql("DROP INDEX " + QuoteTable("IX_" + index.Name) + " ON " + QuoteTable(schema.MappedName), null);
+                        dataProvider.ExecuteSql("DROP INDEX " + QuoteTable("IX_" + index.Name) + " ON " + QuoteTable(schema.MappedName), null);
                     else
                         continue;
                 }
@@ -202,7 +203,7 @@ namespace Velox.DB.Sql.SqlServer
 
                 createIndexSql += ")";
 
-                fnExecuteSql(createIndexSql, null);
+                dataProvider.ExecuteSql(createIndexSql, null);
             }
         }
     }

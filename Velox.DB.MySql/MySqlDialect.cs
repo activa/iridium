@@ -28,8 +28,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Velox.DB.Core;
+using Velox.DB.Sql;
 
-namespace Velox.DB.Sql
+namespace Velox.DB.MySql
 {
     public class MySqlDialect : SqlDialect
     {
@@ -61,9 +62,9 @@ namespace Velox.DB.Sql
             return "select last_insert_id() as " + alias;
         }
 
-        public override void CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes, Func<string, QueryParameterCollection, IEnumerable<Dictionary<string, object>>> fnExecuteReader, Action<string, QueryParameterCollection> fnExecuteSql)
+        public override void CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes, SqlDataProvider datProvider)
         {
-            string longTextType = "LONGTEXT";
+            const string longTextType = "LONGTEXT";
 
             var columnMappings = new[]
             {
@@ -83,7 +84,7 @@ namespace Velox.DB.Sql
                 new {Flags = TypeFlags.DateTime, ColumnType = "DATETIME"}
             };
 
-            var existingColumns = fnExecuteReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=DATABASE() and TABLE_NAME=@name", new QueryParameterCollection(new { name = schema.MappedName })).ToLookup(rec => rec["COLUMN_NAME"].ToString());
+            var existingColumns = datProvider.ExecuteSqlReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=DATABASE() and TABLE_NAME=@name", new QueryParameterCollection(new { name = schema.MappedName })).ToLookup(rec => rec["COLUMN_NAME"].ToString());
 
             var parts = new List<string>();
 
@@ -134,7 +135,7 @@ namespace Velox.DB.Sql
                 sql += ")";
 
 
-            fnExecuteSql(sql, null);
+            datProvider.ExecuteSql(sql, null);
 
 
         }

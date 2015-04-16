@@ -1,31 +1,31 @@
 using System;
 using System.Collections.Generic;
-using NUnit.Framework;
-using NUnit.Framework.Constraints;
+using FluentAssertions;
 
 namespace Velox.DB.Test
 {
     public static class AssertHelper
     {
-        public static void AssertSorting<T>(IEnumerable<T> list, Func<T, object> getValue, Func<object, ComparisonConstraint> constraint)
+        public static void AssertSorting<T>(IEnumerable<T> list, Func<T,T, bool> getValue) where T:class
         {
-            object prev = null;
+            T prev = null;
 
             foreach (var item in list)
             {
                 if (prev == null)
                 {
-                    prev = getValue(item);
+                    prev = item;
                 }
                 else
                 {
-                    Assert.That(getValue(item), constraint(prev));
+                    getValue(prev, item).Should().BeTrue();
 
-                    prev = getValue(item);
+                    prev = item;
                 }
             }
         }
 
+        /*
         public static void AssertSorting<T>(IEnumerable<T> list, Func<T, object> getValue1, Func<object, ComparisonConstraint> constraint1, Func<T, object> getValue2, Func<object, ComparisonConstraint> constraint2)
         {
             object prev1 = null;
@@ -49,7 +49,7 @@ namespace Velox.DB.Test
                     prev2 = getValue2(item);
                 }
             }
-        }
+        }*/
 
     }
 }

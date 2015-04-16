@@ -136,6 +136,7 @@ namespace Velox.DB.Sql
         }
 
         public abstract string GetLastAutoincrementIdSql(string columnName, string alias, string tableName);
-        public abstract void CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes, Func<string, QueryParameterCollection, IEnumerable<Dictionary<string, object>>> fnExecuteReader, Action<string, QueryParameterCollection> fnExecuteSql);
+
+        public abstract void CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes, SqlDataProvider dataProvider);
     }
 }

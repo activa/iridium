@@ -29,19 +29,43 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.Linq;
+using System.Reflection;
 using Velox.DB.Core;
 
-namespace Velox.DB.Sql.SqlServer
+namespace Velox.DB.SqlServer
 {
     public class SqlServerDataProvider : SqlAdoDataProvider<SqlConnection, SqlServerDialect>
     {
         public SqlServerDataProvider(string connectionString) : base(connectionString)
         {
+            string architecture = "?";
+
+
+            PortableExecutableKinds peKind;
+            ImageFileMachine machine;
+            typeof(object).Module.GetPEKind(out peKind, out machine);
+
+            if (machine == ImageFileMachine.I386)
+                architecture = "x86";
+            else if (machine == ImageFileMachine.AMD64)
+                architecture = "x64";
+            else if (machine == ImageFileMachine.ARM)
+                architecture = "ARM";
+
+            var osVersion = System.Environment.OSVersion;
+
+            if (osVersion.Platform == PlatformID.Win32NT)
+                architecture = "windows-" + architecture;
         }
 
         public override void ClearConnectionPool()
         {
             SqlConnection.ClearAllPools();
+        }
+
+        public override bool RequiresAutoIncrementGetInSameStatement
+        {
+            get { return true; }
         }
     }
 }

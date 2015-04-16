@@ -1,10 +1,21 @@
+using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using NUnit.Framework;
 using Velox.DB.TextExpressions;
+
+#if MSTEST
+using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
+
+using TestFixtureAttribute = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestClassAttribute;
+using SetUpAttribute = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestInitializeAttribute;
+using TestAttribute = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestMethodAttribute;
+
+#else
+using NUnit.Framework;
+#endif
 
 namespace Velox.DB.Test
 {
@@ -19,8 +30,7 @@ namespace Velox.DB.Test
             DB.PurgeAll();
         }
 
-        [TestFixtureSetUp]
-        public void CreateTables()
+        public WithEmptyDB()
         {
             DB.CreateAllTables();
         }
@@ -72,16 +82,18 @@ namespace Velox.DB.Test
         [Test]
         public void AsyncInsert()
         {
-            const int numThreads = 20;
+            const int numThreads = 500;
 
             List<string> failedList = new List<string>();
             Task<bool>[] saveTasks = new Task<bool>[numThreads];
             Customer[] customers = new Customer[numThreads];
             List<Customer> createdCustomers = new List<Customer>();
 
+            HashSet<int> ids = new HashSet<int>();
+
             for (int i = 0; i < numThreads; i++)
             {
-                string name = "" + (char)(i + 'A');
+                string name = "C" + (i + 1);
 
                 Customer customer = new Customer { Name = name };
 
@@ -94,13 +106,22 @@ namespace Velox.DB.Test
                         lock (failedList)
                             failedList.Add("CustomerID == 0");
 
-                    createdCustomers.Add(customer);
+                    lock (ids)
+                    {
+                        if (ids.Contains(customer.CustomerID))
+                            failedList.Add("Dupicate CustomerID " + customer.CustomerID + " for " + customer.Name);
+
+                        ids.Add(customer.CustomerID);
+                    }
+
+                    lock (createdCustomers)
+                        createdCustomers.Add(customer);
 
                     DB.Customers.Async().Read(customer.CustomerID).ContinueWith(tRead =>
                     {
                         if (customer.Name != tRead.Result.Name)
                             lock (failedList)
-                                failedList.Add("Name == " + customer.Name);
+                                failedList.Add(string.Format("Customer == ({0},{1})" + ", but should be ({2},{3})", tRead.Result.CustomerID, tRead.Result.Name, customer.CustomerID, customer.Name));
                     });
                 });
             }
@@ -108,7 +129,9 @@ namespace Velox.DB.Test
 
             Task.WaitAll(saveTasks);
 
-            Assert.That(createdCustomers.Count, Is.EqualTo(numThreads));
+            saveTasks.Should().NotContain(t => t.IsFaulted);
+
+            createdCustomers.Count.Should().Be(numThreads);
 
             foreach (var fail in failedList)
             {
@@ -120,21 +143,22 @@ namespace Velox.DB.Test
         [Test]
         public void ParallelTest1()
         {
-            const int numThreads = 20;
+            const int numThreads = 500;
 
             Task[] tasks = new Task[numThreads];
 
             List<string> failedList = new List<string>();
+            Customer[] customers = new Customer[numThreads];
             List<Customer> createdCustomers = new List<Customer>();
+
+            HashSet<int> ids = new HashSet<int>();
 
             for (int i = 0; i < numThreads; i++)
             {
-                var data = i;
+                string name = "C" + (i + 1);
 
                 tasks[i] = Task.Factory.StartNew(() =>
                 {
-                    string name = "" + (char) (((int) data) + 'A');
-
                     Customer customer = new Customer { Name = name };
 
                     customer.Save();
@@ -143,14 +167,23 @@ namespace Velox.DB.Test
                         lock (failedList)
                             failedList.Add("CustomerID == 0");
 
-                    Vx.DataSet<Customer>().Read(customer.CustomerID);
+                    lock (ids)
+                    {
+                        if (ids.Contains(customer.CustomerID))
+                            failedList.Add("Dupicate CustomerID " + customer.CustomerID + " for " + customer.Name);
 
-                    if (customer.Name != name)
-                        lock (failedList)
-                            failedList.Add("Name == " + customer.Name);
+                        ids.Add(customer.CustomerID);
+                    }
 
                     lock (createdCustomers)
                         createdCustomers.Add(customer);
+
+                    var newCustomer = Vx.DataSet<Customer>().Read(customer.CustomerID);
+
+                    if (customer.Name != newCustomer.Name)
+                        lock (failedList)
+                            failedList.Add(string.Format("Customer == ({0},{1})" + ", but should be ({2},{3})", newCustomer.CustomerID, newCustomer.Name, customer.CustomerID, customer.Name));
+
                 });
             }
 
@@ -164,7 +197,7 @@ namespace Velox.DB.Test
                 Assert.Fail(fail);
             }
 
-            Assert.That(createdCustomers.Count, Is.EqualTo(numThreads));
+            createdCustomers.Count.Should().Be(numThreads);
         }
 
         private void CreateRandomPricedProducts()
@@ -192,8 +225,8 @@ namespace Velox.DB.Test
 
             var pr = (from p in DB.Products where p.Description.StartsWith("B") select p).ToArray();
 
-            Assert.That(pr.Count(), Is.EqualTo(2));
-            Assert.That(pr.All(p => p.Description.StartsWith("B")));
+            pr.Count().Should().Be(2);
+            pr.All(p => p.Description.StartsWith("B")).Should().BeTrue();
 
         }
 
@@ -213,9 +246,8 @@ namespace Velox.DB.Test
 
             var pr = (from p in DB.Products where p.Description.EndsWith("B") select p).ToArray();
 
-            Assert.That(pr.Count(), Is.EqualTo(2));
-            Assert.That(pr.All(p => p.Description.EndsWith("B")));
-
+            pr.Count().Should().Be(2);
+            pr.All(p => p.Description.EndsWith("B")).Should().BeTrue();
         }
 
 
@@ -226,11 +258,11 @@ namespace Velox.DB.Test
 
             var sortedProducts = from product in DB.Products orderby product.Price select product;
 
-            AssertHelper.AssertSorting(sortedProducts, p => p.Price, Is.GreaterThanOrEqualTo);
+            sortedProducts.Should().BeInAscendingOrder(product => product.Price);
 
             sortedProducts = from product in DB.Products orderby product.Price descending select product;
 
-            AssertHelper.AssertSorting(sortedProducts, p => p.Price, Is.LessThanOrEqualTo);
+            sortedProducts.Should().BeInDescendingOrder(product => product.Price);
         }
 
 
@@ -239,8 +271,8 @@ namespace Velox.DB.Test
         {
             CreateRandomPricedProducts();
 
-            AssertHelper.AssertSorting(DB.Products.OrderBy(new TextQueryExpression("Price")), p => p.Price, Is.GreaterThanOrEqualTo);
-            AssertHelper.AssertSorting(DB.Products.OrderBy(new TextQueryExpression("Price"), SortOrder.Descending), p => p.Price, Is.LessThanOrEqualTo);
+            DB.Products.OrderBy(new TextQueryExpression("Price")).Should().BeInAscendingOrder(p => p.Price);
+            DB.Products.OrderBy(new TextQueryExpression("Price"), SortOrder.Descending).Should().BeInDescendingOrder(p => p.Price);
         }
 
         [Test]
@@ -303,9 +335,9 @@ namespace Velox.DB.Test
 
             Vx.LoadRelations(() => order.Customer);
 
-            Assert.That(order2.Customer.Name, Is.EqualTo(order.Customer.Name));
-            Assert.That(order2.Customer.CustomerID, Is.EqualTo(order.Customer.CustomerID));
-            Assert.That(order2.Customer.CustomerID, Is.EqualTo(order.CustomerID));
+            order2.Customer.Name.Should().Be(order.Customer.Name);
+            order2.Customer.CustomerID.Should().Be(order.Customer.CustomerID);
+            order2.Customer.CustomerID.Should().Be(order.CustomerID);
         }
 
         [Test]
@@ -574,7 +606,7 @@ namespace Velox.DB.Test
 
             total2 = DB.OrderItems.Sum(item => item.Qty * item.Price);
 
-            Assert.That(total, Is.GreaterThan(total2));
+            total.Should().BeGreaterThan(total2);
 
             Assert.AreEqual(95, DB.OrderItems.Count());
         }

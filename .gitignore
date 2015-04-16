@@ -9,3 +9,5 @@ TestResults
 *.userprefs
 *.pidb
 *.nupkg
+pushAll.cmd
+

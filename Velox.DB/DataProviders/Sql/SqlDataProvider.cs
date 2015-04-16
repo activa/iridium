@@ -32,13 +32,20 @@ using Velox.DB.Core;
 
 namespace Velox.DB.Sql
 {
-    public abstract class SqlDataProvider<T> : IDataProvider where T : SqlDialect, new()
+    public abstract class SqlDataProvider<T> : SqlDataProvider where T : SqlDialect, new()
+    {
+        protected SqlDataProvider() : base(new T())
+        {
+        }
+    }
+
+    public abstract class SqlDataProvider : IDataProvider
     {
         public SqlDialect SqlDialect { get; private set; }
 
-        protected SqlDataProvider()
+        protected SqlDataProvider(SqlDialect sqlDialect)
         {
-            SqlDialect = new T();
+            SqlDialect = sqlDialect;
         }
 
         public object GetScalar(Aggregate aggregate, INativeQuerySpec nativeQuerySpec, OrmSchema schema)
@@ -203,7 +210,7 @@ namespace Velox.DB.Sql
             string tableName = schema.MappedName;
             var autoIncrementField = schema.IncrementKeys.FirstOrDefault();
             var columnList = (from f in schema.Fields.Values where !f.AutoIncrement select new { Field = f, ParameterName = SqlNameGenerator.NextParameterName()  }).ToArray();
-            var parameters = columnList.ToDictionary(c => c.ParameterName, c => o[c.Field.MappedName]);
+            var parameters = new QueryParameterCollection(columnList.ToDictionary(c => c.ParameterName, c => o[c.Field.MappedName]));
 
             string sql;
 
@@ -214,18 +221,33 @@ namespace Velox.DB.Sql
                                     columnList.Select(c => c.Field.MappedName), columnList.Select(c => SqlDialect.CreateParameterExpression(c.ParameterName))
                                     );
 
-                string autoincrementAlias = SqlNameGenerator.NextFieldAlias();
 
-                if (autoIncrementField != null)
-                    sql += String.Format(";{0}", SqlDialect.GetLastAutoincrementIdSql(autoIncrementField.MappedName,autoincrementAlias,tableName));
-
-                var sqlResult = ExecuteSqlReader(sql, new QueryParameterCollection(parameters)).FirstOrDefault();
+                
 
                 if (autoIncrementField != null)
                 {
-                    o[autoIncrementField.MappedName] = sqlResult[autoincrementAlias].Convert(autoIncrementField.FieldType);
+                    object autoIncrementValue = null;
 
+                    if (RequiresAutoIncrementGetInSameStatement)
+                    {
+                        string fieldAlias = SqlNameGenerator.NextFieldAlias();
+
+                        sql += ';' + SqlDialect.GetLastAutoincrementIdSql(autoIncrementField.MappedName, fieldAlias, schema.MappedName);
+
+                        autoIncrementValue = ExecuteSqlReader(sql, parameters).FirstOrDefault()[fieldAlias];
+                    }
+                    else
+                    {
+                        ExecuteSql(sql, parameters);
+                        autoIncrementValue = GetLastAutoIncrementValue(schema);
+                    }
+
+                    o[autoIncrementField.MappedName] = autoIncrementValue.Convert(autoIncrementField.FieldType);
                     result.OriginalUpdated = true;
+                }
+                else
+                {
+                    ExecuteSql(sql, parameters);
                 }
 
                 result.Added = true;
@@ -245,7 +267,7 @@ namespace Velox.DB.Sql
                                         String.Join(" AND ", pkParameters.Select(pk => SqlDialect.QuoteField(pk.Value.MappedName) + "=" + SqlDialect.CreateParameterExpression(pk.Key)))
                                     );
 
-                    ExecuteSql(sql, new QueryParameterCollection(parameters));
+                    ExecuteSql(sql, parameters);
                 }
                 else
                 {
@@ -383,24 +405,51 @@ namespace Velox.DB.Sql
             get { return true; }
         }
 
+        public abstract bool RequiresAutoIncrementGetInSameStatement { get; }
+
         public virtual bool CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes)
         {
-            SqlDialect.CreateOrUpdateTable(schema, recreateTable, recreateIndexes, ExecuteSqlReader, (sql, parameters) => ExecuteSql(sql, parameters));
+            SqlDialect.CreateOrUpdateTable(schema, recreateTable, recreateIndexes, this);
 
             return true;
         }
 
         public abstract int ExecuteSql(string sql, QueryParameterCollection parameters);
-        public abstract IEnumerable<SerializedEntity> Query(string sql, QueryParameterCollection parameters);
-        public abstract object QueryScalar(string sql, QueryParameterCollection parameters);
+        public abstract IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, QueryParameterCollection parameters);
 
-        public void Purge(OrmSchema schema)
+        public virtual IEnumerable<SerializedEntity> Query(string sql, QueryParameterCollection parameters)
+        {
+            return ExecuteSqlReader(sql, parameters).Select(rec => new SerializedEntity(rec));
+        }
+
+        public virtual object QueryScalar(string sql, QueryParameterCollection parameters)
+        {
+            var result = ExecuteSqlReader(sql, parameters).FirstOrDefault();
+
+            if (result != null)
+                return result.First().Value;
+            else
+                return null;
+        }
+
+        public virtual void Purge(OrmSchema schema)
         {
             ExecuteSql(SqlDialect.TruncateTableSql(schema.MappedName), null);
 
             SqlNameGenerator.Reset();
         }
 
-        protected abstract IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, QueryParameterCollection parameters);
+        public virtual long GetLastAutoIncrementValue(OrmSchema schema)
+        {
+            var autoIncrementField = schema.IncrementKeys.FirstOrDefault();
+            var fieldAlias = SqlNameGenerator.NextFieldAlias();
+
+            string sql = SqlDialect.GetLastAutoincrementIdSql(autoIncrementField.MappedName, fieldAlias, schema.MappedName);
+
+            var sqlResult = ExecuteSqlReader(sql, null).FirstOrDefault();
+
+            return sqlResult[fieldAlias].Convert<long>();
+        }
+
     }
 }

@@ -34,14 +34,12 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Threading;
-
+using Velox.DB.Sql;
 
 #if VELOX_SQLSERVER
-namespace Velox.DB.Sql.SqlServer
+namespace Velox.DB.SqlServer
 #elif VELOX_MYSQL
-namespace Velox.DB.Sql.MySql
-#elif VELOX_SQLITE
-namespace Velox.DB.Sql.Sqlite
+namespace Velox.DB.MySql
 #else
 namespace Velox.DB.Sql
 #endif
@@ -131,7 +129,7 @@ namespace Velox.DB.Sql
             return value;
         }
 
-        protected override IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, QueryParameterCollection parameters)
+        public override IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, QueryParameterCollection parameters)
         {
             Debug.WriteLine(string.Format("{0}", sql));
 
@@ -171,21 +169,6 @@ namespace Velox.DB.Sql
             {
                 return cmd.ExecuteNonQuery();
             }
-        }
-
-        public override IEnumerable<SerializedEntity> Query(string sql, QueryParameterCollection parameters)
-        {
-            return ExecuteSqlReader(sql, parameters).Select(rec => new SerializedEntity(rec));
-        }
-
-        public override object QueryScalar(string sql, QueryParameterCollection parameters)
-        {
-            var result = ExecuteSqlReader(sql, parameters).FirstOrDefault();
-
-            if (result != null)
-                return result.First().Value;
-            else
-                return null;
         }
     }
 }

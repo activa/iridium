@@ -1,7 +1,18 @@
+using FluentAssertions;
 using System;
 using System.Linq;
-using NUnit.Framework;
 using Velox.DB.TextExpressions;
+
+#if MSTEST
+using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
+
+using TestFixtureAttribute = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestClassAttribute;
+using SetUpAttribute = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestInitializeAttribute;
+using TestAttribute = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestMethodAttribute;
+
+#else
+using NUnit.Framework;
+#endif
 
 namespace Velox.DB.Test
 {
@@ -17,9 +28,8 @@ namespace Velox.DB.Test
         
         private int FIRST_CUSTOMERID = 0;
 
-
-        [TestFixtureSetUp]
-        public void SetupFixture()
+        
+        public WithStandardTestData()
         {
             DB.CreateAllTables();
             DB.PurgeAll();
@@ -93,8 +103,8 @@ namespace Velox.DB.Test
         {
             var selectedCustomers = DB.Customers.OrderBy(c => c.CustomerID).Skip(5).Take(10).ToArray();
 
-            Assert.That(selectedCustomers.Length, Is.EqualTo(10));
-            Assert.That(selectedCustomers[0].CustomerID, Is.EqualTo(6));
+            selectedCustomers.Length.Should().Be(10);
+            selectedCustomers[0].CustomerID.Should().Be(6);
         }
 
         [Test]
@@ -102,9 +112,9 @@ namespace Velox.DB.Test
         {
             var selectedCustomers = DB.Customers.OrderBy(c => c.CustomerID).Take(10).ToArray();
 
-            Assert.That(selectedCustomers.Length, Is.EqualTo(10));
-            Assert.That(selectedCustomers[0].CustomerID, Is.EqualTo(1));
-            Assert.That(selectedCustomers[9].CustomerID, Is.EqualTo(10));
+            selectedCustomers.Length.Should().Be(10);
+            selectedCustomers[0].CustomerID.Should().Be(1);
+            selectedCustomers[9].CustomerID.Should().Be(10);
         }
 
         [Test]
@@ -112,8 +122,8 @@ namespace Velox.DB.Test
         {
             var selectedCustomers = DB.Customers.OrderBy(c => c.CustomerID).Skip(5).ToArray();
 
-            Assert.That(selectedCustomers.Length, Is.EqualTo(15));
-            Assert.That(selectedCustomers[0].CustomerID, Is.EqualTo(6));
+            selectedCustomers.Length.Should().Be(15);
+            selectedCustomers[0].CustomerID.Should().Be(6);
         }
 
         [Test]
@@ -121,20 +131,19 @@ namespace Velox.DB.Test
         {
             var sortedItems = (from item in DB.OrderItems orderby item.Order.Remark select item).WithRelations(item => item.Order);
 
-            AssertHelper.AssertSorting(sortedItems, item => item.Order.Remark, Is.GreaterThanOrEqualTo);
+            sortedItems.Should().BeInAscendingOrder(item => item.Order.Remark);
 
             sortedItems = (from item in DB.OrderItems.WithRelations(item => item.Order) orderby item.Order.Remark select item);
 
-            AssertHelper.AssertSorting(sortedItems, item => item.Order.Remark, Is.GreaterThanOrEqualTo);
-
+            sortedItems.Should().BeInAscendingOrder(item => item.Order.Remark);
         }
 
         [Test]
-        public void Sorting_SortAlpha_ManyToOne_Expression()
+        public void Sorting_SortAlpha_ManyToOne_Multiple_Expression()
         {
             var sortedItems = DB.OrderItems.OrderBy(new TextQueryExpression("Order.Remark")).OrderBy(new TextQueryExpression("Price"), SortOrder.Descending).WithRelations(item => item.Order);
 
-            AssertHelper.AssertSorting(sortedItems, item => item.Order.Remark, Is.GreaterThanOrEqualTo, item => item.Price, Is.LessThanOrEqualTo);
+            AssertHelper.AssertSorting(sortedItems, (prev, current) => (prev.Order.Remark.CompareTo(current.Order.Remark) < 0) || (current.Order.Remark == prev.Order.Remark && (current.Price <= prev.Price)));
         }
 
         [Test]
@@ -142,7 +151,7 @@ namespace Velox.DB.Test
         {
             var sortedItems = (from item in DB.OrderItems orderby item.Order.Remark, item.Price descending select item).WithRelations(o => o.Order);
 
-            AssertHelper.AssertSorting(sortedItems, item => item.Order.Remark, Is.GreaterThanOrEqualTo, item => item.Price, Is.LessThanOrEqualTo);
+            AssertHelper.AssertSorting(sortedItems, (prev, current) => (prev.Order.Remark.CompareTo(current.Order.Remark) < 0) || (current.Order.Remark == prev.Order.Remark && (current.Price <= prev.Price)));
         }
 
         [Test]
@@ -150,18 +159,19 @@ namespace Velox.DB.Test
         {
             var sortedOrders = (from order in DB.Orders orderby order.OrderItems.Sum(item => item.Price) select order).WithRelations(o => o.OrderItems);
 
-            AssertHelper.AssertSorting(sortedOrders, order => order.OrderItems.Sum(item => item.Price), Is.GreaterThanOrEqualTo);
-        }
 
+            AssertHelper.AssertSorting(sortedOrders, (prev, now) => prev.OrderItems.Sum(item => item.Price) <= now.OrderItems.Sum(item => item.Price));
+            
+        }
 
         [Test]
         public void PrefetchRelations_OneToMany()
         {
             var customers = DB.Customers.Where(c => c.Name == "Customer 10").WithRelations(c => c.Orders).ToArray();
 
-            Assert.That(customers.Length, Is.EqualTo(1));
-            Assert.That(customers[0].Orders, Is.Not.Null);
-            Assert.That(customers[0].Orders.Count(), Is.EqualTo(9));
+            customers.Length.Should().Be(1);
+            customers[0].Orders.Should().NotBeNull();
+            customers[0].Orders.Count().Should().Be(9);
         }
 
         [Test]
@@ -169,9 +179,9 @@ namespace Velox.DB.Test
         {
             var customer = DB.Customers.Read(2);
 
-            Assert.That(customer, Is.Not.Null);
-            Assert.That(customer.Orders, Is.Not.Null);
-            Assert.That(customer.Orders.Count(), Is.EqualTo(1));
+            customer.Should().NotBeNull();
+            customer.Orders.Should().NotBeNull();
+            customer.Orders.Count().Should().Be(1);
         }
 
 
@@ -183,15 +193,15 @@ namespace Velox.DB.Test
 
             var orders = DB.Orders.WithRelations(o => o.Customer).ToArray();
 
-            Assert.That(orders.Length, Is.EqualTo(90));
-            Assert.That(orders[0].Customer.CustomerID,Is.EqualTo(orders[0].CustomerID));
+            orders.Length.Should().Be(90);
+            orders[0].Customer.CustomerID.Should().Be(orders[0].CustomerID);
 
-            Assert.That(Vx.GetQueryCount(DB.Orders), Is.EqualTo(1));
+            Vx.GetQueryCount(DB.Orders).Should().Be(1);
 
             if (DB.DataProvider.SupportsRelationPrefetch)
-                Assert.That(Vx.GetQueryCount(DB.Customers), Is.EqualTo(0));
+                Vx.GetQueryCount(DB.Customers).Should().Be(0);
             else
-                Assert.That(Vx.GetQueryCount(DB.Customers), Is.EqualTo(90));
+                Vx.GetQueryCount(DB.Customers).Should().Be(90);
         }
 
 
@@ -204,23 +214,23 @@ namespace Velox.DB.Test
 
             var orderItems = DB.OrderItems.WithRelations(item => item.Order, item => item.Product, item => item.Order.Customer).ToArray();
 
-            Assert.That(orderItems.Length, Is.EqualTo(220));
-            Assert.That(orderItems[0].Order.OrderID, Is.EqualTo(orderItems[0].OrderID));
-            Assert.That(orderItems[0].Product, Is.Null);
-            Assert.That(orderItems[2].Product.ProductID, Is.EqualTo(orderItems[2].ProductID));
-            Assert.That(orderItems[0].Order.Customer.CustomerID, Is.EqualTo(orderItems[0].Order.CustomerID));
+            orderItems.Length.Should().Be(220);
+            orderItems[0].Order.OrderID.Should().Be(orderItems[0].OrderID);
+            orderItems[0].Product.Should().BeNull();
+            orderItems[2].Product.ProductID.Should().Be(orderItems[2].ProductID);
+            orderItems[0].Order.Customer.CustomerID.Should().Be(orderItems[0].Order.CustomerID);
 
-            Assert.That(Vx.GetQueryCount(DB.OrderItems), Is.EqualTo(1));
+            Vx.GetQueryCount(DB.OrderItems).Should().Be(1);
 
             if (DB.DataProvider.SupportsRelationPrefetch)
             {
-                Assert.That(Vx.GetQueryCount(DB.Customers), Is.EqualTo(220)); // deep prefetch not supported
-                Assert.That(Vx.GetQueryCount(DB.Orders), Is.EqualTo(0));
+                Vx.GetQueryCount(DB.Customers).Should().Be(220); // deep prefetch not supported
+                Vx.GetQueryCount(DB.Orders).Should().Be(0);
             }
             else
             {
-                Assert.That(Vx.GetQueryCount(DB.Customers), Is.EqualTo(220));
-                Assert.That(Vx.GetQueryCount(DB.Orders), Is.EqualTo(220));
+                Vx.GetQueryCount(DB.Customers).Should().Be(220);
+                Vx.GetQueryCount(DB.Orders).Should().Be(220);
             }
         }
 
@@ -240,46 +250,46 @@ namespace Velox.DB.Test
         {
             var items = DB.OrderItems.Where(item => item.ProductID == null).ToArray();
 
-            Assert.That(items.Length, Is.EqualTo(80));
-            Assert.That(items[0].ProductID, Is.Null);
+            items.Length.Should().Be(80);
+            items[0].ProductID.Should().BeNull();
 
             string nullProductId = null;
 
             items = DB.OrderItems.Where(item => item.ProductID == nullProductId).ToArray();
 
-            Assert.That(items.Length, Is.EqualTo(80));
-            Assert.That(items[0].ProductID, Is.Null);
+            items.Length.Should().Be(80);
+            items[0].ProductID.Should().BeNull();
 
             items = DB.OrderItems.Where(item => item.ProductID != null).ToArray();
 
-            Assert.That(items.Length, Is.EqualTo(140));
-            Assert.That(items[0].ProductID, Is.Not.Null);
+            items.Length.Should().Be(140);
+            items[0].ProductID.Should().NotBeNull();
         }
 
         [Test]
         public void ScalarAll()
         {
-            Assert.That(DB.Customers.All(c => c.CustomerID > 0), Is.True);
-            Assert.That(DB.Customers.All(c => c.CustomerID > 1), Is.False);
+            DB.Customers.All(c => c.CustomerID > 0).Should().BeTrue();
+            DB.Customers.All(c => c.CustomerID > 1).Should().BeFalse();
         }
 
         [Test]
         public void ScalarAny()
         {
-            Assert.That(DB.Customers.Any(c => c.CustomerID == 0), Is.False);
-            Assert.That(DB.Customers.Any(c => c.CustomerID > 0), Is.True);
+            DB.Customers.Any(c => c.CustomerID == 0).Should().BeFalse();
+            DB.Customers.Any(c => c.CustomerID > 0).Should().BeTrue();
         }
 
         [Test]
         public void ScalarAny_Chained()
         {
-            Assert.That(DB.Customers.Where(c => c.CustomerID == 0).Any(), Is.False);
-            Assert.That(DB.Customers.Where(c => c.CustomerID > 0).Any(), Is.True);
-            Assert.That(DB.Customers.Where(c => c.CustomerID == 0).Where(c => c.CustomerID > 0).Any(), Is.False);
-            Assert.That(DB.Customers.Where(c => c.CustomerID > 0).Where(c => c.CustomerID > 1).Any(), Is.True);
+            DB.Customers.Where(c => c.CustomerID == 0).Any().Should().BeFalse();
+            DB.Customers.Where(c => c.CustomerID > 0).Any().Should().BeTrue();
+            DB.Customers.Where(c => c.CustomerID == 0).Where(c => c.CustomerID > 0).Any().Should().BeFalse();
+            DB.Customers.Where(c => c.CustomerID > 0).Where(c => c.CustomerID > 1).Any().Should().BeTrue();
 
-            Assert.That(DB.Customers.Where(c => c.CustomerID == 0).Any(c => c.CustomerID > 0), Is.False);
-            Assert.That(DB.Customers.Where(c => c.CustomerID > 0).Any(c => c.CustomerID > 1), Is.True);
+            DB.Customers.Where(c => c.CustomerID == 0).Any(c => c.CustomerID > 0).Should().BeFalse();
+            DB.Customers.Where(c => c.CustomerID > 0).Any(c => c.CustomerID > 1).Should().BeTrue();
         }
 
         [Test]
@@ -307,15 +317,15 @@ namespace Velox.DB.Test
         {
             var items = DB.OrderItems.Where(new TextQueryExpression("ProductID == null")).ToArray();
 
-            Assert.That(items.Length, Is.EqualTo(80));
-            Assert.That(items[0].ProductID, Is.Null);
+            items.Length.Should().Be(80);
+            items[0].ProductID.Should().BeNull();
 
             string nullProductId = null;
 
             items = DB.OrderItems.Where(new TextQueryExpression("ProductID != null")).ToArray();
 
-            Assert.That(items.Length, Is.EqualTo(140));
-            Assert.That(items[0].ProductID, Is.Not.Null);
+            items.Length.Should().Be(140);
+            items[0].ProductID.Should().NotBeNull();
         }
 
         [Test]
@@ -323,14 +333,14 @@ namespace Velox.DB.Test
         {
             var orders = DB.Orders.Where(o => o.Customer.CustomerID == 3 && o.Customer.Name.Length == 10);
 
-            Assert.That(orders.Count(), Is.EqualTo(2));
-            Assert.That(orders.ToArray().Length, Is.EqualTo(2)); // force enumeration
-            Assert.That(orders.First().CustomerID, Is.EqualTo(3));
+            orders.Count().Should().Be(2);
+            orders.ToArray().Length.Should().Be(2); // force enumeration
+            orders.First().CustomerID.Should().Be(3);
 
             orders = DB.Orders.Where(o => o.Customer.CustomerID == 3 && o.Customer.Name.Length == 9);
 
             Assert.AreEqual(0, orders.Count());
-            Assert.That(orders.ToArray().Length, Is.EqualTo(0)); // force enumeration
+            orders.ToArray().Length.Should().Be(0); // force enumeration
         }
 
 
@@ -345,7 +355,7 @@ namespace Velox.DB.Test
 
             Assert.AreEqual(2, orders.Count());
 
-            Assert.That(orders.First().CustomerID, Is.EqualTo(3));
+            orders.First().CustomerID.Should().Be(3);
         }
 
         [Test]
@@ -535,11 +545,11 @@ namespace Velox.DB.Test
 
             var adhocProducts = DB.Query<Adhoc_Product>("select ProductID,Description,Price,Price as Price2 from Product order by ProductID", null).ToArray();
 
-            Assert.That(adhocProducts.Length,Is.EqualTo(NUM_PRODUCTS));
-            Assert.That(adhocProducts[0].ProductID, Is.EqualTo("A"));
-            Assert.That((decimal)adhocProducts[0].Price2, Is.EqualTo(adhocProducts[0].Price));
+            adhocProducts.Length.Should().Be(NUM_PRODUCTS);
+            adhocProducts[0].ProductID.Should().Be("A");
+            ((decimal)adhocProducts[0].Price2).Should().Be(adhocProducts[0].Price);
 
-            Assert.That(DB.Products.Select(p => p.Price).SequenceEqual(adhocProducts.Select(p => p.Price)), Is.True);
+            DB.Products.Select(p => p.Price).SequenceEqual(adhocProducts.Select(p => p.Price)).Should().BeTrue();
         }
 
         [Test]
@@ -548,9 +558,9 @@ namespace Velox.DB.Test
             var maxPrice1 = DB.QueryScalar<decimal>("select max(Price) from Product where Price < @price",new{price = 100.0m});
             var maxPrice2 = DB.Products.Max(p => p.Price, p => p.Price < 100.0m);
 
-            Assert.That(maxPrice1, Is.GreaterThan(0.0m));
-            Assert.That(maxPrice1, Is.LessThan(100.0m));
-            Assert.That(maxPrice1, Is.EqualTo(maxPrice2));
+            maxPrice1.Should().BeGreaterThan(0.0m);
+            maxPrice1.Should().BeLessThan(100.0m);
+            maxPrice1.Should().Be(maxPrice2);
         }
 
     }

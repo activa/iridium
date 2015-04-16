@@ -81,7 +81,6 @@
     <Compile Include="DataProviders\Sql\SqlExpressionBuilder.cs" />
     <Compile Include="DataProviders\Sql\ExpressionTranslator\SqlExpressionTranslator.cs" />
     <Compile Include="DataProviders\Sql\ExpressionTranslator\SqlExpressionTranslatorException.cs" />
-    <Compile Include="DataProviders\Sql\Sqlite\SqliteDialect.cs" />
     <Compile Include="DataProviders\Sql\SqlJoinDefinition.cs" />
     <Compile Include="DataProviders\Sql\SqlJoinPart.cs" />
     <Compile Include="DataProviders\Sql\SqlDataProvider.cs" />
@@ -123,7 +122,11 @@
     <Compile Include="Repository\Repository.cs" />
     <Compile Include="Vx\Vx.Context.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Reference Include="System.Runtime.InteropServices">
+      <HintPath>..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\WindowsPhoneApp\v8.1\System.Runtime.InteropServices.dll</HintPath>
+    </Reference>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Target Name="BeforeBuild">
   </Target>
