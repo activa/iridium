@@ -57,7 +57,6 @@ namespace Velox.DB.Sqlite
         public override string GetLastAutoincrementIdSql(string columnName, string alias, string tableName)
         {
             throw new NotSupportedException(); // Is handled in DataProvider class
-
             return "select last_insert_rowid() as " + alias;
         }
 

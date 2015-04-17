@@ -26,26 +26,32 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Data.SqlTypes;
 using System.Linq;
-using MySql.Data.MySqlClient;
+using System.Reflection;
 using Velox.DB.Core;
 
-namespace Velox.DB.MySql
+namespace Velox.DB.SqlServer
 {
-    public class MySqlDataProvider : SqlAdoDataProvider<MySqlConnection, MySqlDialect>
+    public class SqlServerDataProvider : SqlAdoDataProvider<SqlConnection, SqlServerDialect>
     {
-        public MySqlDataProvider(string connectionString) : base(connectionString)
+        public SqlServerDataProvider()
         {
+        }
+
+        public SqlServerDataProvider(string connectionString) : base(connectionString)
+        {
+        }
+
+        public override void ClearConnectionPool()
+        {
+            SqlConnection.ClearAllPools();
         }
 
         public override bool RequiresAutoIncrementGetInSameStatement
         {
             get { return true; }
-        }
-
-        public override void ClearConnectionPool()
-        {
-            MySqlConnection.ClearAllPools();
         }
     }
 }

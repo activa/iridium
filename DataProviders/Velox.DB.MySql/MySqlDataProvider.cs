@@ -26,46 +26,30 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Data.SqlTypes;
 using System.Linq;
-using System.Reflection;
+using MySql.Data.MySqlClient;
 using Velox.DB.Core;
 
-namespace Velox.DB.SqlServer
+namespace Velox.DB.MySql
 {
-    public class SqlServerDataProvider : SqlAdoDataProvider<SqlConnection, SqlServerDialect>
+    public class MySqlDataProvider : SqlAdoDataProvider<MySqlConnection, MySqlDialect>
     {
-        public SqlServerDataProvider(string connectionString) : base(connectionString)
+        public MySqlDataProvider()
         {
-            string architecture = "?";
-
-
-            PortableExecutableKinds peKind;
-            ImageFileMachine machine;
-            typeof(object).Module.GetPEKind(out peKind, out machine);
-
-            if (machine == ImageFileMachine.I386)
-                architecture = "x86";
-            else if (machine == ImageFileMachine.AMD64)
-                architecture = "x64";
-            else if (machine == ImageFileMachine.ARM)
-                architecture = "ARM";
-
-            var osVersion = System.Environment.OSVersion;
-
-            if (osVersion.Platform == PlatformID.Win32NT)
-                architecture = "windows-" + architecture;
         }
 
-        public override void ClearConnectionPool()
+        public MySqlDataProvider(string connectionString) : base(connectionString)
         {
-            SqlConnection.ClearAllPools();
         }
 
         public override bool RequiresAutoIncrementGetInSameStatement
         {
             get { return true; }
+        }
+
+        public override void ClearConnectionPool()
+        {
+            MySqlConnection.ClearAllPools();
         }
     }
 }

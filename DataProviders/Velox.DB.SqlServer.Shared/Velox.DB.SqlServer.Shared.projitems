@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>3f04700d-5917-4596-a2b2-873d4d320892</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Velox.DB.SqlServer.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)SqlServerContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SqlServerDataProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SqlServerDialect.cs" />
+  </ItemGroup>
+</Project>

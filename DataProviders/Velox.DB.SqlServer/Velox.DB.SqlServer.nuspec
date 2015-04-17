@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>velox.db.sqlserver</id>
+    <version>0.9.30</version>
+    <title>Velox.DB.SqlServer</title>
+    <authors>Philippe Leybaert</authors>
+    <licenseUrl>http://github.com/velox/db/LICENSE</licenseUrl>
+    <projectUrl>http://github.com/velox/db</projectUrl>
+    <iconUrl>http://dstyler.com/vici/32x32/im-_IconPlain100-w32-h32.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Velox.DB data provider for SQL Server 2008+ for use in .NET 4.5, Xamarin.iOS and Xamarin.Android</description>
+    <copyright>Copyright 2015</copyright>
+    <tags>velox db sqlserver</tags>
+    <dependencies>
+      <dependency id="velox.db" version="0.9.29" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\Velox.DB.SqlServer\bin\Release\Velox.DB.SqlServer.dll" target="lib\net45" />
+    <file src="..\Velox.DB.SqlServer.iOS\bin\iPhone\Release\Velox.DB.SqlServer.iOS.dll" target="lib\Xamarin.iOS10" />
+    <file src="..\Velox.DB.SqlServer.iOS\bin\iPhone\Release\Velox.DB.SqlServer.iOS.dll" target="lib\MonoTouch10" />
+    <file src="..\Velox.DB.SqlServer.Android\bin\Release\Velox.DB.SqlServer.Android.dll" target="lib\MonoAndroid10" />
+  </files>
+</package>

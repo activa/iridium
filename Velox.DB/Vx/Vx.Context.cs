@@ -96,6 +96,7 @@ namespace Velox.DB
                 return new DataSet<T>(GetRepository<T>());
             }
 
+
             public void CreateTable<T>(bool recreateTable = false, bool recreateIndexes = false)
             {
                 DataProvider.CreateOrUpdateTable(GetRepository<T>().Schema, recreateTable, recreateIndexes);
@@ -146,6 +147,8 @@ namespace Velox.DB
                 return DataProvider.QueryScalar(sql, new QueryParameterCollection(parameters)).Convert<T>();
             }
 
+            // Async methods
+
             public IAsyncDataSet<T> AsyncDataSet<T>()
             {
                 return new AsyncDataSet<T>(new DataSet<T>(GetRepository<T>()));
@@ -175,6 +178,33 @@ namespace Velox.DB
             {
                 return Task.Factory.StartNew(() => QueryScalar<T>(sql, parameters));
             }
+
+            public Task<T> ReadAsync<T>(object key, params Expression<Func<T, object>>[] relationsToLoad)
+            {
+                return Task.Factory.StartNew(() => GetRepository<T>().Read(key, relationsToLoad));
+            }
+
+            public Task<T> LoadAsync<T>(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad)
+            {
+                return Task.Factory.StartNew(() => GetRepository<T>().Load(obj, key, relationsToLoad));
+            }
+
+            public Task<bool> SaveAsync<T>(T obj, bool saveRelations = false, bool? create = null)
+            {
+                return Task.Factory.StartNew(() => GetRepository<T>().Save(obj, saveRelations, create));
+            }
+
+            public Task<bool> CreateAsync<T>(T obj, bool saveRelations = false)
+            {
+                return Task.Factory.StartNew(() => GetRepository<T>().Save(obj, saveRelations, true));
+            }
+
+            public Task<bool> DeleteAsync<T>(T obj)
+            {
+                return Task.Factory.StartNew(() => GetRepository<T>().Delete(obj));
+            }
+
+            // IDisposable
 
             public void Dispose()
             {

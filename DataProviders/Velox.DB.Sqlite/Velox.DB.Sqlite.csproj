@@ -35,7 +35,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
-    <ProjectReference Include="..\Velox.DB\Velox.DB.csproj">
+    <ProjectReference Include="..\..\Velox.DB\Velox.DB.csproj">
       <Project>{8db31db3-ae35-44c3-876e-940c19689c59}</Project>
       <Name>Velox.DB</Name>
     </ProjectReference>
