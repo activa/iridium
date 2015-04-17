@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>velox.db.mysql</id>
-    <version>0.9.28</version>
+    <version>0.9.29</version>
     <title>Velox.DB.MySql</title>
     <authors>Philippe Leybaert</authors>
     <licenseUrl>http://github.com/velox/db/LICENSE</licenseUrl>
