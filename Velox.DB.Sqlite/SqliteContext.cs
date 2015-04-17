@@ -4,7 +4,7 @@ namespace Velox.DB.Sqlite
 {
     public class SqliteContext : Vx.Context
     {
-        public static void Create(string dbFileName)
+        public static void Use(string dbFileName)
         {
             Vx.DB = new SqliteContext(dbFileName);
         }

@@ -27,6 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Velox.DB.Core;
 
@@ -98,6 +99,31 @@ namespace Velox.DB
             public void CreateTable<T>(bool recreateTable = false, bool recreateIndexes = false)
             {
                 DataProvider.CreateOrUpdateTable(GetRepository<T>().Schema, recreateTable, recreateIndexes);
+            }
+
+            public T Read<T>(object key, params Expression<Func<T, object>>[] relationsToLoad)
+            {
+                return GetRepository<T>().Read(key, relationsToLoad);
+            }
+
+            public T Load<T>(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad)
+            {
+                return GetRepository<T>().Load(obj, key, relationsToLoad);
+            }
+
+            public bool Save<T>(T obj, bool saveRelations = false, bool? create = null)
+            {
+                return GetRepository<T>().Save(obj, saveRelations, create);
+            }
+
+            public bool Create<T>(T obj, bool saveRelations = false)
+            {
+                return GetRepository<T>().Save(obj, saveRelations, true);
+            }
+
+            public bool Delete<T>(T obj)
+            {
+                return GetRepository<T>().Delete(obj);
             }
 
             public int Execute(string sql, object parameters)
