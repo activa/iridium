@@ -207,3 +207,9 @@ foreach (Customer c in aCustomers.Sync())
    // We can synchronously enumerate over the DataSet again
 }
 ```
+
+#### Documentation
+
+Full documention is in the works. A good part is already done and can be found here:
+
+https://github.com/velox/DB/wiki
