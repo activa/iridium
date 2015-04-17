@@ -46,7 +46,7 @@ Connect to a storage backend:
 ```csharp
 var dbContext = new Vx.Context(new SqliteDataProvider("mydb.sqlite"));
 
-// Create tables
+// Create tables (if they don't exist) yet
 
 dbContext.CreateTable<Customer>();
 dbContext.CreateTable<Order>();
@@ -57,24 +57,9 @@ Create a record in the database:
 ```csharp
 Customer customer = new Customer { Name = "John Doe" };
 
-dbContext.DataSet<Customer>.Save(customer);
+dbContext.Save(customer);
 
 Console.WriteLine("Created customer ID {0}", customer.CustomerID");
-```
-
-Ok, so having to use dbContext.DataSet<Customer>() may be a little too much typing...
-
-```csharp
-var DB = new {
-                Customers = dbContext.DataSet<Customer>(),
-                Orders = dbContext.DataSet<Order>()
-             };
-// This works because DataSets are immutable and lightweight objects that are 
-// bound to the data store
-
-// Now it's a little easier (but there are other ways too)
-
-DB.Customers.Save(customer);
 ```
 
 Add a related record:
@@ -82,7 +67,7 @@ Add a related record:
 ```csharp
 Order order = new Order { Date = DateTime.Today, Customer = customer };
 
-DB.Orders.Save(order);
+dbContext.Save(order);
 ```
 
 Read relations:
@@ -100,6 +85,32 @@ foreach (Order order in customer.Orders)
 // by calling Vx.LoadRelations(...) - the same is true for
 // many-to-one relations
 ```
+
+Reading data from the database requires a DataSet, which can be retrieved by calling DataSet<T> from the context:
+
+```csharp
+var customers = from customer in dbContext.DataSet<Customer>() 
+                   order by customer.Name 
+                   select customer;
+```
+
+Ok, so having to use dbContext.DataSet<Customer>() may be a little too much typing...
+
+```csharp
+var DB = new {
+                Customers = dbContext.DataSet<Customer>(),
+                Orders = dbContext.DataSet<Order>()
+             };
+// This works because DataSets are immutable and lightweight objects that are 
+// bound to the data store
+
+// Now it's a little easier (but there are other ways too)
+
+var customers = from customer in DB.Customers
+                   order by customer.Name 
+                   select customer;
+```
+
 
 LINQ queries:
 
