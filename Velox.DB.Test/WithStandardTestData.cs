@@ -19,13 +19,10 @@ namespace Velox.DB.Test
     [TestFixture]
     public class WithStandardTestData
     {
-        private MyContext DB = MyContext.Instance;
-        //private Storage DB = new MemoryStorage();
-
+        private readonly MyContext DB = MyContext.Instance;
         
         private const int NUM_CUSTOMERS = 20;
         private const int NUM_PRODUCTS = 5;
-        
         private int FIRST_CUSTOMERID = 0;
 
         
@@ -188,30 +185,18 @@ namespace Velox.DB.Test
         [Test]
         public void PrefetchRelations_ManyToOne()
         {
-            Vx.ResetStats(DB.Orders);
-            Vx.ResetStats(DB.Customers);
-
             var orders = DB.Orders.WithRelations(o => o.Customer).ToArray();
 
             orders.Length.Should().Be(90);
             orders[0].Customer.CustomerID.Should().Be(orders[0].CustomerID);
 
-            Vx.GetQueryCount(DB.Orders).Should().Be(1);
-
-            if (DB.DataProvider.SupportsRelationPrefetch)
-                Vx.GetQueryCount(DB.Customers).Should().Be(0);
-            else
-                Vx.GetQueryCount(DB.Customers).Should().Be(90);
+            //TODO: check query stats
         }
 
 
         [Test]
         public void PrefetchRelations_ManyToOne_Deep()
         {
-            Vx.ResetStats(DB.Orders);
-            Vx.ResetStats(DB.OrderItems);
-            Vx.ResetStats(DB.Customers);
-
             var orderItems = DB.OrderItems.WithRelations(item => item.Order, item => item.Product, item => item.Order.Customer).ToArray();
 
             orderItems.Length.Should().Be(220);
@@ -220,18 +205,7 @@ namespace Velox.DB.Test
             orderItems[2].Product.ProductID.Should().Be(orderItems[2].ProductID);
             orderItems[0].Order.Customer.CustomerID.Should().Be(orderItems[0].Order.CustomerID);
 
-            Vx.GetQueryCount(DB.OrderItems).Should().Be(1);
-
-            if (DB.DataProvider.SupportsRelationPrefetch)
-            {
-                Vx.GetQueryCount(DB.Customers).Should().Be(220); // deep prefetch not supported
-                Vx.GetQueryCount(DB.Orders).Should().Be(0);
-            }
-            else
-            {
-                Vx.GetQueryCount(DB.Customers).Should().Be(220);
-                Vx.GetQueryCount(DB.Orders).Should().Be(220);
-            }
+            //TODO: check query stats
         }
 
 

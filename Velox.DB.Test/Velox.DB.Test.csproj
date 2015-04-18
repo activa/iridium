@@ -68,7 +68,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Velox.DB.Sqlite\Velox.DB.Sqlite.csproj">
+    <ProjectReference Include="..\DataProviders\Velox.DB.Sqlite\Velox.DB.Sqlite.csproj">
       <Project>{fcf8cc49-a5eb-46e4-932d-d4d6d36924a5}</Project>
       <Name>Velox.DB.Sqlite</Name>
     </ProjectReference>
@@ -80,11 +80,11 @@
       <Project>{8db31db3-ae35-44c3-876e-940c19689c59}</Project>
       <Name>Velox.DB</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Velox.DB.MySql\Velox.DB.MySql.csproj">
+    <ProjectReference Include="..\DataProviders\Velox.DB.MySql\Velox.DB.MySql.csproj">
       <Project>{a74d8405-74ee-482d-a03e-92b45c17f9f5}</Project>
       <Name>Velox.DB.MySql</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Velox.DB.SqlServer\Velox.DB.SqlServer.csproj">
+    <ProjectReference Include="..\DataProviders\Velox.DB.SqlServer\Velox.DB.SqlServer.csproj">
       <Project>{680c31ca-c072-4af7-bcfc-8bd270bee7bc}</Project>
       <Name>Velox.DB.SqlServer</Name>
     </ProjectReference>

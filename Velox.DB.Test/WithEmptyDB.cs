@@ -36,6 +36,105 @@ namespace Velox.DB.Test
         }
 
         [Test]
+        public void Events_ObjectCreated()
+        {
+            int counter = 0;
+
+            DB.Customers.Events.ObjectCreated += (sender, args) => { counter++; };
+            DB.Customers.Events.ObjectCreated += (sender, args) => { counter++; };
+
+            DB.Save(new Customer() {Name = "A"});
+            DB.Save(new Customer() {Name = "A"});
+
+            counter.Should().Be(4);
+        }
+
+        [Test]
+        public void Events_ObjectCreating()
+        {
+            int counter = 0;
+
+            EventHandler<Vx.ObjectWithCancelEventArgs<Customer>> ev1 = (sender, args) => { counter++; };
+            EventHandler<Vx.ObjectWithCancelEventArgs<Customer>> ev2 = (sender, args) => { counter++; };
+
+            DB.Customers.Events.ObjectCreating += ev1;
+            DB.Customers.Events.ObjectCreating += ev2;
+
+            try
+            {
+                bool saveResult = DB.Save(new Customer() {Name = "A"});
+
+                DB.Customers.FirstOrDefault(c => c.Name == "A").Should().NotBeNull();
+
+                saveResult.Should().Be(true);
+
+                counter.Should().Be(2);
+            }
+            finally
+            {
+                DB.Customers.Events.ObjectCreating -= ev1;
+                DB.Customers.Events.ObjectCreating -= ev2;
+            }
+        }
+
+        [Test]
+        public void Events_ObjectCreatingWithCancel1()
+        {
+            int counter = 0;
+
+            EventHandler<Vx.ObjectWithCancelEventArgs<Customer>> ev = (sender, args) => { counter++; };
+            EventHandler<Vx.ObjectWithCancelEventArgs<Customer>> evWithCancel = (sender, args) => { counter++; args.Cancel = true; };
+
+            DB.Customers.Events.ObjectCreating += ev;
+            DB.Customers.Events.ObjectCreating += evWithCancel;
+
+            try
+            {
+                bool saveResult = DB.Save(new Customer() { Name = "A" });
+
+                DB.Customers.FirstOrDefault(c => c.Name == "A").Should().BeNull();
+
+                saveResult.Should().Be(false);
+
+                counter.Should().Be(2);
+            }
+            finally
+            {
+                DB.Customers.Events.ObjectCreating -= ev;
+                DB.Customers.Events.ObjectCreating -= evWithCancel;
+            }
+        }
+
+        [Test]
+        public void Events_ObjectCreatingWithCancel2()
+        {
+            int counter = 0;
+
+            EventHandler<Vx.ObjectWithCancelEventArgs<Customer>> ev = (sender, args) => { counter++; };
+            EventHandler<Vx.ObjectWithCancelEventArgs<Customer>> evWithCancel = (sender, args) => { counter++; args.Cancel = true; };
+
+            DB.Customers.Events.ObjectCreating += evWithCancel;
+            DB.Customers.Events.ObjectCreating += ev;
+
+            try
+            {
+                bool saveResult = DB.Save(new Customer() { Name = "A" });
+
+                DB.Customers.FirstOrDefault(c => c.Name == "A").Should().BeNull();
+
+                saveResult.Should().Be(false);
+
+                counter.Should().Be(1);
+            }
+            finally
+            {
+                DB.Customers.Events.ObjectCreating -= ev;
+                DB.Customers.Events.ObjectCreating -= evWithCancel;
+            }
+        }
+
+
+        [Test]
         public void ManyToOne()
         {
             Customer customer = new Customer { Name = "x" };
@@ -82,7 +181,7 @@ namespace Velox.DB.Test
         [Test]
         public void AsyncInsert()
         {
-            const int numThreads = 500;
+            const int numThreads = 100;
 
             List<string> failedList = new List<string>();
             Task<bool>[] saveTasks = new Task<bool>[numThreads];
@@ -143,7 +242,7 @@ namespace Velox.DB.Test
         [Test]
         public void ParallelTest1()
         {
-            const int numThreads = 500;
+            const int numThreads = 100;
 
             Task[] tasks = new Task[numThreads];
 

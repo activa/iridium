@@ -46,18 +46,6 @@ namespace Velox.DB
         }
 
 
-        // TODO: wrap in proper statistics class
-        public static int GetQueryCount<T>(IDataSet<T> dataSet)
-        {
-            return ((DataSet<T>) dataSet).Repository.QueryCount;
-        }
-
-        public static void ResetStats<T>(IDataSet<T> dataSet)
-        {
-            ((DataSet<T>) dataSet).Repository.QueryCount = 0;
-        }
-
-
         // TODO: move this somewhere else
 
         public static List<T> CreateEmptyList<T>(T templateValue) { return new List<T>(); }

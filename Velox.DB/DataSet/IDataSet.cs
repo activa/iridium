@@ -83,5 +83,7 @@ namespace Velox.DB
         bool Delete(T obj);
         bool Delete(Expression<Func<T, bool>> filter);
         bool Delete(QueryExpression filterExpression);
+
+        Vx.IEvents<T> Events { get; } 
     }
 }
