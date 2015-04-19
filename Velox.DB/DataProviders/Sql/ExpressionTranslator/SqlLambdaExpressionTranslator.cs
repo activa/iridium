@@ -73,6 +73,16 @@ namespace Velox.DB.Sql
 
         protected override Expression VisitMember(MemberExpression node)
         {
+            if (node.Expression.Type == typeof(string) && node.Member.Name == "Length")
+            {
+                _builder.AppendFunctionName(SqlDialect.Function.StringLength);
+                _builder.AppendSql("(");
+                Visit(node.Expression);
+                _builder.AppendSql(")");
+
+                return node;
+            }
+
             Visit(node.Expression);
 
             if (_builder.ProcessMember(node, node.Expression, node.Member.Name))
@@ -81,8 +91,22 @@ namespace Velox.DB.Sql
             throw new SqlExpressionTranslatorException(node.ToString());
         }
 
+        private Expression VisitCoalesce(BinaryExpression node)
+        {
+            _builder.AppendSql("COALESCE(");
+            Visit(node.Left);
+            _builder.AppendSql(",");
+            Visit(node.Right);
+            _builder.AppendSql(")");
+
+            return node;
+        }
+
         protected override Expression VisitBinary(BinaryExpression node)
         {
+            if (node.NodeType == ExpressionType.Coalesce)
+                return VisitCoalesce(node);
+
             _builder.AppendSql("(");
 
             Visit(node.Left);
@@ -157,6 +181,7 @@ namespace Velox.DB.Sql
             return node;
         }
 
+       
         private static Expression UnQuote(Expression expression)
         {
             return expression.NodeType == ExpressionType.Quote ? ((UnaryExpression) expression).Operand : expression;
@@ -282,6 +307,9 @@ namespace Velox.DB.Sql
 
         protected override Expression VisitUnary(UnaryExpression node)
         {
+            if (node.NodeType == ExpressionType.Quote)
+                return base.VisitUnary((UnaryExpression) node.Operand);
+
             if (node.NodeType == ExpressionType.Not)
                 _builder.AppendSql(" NOT ");
 

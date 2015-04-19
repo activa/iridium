@@ -27,6 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Schema;
 using Velox.DB.Core;
 using Velox.DB.Sql;
 
@@ -103,6 +104,21 @@ namespace Velox.DB.SqlServer
         public override string GetLastAutoincrementIdSql(string columnName, string alias, string tableName)
         {
             return "select SCOPE_IDENTITY() as " + alias;
+        }
+
+        public override string SqlFunctionName(Function function, params string[] parameters)
+        {
+            switch (function)
+            {
+                case Function.StringLength:
+                    return string.Format("len({0})", parameters[0]);
+                case Function.BlobLength:
+                    return string.Format("datalength({0})", parameters[0]);
+                case Function.Coalesce:
+                    return string.Format("coalesce({0},{1})", parameters[0], parameters[1]);
+                default:
+                    return null;
+            }
         }
 
         public override void CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes, SqlDataProvider dataProvider)

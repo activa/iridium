@@ -68,6 +68,11 @@ namespace Velox.DB
 
             _mappedName = t.Name;
 
+            var tableNameAttribute = t.Inspector().GetAttribute<Table.NameAttribute>(false);
+
+            if (tableNameAttribute != null)
+                _mappedName = tableNameAttribute.Name;
+
             var indexedFields = Vx.CreateEmptyList(new { IndexName = "", Position = 0, SortOrder = SortOrder.Ascending, Field = (Field)null });
 
             var fieldList = new List<Field>();

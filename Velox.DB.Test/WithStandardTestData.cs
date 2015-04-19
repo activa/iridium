@@ -96,6 +96,15 @@ namespace Velox.DB.Test
         }
 
         [Test]
+        public void StringLenthExpression()
+        {
+            var selectedCustomers = DB.Customers.Where(c => c.Name.Length == 10);
+
+            selectedCustomers.Should().HaveCount(9);
+            selectedCustomers.FirstOrDefault().Name.Length.Should().Be(10);
+        }
+
+        [Test]
         public void Range_TakeAndSkip()
         {
             var selectedCustomers = DB.Customers.OrderBy(c => c.CustomerID).Skip(5).Take(10).ToArray();

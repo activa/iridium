@@ -51,7 +51,7 @@ namespace Velox.DB.Sql
         public class SubQuery
         {
             public string Sql = "";
-            public HashSet<SqlJoinDefinition> Joins = new HashSet<SqlJoinDefinition>();
+            public readonly HashSet<SqlJoinDefinition> Joins = new HashSet<SqlJoinDefinition>();
         }
 
         private readonly SafeDictionary<object, ExpressionMetaData> _metaData = new SafeDictionary<object, ExpressionMetaData>();
@@ -64,11 +64,7 @@ namespace Velox.DB.Sql
 
         private object GetRootIterator(object iterator) // TODO: needs better name
         {
-            return _rootIterators.ContainsKey(iterator) 
-                ? 
-                _rootIterators[iterator] 
-                : 
-                iterator;
+            return _rootIterators.ContainsKey(iterator) ? _rootIterators[iterator] : iterator;
         }
 
         private SubQuery CurrentQuery
@@ -246,5 +242,9 @@ namespace Velox.DB.Sql
         }
 
 
+        public void AppendFunctionName(SqlDialect.Function function)
+        {
+            AppendSql(_sqlDialect.SqlFunctionName(function));
+        }
     }
 }

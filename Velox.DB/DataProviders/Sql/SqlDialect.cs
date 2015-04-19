@@ -33,6 +33,13 @@ namespace Velox.DB.Sql
 {
     public abstract class SqlDialect
     {
+        public enum Function
+        {
+            StringLength,
+            BlobLength,
+            Coalesce
+        }
+
         public virtual string SelectSql(SqlTableNameWithAlias tableName, IEnumerable<SqlExpressionWithAlias> columns, string sqlWhere, IEnumerable<SqlJoinDefinition> joins = null, string sqlSortExpression = null, int? start = null, int? numRecords = null, string afterSelect = null)
         {
             var parts = new List<string>
@@ -138,5 +145,20 @@ namespace Velox.DB.Sql
         public abstract string GetLastAutoincrementIdSql(string columnName, string alias, string tableName);
 
         public abstract void CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes, SqlDataProvider dataProvider);
+
+        public virtual string SqlFunctionName(Function function, params string[] parameters)
+        {
+            switch (function)
+            {
+                case Function.StringLength:
+                    return string.Format("length({0})", parameters[0]);
+                case Function.BlobLength:
+                    return string.Format("length({0})", parameters[0]);
+                case Function.Coalesce:
+                    return string.Format("coalesce({0},{1})", parameters[0], parameters[1]);
+                default:
+                    return null;
+            }
+        }
     }
 }
