@@ -151,50 +151,78 @@ namespace Velox.DB.Sql
 
             expression = PartialEvaluator.Eval(expression);
 
-            if (expression is BinaryExpression)
-                return TranslateBinary((BinaryExpression) expression);
+            switch (expression.NodeType)
+            {
+                case ExpressionType.Call:
+                    return TranslateMethodCall((MethodCallExpression) expression);
 
-            if (expression is MemberExpression)
-                return TranslateMember((MemberExpression) expression);
+                case ExpressionType.Constant:
+                    {
+                        if (expression.Type.Inspector().Is(TypeFlags.Numeric | TypeFlags.Boolean | TypeFlags.String | TypeFlags.DateTime | TypeFlags.Enum))
+                            return CreateParameter(((ConstantExpression) expression).Value);
+                    }
+                    break;
 
-            if (expression is MethodCallExpression)
-                return TranslateMethodCall((MethodCallExpression) expression);
+                case ExpressionType.ConvertChecked:
+                case ExpressionType.Convert:
+                case ExpressionType.Negate:
+                case ExpressionType.NegateChecked:
+                case ExpressionType.Not:
+                case ExpressionType.Quote:
+                case ExpressionType.UnaryPlus:
+                case ExpressionType.Unbox:
+                    return TranslateUnary((UnaryExpression) expression);
+                    
+                case ExpressionType.MemberAccess:
+                    return TranslateMember((MemberExpression)expression);
+                    
+                case ExpressionType.Parameter:
+                    return null;
 
-            if (expression is UnaryExpression)
-                return TranslateUnary((UnaryExpression) expression);
+                case ExpressionType.Add:
+                case ExpressionType.AddChecked:
+                case ExpressionType.AndAlso:
+                case ExpressionType.Coalesce:
+                case ExpressionType.Divide:
+                case ExpressionType.Equal:
+                case ExpressionType.GreaterThan:
+                case ExpressionType.GreaterThanOrEqual:
+                case ExpressionType.LessThan:
+                case ExpressionType.LessThanOrEqual:
+                case ExpressionType.Multiply:
+                case ExpressionType.MultiplyChecked:
+                case ExpressionType.NotEqual:
+                case ExpressionType.OrElse:
+                case ExpressionType.Subtract:
+                case ExpressionType.SubtractChecked:
+                    return TranslateBinary((BinaryExpression)expression);
 
-            if (expression is ConstantExpression)
-                return TranslateConstant((ConstantExpression) expression);
-
-            if (expression is ParameterExpression)
-                return null;
-
-            if (expression is LambdaExpression)
-                return Translate(((LambdaExpression)expression).Body);
+                case ExpressionType.Lambda:
+                    return Translate(((LambdaExpression) expression).Body);
+            }
 
             throw new SqlExpressionTranslatorException(expression.ToString());
         }
 
-        private string TranslateConstant(ConstantExpression node)
-        {
-            if (node.Type.Inspector().Is(TypeFlags.Numeric | TypeFlags.Boolean | TypeFlags.String | TypeFlags.DateTime | TypeFlags.Enum))
-            {
-                return CreateParameter(node.Value);
-            }
-
-            return null;
-        }
-
         private string TranslateUnary(UnaryExpression expression)
         {
+            string sql = Translate(expression.Operand);
+
             switch (expression.NodeType)
             {
+                case ExpressionType.Negate:
+                case ExpressionType.NegateChecked:
+                    return string.Format("(-{0})", sql);
+
+                case ExpressionType.UnaryPlus:
+                case ExpressionType.Unbox:
                 case ExpressionType.Convert:
+                case ExpressionType.ConvertChecked:
                 case ExpressionType.Quote:
-                    return Translate(expression.Operand);
+                    return sql;
 
                 case ExpressionType.Not:
-                    return "(NOT " + Translate(expression.Operand) + ")";
+                    return string.Format("(NOT {0})", sql);
             }
 
             throw new SqlExpressionTranslatorException(expression.ToString());
