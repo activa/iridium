@@ -42,7 +42,7 @@ namespace Velox.DB
         }
 
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-        public sealed class NotMappedAttribute : Attribute
+        public sealed class IgnoreAttribute : Attribute
         {
         }
 
@@ -77,7 +77,6 @@ namespace Velox.DB
         public sealed class PrimaryKeyAttribute : Attribute
         {
             public bool AutoIncrement { get; set; }
-            public int Pos { get; set; }
         }
 
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
@@ -96,5 +95,11 @@ namespace Velox.DB
         public sealed class LargeTextAttribute : Attribute
         {
         }
+
+        [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+        public sealed class ReadbackAttribute : Attribute
+        {
+        }
+
     }
 }

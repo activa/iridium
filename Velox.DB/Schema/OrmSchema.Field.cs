@@ -151,7 +151,7 @@ namespace Velox.DB
 
                 if (RelationType == RelationType.ManyToOne)
                 {
-                    var serializedForeignObject = localFieldValue == null ? null : foreignRepository.DataProvider.ReadObject(new[] {localFieldValue}, ForeignSchema);
+                    var serializedForeignObject = localFieldValue == null ? null : foreignRepository.DataProvider.ReadObject(new Dictionary<string, object> {{ForeignField.MappedName,localFieldValue}}, ForeignSchema);
 
                     return serializedForeignObject != null ? ForeignSchema.UpdateObject(Activator.CreateInstance(FieldType), serializedForeignObject) : null;
                 }

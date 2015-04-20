@@ -174,13 +174,20 @@ namespace Velox.DB.SqlServer
 
                 part += " NULL";
 
+                /*
                 if (field.PrimaryKey)
                     part += " PRIMARY KEY";
+                */
 
                 if (field.AutoIncrement)
                     part += " IDENTITY(1,1)";
 
                 parts.Add(part);
+            }
+
+            if (parts.Any() && schema.PrimaryKeys.Length > 0)
+            {
+                parts.Add("PRIMARY KEY (" + string.Join(",", schema.PrimaryKeys.Select(pk => QuoteField(pk.MappedName))) + ")");
             }
 
             if (recreateTable)
@@ -207,7 +214,7 @@ namespace Velox.DB.SqlServer
             {
                 if (existingIndexes["IX_" + index.Name].Any())
                 {
-                    if (recreateIndexes)
+                    if (recreateIndexes || recreateTable)
                         dataProvider.ExecuteSql("DROP INDEX " + QuoteTable("IX_" + index.Name) + " ON " + QuoteTable(schema.MappedName), null);
                     else
                         continue;

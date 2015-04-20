@@ -165,7 +165,7 @@ namespace Velox.DB.Test
 
             rec = SaveAndReload(new RecordWithAllTypes { DateTimeField = now});
 
-            rec.DateTimeField.Should().BeCloseTo(now);
+            rec.DateTimeField.Should().BeCloseTo(now, 1000);
             rec.DateTimeFieldNullable.Should().NotHaveValue();
 
         }

@@ -282,12 +282,12 @@ namespace Velox.DB.Sql
             return result;
         }
 
-        public SerializedEntity ReadObject(object[] keys, OrmSchema schema)
+        public SerializedEntity ReadObject(Dictionary<string,object> keys, OrmSchema schema)
         {
             string tableName = schema.MappedName;
             var columnList = (from f in schema.Fields.Values select new { Field = f, Alias = SqlNameGenerator.NextFieldAlias() }).ToArray();
             var keyList = (from f in schema.PrimaryKeys select new {Field = f, ParameterName = SqlNameGenerator.NextParameterName()}).ToArray();
-            var parameters = Enumerable.Range(0, keyList.Length).ToDictionary(i => keyList[i].ParameterName, i => keys[i]);
+            var parameters = keyList.ToDictionary(key => key.ParameterName, key => keys[key.Field.MappedName]);
 
             string sql = SqlDialect.SelectSql(
                                         new SqlTableNameWithAlias(tableName), 

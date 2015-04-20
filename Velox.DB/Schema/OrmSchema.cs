@@ -25,11 +25,8 @@
 #endregion
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
 using Velox.DB.Core;
 
 namespace Velox.DB
@@ -81,6 +78,9 @@ namespace Velox.DB
             {
                 var fieldInspector = field.Inspector();
 
+                if (fieldInspector.HasAttribute<Column.IgnoreAttribute>())
+                    continue;
+
                 var schemaField = new Field(field);
 
                 var fieldPropertiesFromConvention = Vx.Config.NamingConvention.GetFieldProperties(this, schemaField);
@@ -113,8 +113,10 @@ namespace Velox.DB
 
                 if (fieldInspector.HasAttribute<Column.PrimaryKeyAttribute>())
                 {
+                    var pkAttribute = fieldInspector.GetAttribute<Column.PrimaryKeyAttribute>();
+
                     schemaField.PrimaryKey = true;
-                    schemaField.AutoIncrement = fieldInspector.GetAttribute<Column.PrimaryKeyAttribute>().AutoIncrement;
+                    schemaField.AutoIncrement = pkAttribute.AutoIncrement;
                 }
                 else if (fieldPropertiesFromConvention.PrimaryKey ?? false)
                 {
@@ -339,8 +341,6 @@ namespace Velox.DB
         {
             return new SerializedEntity((from field in _mappedFields select new { field.Key, Value = field.Value.GetField(o)}).ToDictionary(k => k.Key, k=> k.Value) );
         }
-
-        //private static readonly SafeDictionary<Type, OrmSchema> _allSchemas = new SafeDictionary<Type, OrmSchema>();
 
 #if DEBUG
         public override string ToString()

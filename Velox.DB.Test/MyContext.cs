@@ -18,6 +18,7 @@ namespace Velox.DB.Test
         public IDataSet<PaymentMethod> PaymentMethods { get; set; }
         public IDataSet<CustomerPaymentMethodLink> CustomerPaymentMethodLinks { get; set; }
         public IDataSet<RecordWithAllTypes> RecordsWithAllTypes;
+        public IDataSet<RecordWithCompositeKey> RecordsWithCompositeKey;
 
         public MyContext(IDataProvider dataProvider) : base(dataProvider)
         {
@@ -42,18 +43,21 @@ namespace Velox.DB.Test
             PaymentMethods.Purge();
             CustomerPaymentMethodLinks.Purge();
             RecordsWithAllTypes.Purge();
+            RecordsWithCompositeKey.Purge();
+            
         }
 
         public void CreateAllTables()
         {
-            CreateTable<Product>();
-            CreateTable<Order>();
-            CreateTable<Customer>();
-            CreateTable<OrderItem>();
-            CreateTable<SalesPerson>();
-            CreateTable<PaymentMethod>();
-            CreateTable<CustomerPaymentMethodLink>();
-            CreateTable<RecordWithAllTypes>();
+            CreateTable<Product>(recreateTable: true);
+            CreateTable<Order>(recreateTable: true);
+            CreateTable<Customer>(recreateTable: true);
+            CreateTable<OrderItem>(recreateTable: true);
+            CreateTable<SalesPerson>(recreateTable: true);
+            CreateTable<PaymentMethod>(recreateTable: true);
+            CreateTable<CustomerPaymentMethodLink>(recreateTable: true);
+            CreateTable<RecordWithAllTypes>(recreateTable: true);
+            CreateTable<RecordWithCompositeKey>(recreateTable: true);
         }
 
         private static MyContext _instance;
@@ -61,9 +65,9 @@ namespace Velox.DB.Test
         public static MyContext Instance
         {
 //            get { return _instance ?? (_instance = new MemoryStorage()); }
-            get { return _instance ?? (_instance = new SqlServerStorage()); }
-//            get { return _instance ?? (_instance = new MySqlStorage()); }
-            //get { return _instance ?? (_instance = new SqliteStorage()); }
+//            get { return _instance ?? (_instance = new SqlServerStorage()); }
+            get { return _instance ?? (_instance = new MySqlStorage()); }
+//              get { return _instance ?? (_instance = new SqliteStorage()); }
         }
     }
 

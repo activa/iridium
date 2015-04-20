@@ -113,13 +113,18 @@ namespace Velox.DB.MySql
 
                 part += " NULL";
 
-                if (field.PrimaryKey)
-                    part += " PRIMARY KEY";
+//                if (field.PrimaryKey)
+//                    part += " PRIMARY KEY";
 
                 if (field.AutoIncrement)
                     part += " AUTO_INCREMENT";
 
                 parts.Add(part);
+            }
+
+            if (parts.Any() && schema.PrimaryKeys.Length > 0)
+            {
+                parts.Add("PRIMARY KEY (" + string.Join(",", schema.PrimaryKeys.Select(pk => QuoteField(pk.MappedName))) + ")");
             }
 
             if (!parts.Any())

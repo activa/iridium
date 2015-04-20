@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -168,5 +169,14 @@ namespace Velox.DB.Test
         public TestFlagsEnum FlagsEnumField;
         public TestFlagsEnum? FlagsEnumFieldNullable;
 
+    }
+
+    public class RecordWithCompositeKey
+    {
+        [Column.PrimaryKeyAttribute]
+        public int Key1;
+        [Column.PrimaryKeyAttribute]
+        public int Key2;
+        public string Name;
     }
 }

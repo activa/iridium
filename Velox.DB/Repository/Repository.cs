@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Velox.DB.Core;
 
 namespace Velox.DB
@@ -14,6 +15,23 @@ namespace Velox.DB
         {
         }
 
+        private object GetFieldOrPropertyValue(object obj, string fieldName) // assume obj != null
+        {
+            var t = obj.GetType();
+
+            var fieldInfo = t.GetRuntimeField(fieldName);
+
+            if (fieldInfo != null)
+                return fieldInfo.GetValue(obj);
+
+            var propInfo = t.GetRuntimeProperty(fieldName);
+
+            if (propInfo != null)
+                return propInfo.GetValue(obj);
+
+            return null;
+        }
+
         internal T Read(object key, params Expression<Func<T, object>>[] relationsToLoad)
         {
             var o = Activator.CreateInstance<T>();
@@ -23,10 +41,26 @@ namespace Velox.DB
 
         internal T Load(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad)
         {
-            if (Schema.PrimaryKeys.Length != 1)
-                throw new Exception(string.Format("{0} primary keys defined for {1}", Schema.PrimaryKeys.Length, typeof(T)));
+            if (key == null)
+                throw new ArgumentNullException("key");
 
-            var serializedEntity = DataProvider.ReadObject(new[] { key }, Schema);
+            Dictionary<string, object> primaryKey = null;
+
+            var keyTypeInspector = key.GetType().Inspector();
+
+            if (keyTypeInspector.Is(TypeFlags.Numeric | TypeFlags.Enum | TypeFlags.String))
+            {
+                if (Schema.PrimaryKeys.Length != 1)
+                    throw new Exception(string.Format("Invalid key for {0}", typeof (T)));
+
+                primaryKey = new Dictionary<string, object>() {{Schema.PrimaryKeys[0].MappedName, key}};
+            }
+            else
+            {
+                primaryKey = Schema.PrimaryKeys.ToDictionary(pk => pk.MappedName, pk => GetFieldOrPropertyValue(key, pk.FieldName));
+            }
+
+            var serializedEntity = DataProvider.ReadObject(primaryKey, Schema);
 
             if (serializedEntity == null)
                 return default(T);

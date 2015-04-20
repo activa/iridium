@@ -38,28 +38,28 @@ namespace Velox.DB
     {
         private class CompositeKey
         {
-            private readonly object[] _keyValues;
+            private Dictionary<string,object>  _keyValues;
 
-            public CompositeKey(object[] keyValues)
+            public CompositeKey(Dictionary<string,object> keyValues)
             {
                 _keyValues = keyValues;
             }
 
             public CompositeKey(OrmSchema schema, SerializedEntity o)
             {
-                _keyValues = schema.PrimaryKeys.Select(pk => o[pk.MappedName]).ToArray();
+                _keyValues = schema.PrimaryKeys.ToDictionary(pk => pk.MappedName, pk => o[pk.MappedName]);
             }
 
             public override int GetHashCode()
             {
-                return _keyValues.Aggregate(0, (current, t) => current ^ t.GetHashCode());
+                return _keyValues.Aggregate(0, (current, t) => current ^ t.Value.GetHashCode() ^ t.Key.GetHashCode());
             }
 
             public override bool Equals(object obj)
             {
                 var other = (CompositeKey) obj;
 
-                return Enumerable.Range(0, _keyValues.Length).All(i => _keyValues[i].Equals(other._keyValues[i]));
+                return _keyValues.All(pk => other._keyValues.ContainsKey(pk.Key) && pk.Value.Equals(other._keyValues[pk.Key]));
             }
         }
 
@@ -190,7 +190,7 @@ namespace Velox.DB
             return result;
         }
 
-        public SerializedEntity ReadObject(object[] keys, OrmSchema schema)
+        public SerializedEntity ReadObject(Dictionary<string,object> keys, OrmSchema schema)
         {
             using (var bucket = GetBucket(schema))
             {
