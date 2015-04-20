@@ -37,7 +37,8 @@ namespace Velox.DB.Sql
         {
             StringLength,
             BlobLength,
-            Coalesce
+            Coalesce,
+            Trim
         }
 
         public virtual string SelectSql(SqlTableNameWithAlias tableName, IEnumerable<SqlExpressionWithAlias> columns, string sqlWhere, IEnumerable<SqlJoinDefinition> joins = null, string sqlSortExpression = null, int? start = null, int? numRecords = null, string afterSelect = null)
@@ -159,6 +160,11 @@ namespace Velox.DB.Sql
                 default:
                     return null;
             }
+        }
+
+        public virtual string StringLiteral(string s)
+        {
+            return '\'' + s + '\'';
         }
     }
 }

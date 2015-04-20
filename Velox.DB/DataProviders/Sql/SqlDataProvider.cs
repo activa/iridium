@@ -342,7 +342,9 @@ namespace Velox.DB.Sql
         {
             var tableAlias = SqlNameGenerator.NextTableAlias();
 
-            SqlExpressionTranslator sqlTranslator = new SqlExpressionTranslator(SqlDialect,schema,tableAlias);
+            SqlExpressionTranslator sqlTranslator = new SqlExpressionTranslator(SqlDialect, schema, tableAlias);
+
+//            SqlExpressionTranslator sqlTranslator = new SqlExpressionTranslator(SqlDialect,schema,tableAlias);
 
             string filterSql = null;
 

@@ -34,57 +34,30 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\Core\Velox.Core\Core\SafeDictionary.cs">
-      <Link>Core\SafeDictionary.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Core\Velox.Core\Reflection\FieldOrPropertyInfo.cs">
-      <Link>Core\Reflection\FieldOrPropertyInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Core\Velox.Core\Reflection\Inspectors\AssemblyInspector.cs">
-      <Link>Core\Reflection\Inspectors\AssemblyInspector.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Core\Velox.Core\Reflection\Inspectors\MemberInspector.cs">
-      <Link>Core\Reflection\Inspectors\MemberInspector.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Core\Velox.Core\Reflection\Inspectors\PropertyInspector.cs">
-      <Link>Core\Reflection\Inspectors\PropertyInspector.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Core\Velox.Core\Reflection\Inspectors\TypeInspector.cs">
-      <Link>Core\Reflection\Inspectors\TypeInspector.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Core\Velox.Core\Reflection\LazyBinder.cs">
-      <Link>Core\Reflection\LazyBinder.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Core\Velox.Core\Reflection\ObjectMapper.cs">
-      <Link>Core\Reflection\ObjectMapper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Core\Velox.Core\Reflection\ReflectionExtensions.cs">
-      <Link>Core\Reflection\ReflectionExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Core\Velox.Core\SmartConverter\EnumConverter.cs">
-      <Link>Core\SmartConverter\EnumConverter.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Core\Velox.Core\SmartConverter\IStringConverter.cs">
-      <Link>Core\SmartConverter\IStringConverter.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Core\Velox.Core\SmartConverter\ObjectConverter.cs">
-      <Link>Core\SmartConverter\ObjectConverter.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Core\Velox.Core\SmartConverter\StringConverter.cs">
-      <Link>Core\SmartConverter\StringConverter.cs</Link>
-    </Compile>
     <Compile Include="Attributes\ColumnAttributes.cs" />
     <Compile Include="Attributes\PreserveAttribute.cs" />
     <Compile Include="Attributes\RelationAttributes.cs" />
     <Compile Include="Attributes\TableAttributes.cs" />
+    <Compile Include="Core\Reflection\FieldOrPropertyInfo.cs" />
+    <Compile Include="Core\Reflection\Inspectors\MemberInspector.cs" />
+    <Compile Include="Core\Reflection\Inspectors\PropertyInspector.cs" />
+    <Compile Include="Core\Reflection\Inspectors\TypeInspector.cs" />
+    <Compile Include="Core\Reflection\LazyBinder.cs" />
+    <Compile Include="Core\Reflection\ObjectMapper.cs" />
+    <Compile Include="Core\Reflection\ReflectionExtensions.cs" />
+    <Compile Include="Core\SafeDictionary.cs" />
+    <Compile Include="Core\SmartConverter\EnumConverter.cs" />
+    <Compile Include="Core\SmartConverter\IStringConverter.cs" />
+    <Compile Include="Core\SmartConverter\ObjectConverter.cs" />
+    <Compile Include="Core\SmartConverter\StringConverter.cs" />
+    <Compile Include="DataProviders\Sql\ExpressionTranslator\SqlExpressionTranslator.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DataProviders\Sql\SqlDialect.cs" />
-    <Compile Include="DataProviders\Sql\SqlExpressionBuilder.cs" />
-    <Compile Include="DataProviders\Sql\ExpressionTranslator\SqlExpressionTranslator.cs" />
     <Compile Include="DataProviders\Sql\ExpressionTranslator\SqlExpressionTranslatorException.cs" />
     <Compile Include="DataProviders\Sql\SqlJoinDefinition.cs" />
     <Compile Include="DataProviders\Sql\SqlJoinPart.cs" />
     <Compile Include="DataProviders\Sql\SqlDataProvider.cs" />
-    <Compile Include="DataProviders\Sql\ExpressionTranslator\SqlLambdaExpressionTranslator.cs" />
     <Compile Include="DataProviders\Sql\SqlQuerySpec.cs" />
     <Compile Include="DataProviders\Sql\SqlNameGenerator.cs" />
     <Compile Include="DataProviders\Sql\SqlNameWithAlias.cs" />

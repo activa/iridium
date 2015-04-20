@@ -72,10 +72,6 @@
       <Project>{fcf8cc49-a5eb-46e4-932d-d4d6d36924a5}</Project>
       <Name>Velox.DB.Sqlite</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Velox.DB.TextExpressions\Velox.DB.TextExpressions.csproj">
-      <Project>{321ad674-0c1f-44cc-afad-188f47b39885}</Project>
-      <Name>Velox.DB.TextExpressions</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Velox.DB\Velox.DB.csproj">
       <Project>{8db31db3-ae35-44c3-876e-940c19689c59}</Project>
       <Name>Velox.DB</Name>

@@ -1,8 +1,8 @@
 #region License
 //=============================================================================
-// Velox.DB - Portable .NET ORM 
+// VeloxDB Core - Portable .NET Productivity Library 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2008-2015 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -26,12 +26,28 @@
 
 using System;
 
-namespace Velox.DB.Sql
+#if VELOX_DB
+namespace Velox.DB.Core
+#else
+namespace Velox.Core
+#endif
 {
-    internal class SqlExpressionTranslatorException : Exception
+    public static class EnumConverter
     {
-        public SqlExpressionTranslatorException(string expression) : base("Expression not supported:" + expression)
+        public static T ToEnum<T>(this int value)
         {
+            if (Enum.IsDefined(typeof(T), value))
+                return (T)(object)value;
+            else
+                return default(T);
+        }
+
+        public static T ToEnum<T>(this int value, T defaultValue)
+        {
+            if (Enum.IsDefined(typeof(T), value))
+                return (T)(object)value;
+            else
+                return defaultValue;
         }
     }
 }

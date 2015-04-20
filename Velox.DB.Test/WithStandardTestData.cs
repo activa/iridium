@@ -1,7 +1,6 @@
 using FluentAssertions;
 using System;
 using System.Linq;
-using Velox.DB.TextExpressions;
 
 #if MSTEST
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
@@ -145,14 +144,6 @@ namespace Velox.DB.Test
         }
 
         [Test]
-        public void Sorting_SortAlpha_ManyToOne_Multiple_Expression()
-        {
-            var sortedItems = DB.OrderItems.OrderBy(new TextQueryExpression("Order.Remark")).OrderBy(new TextQueryExpression("Price"), SortOrder.Descending).WithRelations(item => item.Order);
-
-            AssertHelper.AssertSorting(sortedItems, (prev, current) => (prev.Order.Remark.CompareTo(current.Order.Remark) < 0) || (current.Order.Remark == prev.Order.Remark && (current.Price <= prev.Price)));
-        }
-
-        [Test]
         public void Sorting_SortAlpha_ManyToOne_Multiple()
         {
             var sortedItems = (from item in DB.OrderItems orderby item.Order.Remark, item.Price descending select item).WithRelations(o => o.Order);
@@ -286,41 +277,17 @@ namespace Velox.DB.Test
         }
 
         [Test]
-        public void SimpleFiltering_Expression()
-        {
-            var customers = DB.Customers.Where(new TextQueryExpression("Name==@name", new { name = "Customer 10" })).ToArray();
-
-            Assert.AreEqual(1, customers.Length);
-
-            Assert.AreEqual(10, customers[0].CustomerID);
-        }
-
-        [Test]
-        public void SimpleFiltering_Expression_NullCheck()
-        {
-            var items = DB.OrderItems.Where(new TextQueryExpression("ProductID == null")).ToArray();
-
-            items.Length.Should().Be(80);
-            items[0].ProductID.Should().BeNull();
-
-            string nullProductId = null;
-
-            items = DB.OrderItems.Where(new TextQueryExpression("ProductID != null")).ToArray();
-
-            items.Length.Should().Be(140);
-            items[0].ProductID.Should().NotBeNull();
-        }
-
-        [Test]
         public void FilteringWithNonSupportedLambda()
         {
-            var orders = DB.Orders.Where(o => o.Customer.CustomerID == 3 && o.Customer.Name.Length == 10);
+            Func<Customer, int, bool> fn = (customer, len) => customer.Name.Length == len;
+
+            var orders = DB.Orders.Where(o => o.Customer.CustomerID == 3 && fn(o.Customer, 10));
 
             orders.Count().Should().Be(2);
             orders.ToArray().Length.Should().Be(2); // force enumeration
             orders.First().CustomerID.Should().Be(3);
 
-            orders = DB.Orders.Where(o => o.Customer.CustomerID == 3 && o.Customer.Name.Length == 9);
+            orders = DB.Orders.Where(o => o.Customer.CustomerID == 3 && fn(o.Customer,9));
 
             Assert.AreEqual(0, orders.Count());
             orders.ToArray().Length.Should().Be(0); // force enumeration
@@ -362,18 +329,6 @@ namespace Velox.DB.Test
         }
 
         [Test]
-        public void ManyToOneFiltering_Expression()
-        {
-            var orders = DB.Orders.Where(new TextQueryExpression("Customer.CustomerID == @id", new { id = 3 }));
-
-            Assert.AreEqual(2, orders.Count());
-
-            orders = DB.Orders.Where(new TextQueryExpression("Customer.CustomerID == 3 && Customer.Name == @name", new { name = "Customer 3" }));
-
-            Assert.AreEqual(2, orders.Count());
-        }
-
-        [Test]
         public void ManyToOneFiltering_Deep_Lambda()
         {
             var orderItems = DB.OrderItems.Where(o => o.Order.Customer.CustomerID == 3 && o.Order.Customer.Name == "Customer 3");
@@ -381,14 +336,6 @@ namespace Velox.DB.Test
             Assert.AreEqual(2 * 2, orderItems.Count());
 
             orderItems = DB.OrderItems.Where(o => o.Order.Customer.CustomerID == 3);
-
-            Assert.AreEqual(2 * 2, orderItems.Count());
-        }
-
-        [Test]
-        public void ManyToOneFiltering_Deep_Expression()
-        {
-            var orderItems = DB.OrderItems.Where(new TextQueryExpression("Order.Customer.CustomerID == 3"));
 
             Assert.AreEqual(2 * 2, orderItems.Count());
         }
@@ -436,18 +383,6 @@ namespace Velox.DB.Test
         }
 
         [Test]
-        public void MixedRelationFiltering1_Expression()
-        {
-            if (!DB.DataProvider.SupportsQueryTranslation())
-                return; // oneToMany not supported for expressionfiltering
-
-            var customers = DB.Customers.Where(new TextQueryExpression("Orders.Count(Customer.Name == \"Customer 5\") == 4", new { }));
-
-            Assert.AreEqual(1, customers.Count());
-        }
-
-
-        [Test]
         public void MixedRelationFiltering2_Lambda()
         {
             var orders = DB.Orders.Where(o => o.Customer.Orders.Count() == 1);
@@ -465,41 +400,6 @@ namespace Velox.DB.Test
             var customers = DB.Customers.Where(c => c.CustomerID == 3).Where(c => c.Orders.Any(order => order.OrderItems.Count(item => item.OrderID == order.OrderID) == order.OrderItems.Count()));
 
             Assert.AreEqual(1, customers.Count());
-        }
-
-        [Test]
-        public void MixedRelationFiltering2_Expression()
-        {
-            if (!DB.DataProvider.SupportsQueryTranslation())
-                return; // oneToMany not supported for expressionfiltering
-
-            var orders = DB.Orders.Where(new TextQueryExpression("Customer.Orders.Count() == 1"));
-
-            Assert.AreEqual(2, orders.Count());
-
-            var customers = DB.Customers.Where(new TextQueryExpression("CustomerID == 3 && Orders.Any(OrderItems.Count(OrderID == OrderID) == OrderItems.Count()))"));
-
-            Assert.AreEqual(1, customers.Count());
-        }
-
-
-        [Test]
-        public void OneToManyFiltering_Expression()
-        {
-            var customers = DB.Customers.Where(new TextQueryExpression("Orders.Count() == 4"));
-
-            Assert.AreEqual(2, customers.Count());
-        }
-
-        [Test]
-        public void OneToManyFiltering_Deep_Expression()
-        {
-            if (!DB.DataProvider.SupportsQueryTranslation())
-                return; // oneToMany not supported for expressionfiltering
-
-            var customers = DB.Customers.Where(new TextQueryExpression("Orders.Count(OrderItems.Count() == 4) == 4"));
-
-            Assert.AreEqual(2, customers.Count());
         }
 
         private class Adhoc_Product

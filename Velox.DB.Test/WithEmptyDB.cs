@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Velox.DB.TextExpressions;
+
 
 #if MSTEST
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
@@ -362,16 +362,6 @@ namespace Velox.DB.Test
             sortedProducts = from product in DB.Products orderby product.Price descending select product;
 
             sortedProducts.Should().BeInDescendingOrder(product => product.Price);
-        }
-
-
-        [Test]
-        public void SortDouble_Expression()
-        {
-            CreateRandomPricedProducts();
-
-            DB.Products.OrderBy(new TextQueryExpression("Price")).Should().BeInAscendingOrder(p => p.Price);
-            DB.Products.OrderBy(new TextQueryExpression("Price"), SortOrder.Descending).Should().BeInDescendingOrder(p => p.Price);
         }
 
         [Test]
