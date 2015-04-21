@@ -82,11 +82,24 @@ namespace Velox.DB.Sqlite
                 new {Flags = TypeFlags.DateTime, ColumnType = "DATETIME"}
             };
 
+            if (recreateTable)
+                recreateIndexes = true;
+
+
+            HashSet<string> tableNames = new HashSet<string>(dataProvider.ExecuteSqlReader("SELECT name FROM sqlite_master WHERE type='table'", null).Select(rec => rec["name"].ToString()),StringComparer.OrdinalIgnoreCase);
+
+            if (tableNames.Contains(schema.MappedName) && recreateTable)
+            {
+                dataProvider.ExecuteSql("DROP TABLE " + QuoteTable(schema.MappedName), null);
+            }
+
             var existingColumns = dataProvider.ExecuteSqlReader("pragma table_info(" + QuoteTable(schema.MappedName) + ")", null).ToLookup(rec => rec["name"].ToString());
 
             var parts = new List<string>();
 
             bool createNew = true;
+
+            
 
             foreach (var field in schema.FieldList)
             {
@@ -95,7 +108,7 @@ namespace Velox.DB.Sqlite
                 if (columnMapping == null)
                     continue;
 
-                if (existingColumns.Contains(field.MappedName))
+                if (existingColumns.Contains(field.MappedName) && !recreateTable)
                 {
                     createNew = false;
                     continue;
@@ -111,35 +124,59 @@ namespace Velox.DB.Sqlite
 
                 part += " NULL";
 
-                //if (field.PrimaryKey)
-                //    part += " PRIMARY KEY";
+                if (field.PrimaryKey && schema.PrimaryKeys.Length == 1)
+                {
+                    part += " PRIMARY KEY";
 
-                if (field.AutoIncrement)
-                    part += " AUTOINCREMENT";
+                    if (field.AutoIncrement)
+                        part += " AUTOINCREMENT";
+                }
 
                 parts.Add(part);
             }
 
-            if (parts.Any() && schema.PrimaryKeys.Length > 0)
+            if (parts.Any() && schema.PrimaryKeys.Length > 1)
             {
                 parts.Add("PRIMARY KEY (" + string.Join(",", schema.PrimaryKeys.Select(pk => QuoteField(pk.MappedName))) + ")");
             }
 
-            if (!parts.Any())
-                return;
-
-            if (createNew)
+            if (parts.Any())
             {
-                dataProvider.ExecuteSql("CREATE TABLE " + QuoteTable(schema.MappedName) + " (" + string.Join(",", parts) + ")", null);
-            }
-            else
-            {
-                foreach (var part in parts)
+                if (createNew)
                 {
-                    dataProvider.ExecuteSql("ALTER TABLE " + QuoteTable(schema.MappedName) + " ADD COLUMN " + part + ";", null);
+                    dataProvider.ExecuteSql("CREATE TABLE " + QuoteTable(schema.MappedName) + " (" + string.Join(",", parts) + ")", null);
+                }
+                else
+                {
+                    foreach (var part in parts)
+                    {
+                        dataProvider.ExecuteSql("ALTER TABLE " + QuoteTable(schema.MappedName) + " ADD COLUMN " + part + ";", null);
+                    }
+
+                }
+            }
+
+            var existingIndexes = dataProvider.ExecuteSqlReader("PRAGMA INDEX_LIST(' " + schema.MappedName + "')", null).ToLookup(rec => rec["name"].ToString());
+
+            foreach (var index in schema.Indexes)
+            {
+                if (existingIndexes[index.Name].Any())
+                {
+                    if (recreateIndexes)
+                        dataProvider.ExecuteSql("DROP INDEX " + QuoteTable(index.Name) + " ON " + QuoteTable(schema.MappedName), null);
+                    else
+                        continue;
                 }
 
+                string createIndexSql = "CREATE INDEX " + QuoteTable(index.Name) + " ON " + QuoteTable(schema.MappedName) + " (";
+
+                createIndexSql += string.Join(",", index.FieldsWithOrder.Select(field => QuoteField(field.Item1.MappedName) + " " + (field.Item2 == SortOrder.Ascending ? "ASC" : "DESC")));
+
+                createIndexSql += ")";
+
+                dataProvider.ExecuteSql(createIndexSql, null);
             }
+
         }
 
     }

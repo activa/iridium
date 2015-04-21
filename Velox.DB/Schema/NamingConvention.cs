@@ -66,6 +66,7 @@ namespace Velox.DB
             {
                 fieldProperties.PrimaryKey = true;
                 fieldProperties.AutoIncrement = UseAutoIncrement && field.FieldType.Inspector().Is(TypeFlags.Integer);
+                fieldProperties.Indexed = false;
             }
 
             return fieldProperties;

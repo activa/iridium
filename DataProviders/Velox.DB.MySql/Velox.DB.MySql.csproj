@@ -46,7 +46,7 @@
     <Compile Include="MySqlDataProvider.cs" />
     <Compile Include="MySqlDialect.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SqlServerContext.cs" />
+    <Compile Include="MySqlContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Velox.DB\Velox.DB.csproj">

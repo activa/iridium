@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>velox.db.sqlserver</id>
-    <version>0.9.33</version>
+    <version>0.9.34</version>
     <title>Velox.DB.SqlServer</title>
     <authors>Philippe Leybaert</authors>
     <licenseUrl>http://github.com/velox/db/LICENSE</licenseUrl>

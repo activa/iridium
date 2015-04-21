@@ -66,8 +66,8 @@ namespace Velox.DB.Test
         {
 //            get { return _instance ?? (_instance = new MemoryStorage()); }
 //            get { return _instance ?? (_instance = new SqlServerStorage()); }
-            get { return _instance ?? (_instance = new MySqlStorage()); }
-//              get { return _instance ?? (_instance = new SqliteStorage()); }
+//            get { return _instance ?? (_instance = new MySqlStorage()); }
+              get { return _instance ?? (_instance = new SqliteStorage()); }
         }
     }
 

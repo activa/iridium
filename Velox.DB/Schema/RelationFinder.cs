@@ -56,8 +56,6 @@ namespace Velox.DB
 
             Relations.Add(relation);
 
-            Debug.WriteLine("Found relation: {0}", node);
-
             return node;
         }
 

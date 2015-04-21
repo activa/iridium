@@ -67,8 +67,6 @@ namespace Velox.DB.Sql
             {
                 var connection = _localConnection.Value;
 
-                Debug.WriteLine("Fetching connection ({0})", connection);
-
                 if (connection != null)
                 {
                     if (connection.State == ConnectionState.Open)
@@ -91,8 +89,6 @@ namespace Velox.DB.Sql
 
             connection.Open();
 
-            Debug.WriteLine("Creating connection");
-
             return connection;
         }
 
@@ -100,6 +96,8 @@ namespace Velox.DB.Sql
 
         protected DbCommand CreateCommand(string sqlQuery, Dictionary<string, object> parameters)
         {
+            Debug.WriteLine(string.Format("{0}", sqlQuery));
+
             DbCommand dbCommand = Connection.CreateCommand();
 
             dbCommand.CommandType = CommandType.Text;
@@ -135,8 +133,6 @@ namespace Velox.DB.Sql
 
         public override IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, QueryParameterCollection parameters)
         {
-            Debug.WriteLine(string.Format("{0}", sql));
-
             List<Dictionary<string, object>> records = new List<Dictionary<string, object>>();
 
             using (var cmd = CreateCommand(sql, parameters == null ? null : parameters.AsDictionary()))
@@ -167,8 +163,6 @@ namespace Velox.DB.Sql
 
         public override int ExecuteSql(string sql, QueryParameterCollection parameters)
         {
-            Debug.WriteLine(string.Format("{0}", sql));
-
             using (var cmd = CreateCommand(sql, parameters == null ? null : parameters.AsDictionary()))
             {
                 return cmd.ExecuteNonQuery();

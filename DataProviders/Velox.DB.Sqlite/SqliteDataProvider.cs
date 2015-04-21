@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using Velox.DB.Core;
 using Velox.DB.Sql;
 using Velox.DB.Sqlite.API;
@@ -167,61 +168,64 @@ namespace Velox.DB.Sqlite
         {
             var stmt = CreateCommand(sql, parameters);
 
-            var returnCode = SqliteReturnCode.Row;
-
-            while (returnCode == SqliteReturnCode.Row)
+            try
             {
-                returnCode = SqliteReturnCode.Busy;
+                
 
-                while (returnCode == SqliteReturnCode.Busy)
+                for (;;)
                 {
-                    returnCode = _sqlite3.step(stmt);
-                }
+                    var returnCode = _sqlite3.step(stmt);
 
-                if (returnCode != SqliteReturnCode.Row)
-                {
-                    if (returnCode != SqliteReturnCode.Done)
+                    if (returnCode == SqliteReturnCode.Busy)
                     {
-                        // TODO: handle error
+                        Task.Delay(100).Wait();
+                        continue;
                     }
 
-                    break;
-                }
+                    if (returnCode == SqliteReturnCode.Done)
+                        break;
 
-                Dictionary<string, object> record = new Dictionary<string, object>();
+                    if (returnCode != SqliteReturnCode.Row)
+                        throw new Exception(_sqlite3.errmsg(DbHandle));
 
-                for (int i = 0; i < _sqlite3.column_count(stmt); i++)
-                {
-                    string fieldName = _sqlite3.column_name(stmt, i);
+                    Dictionary<string, object> record = new Dictionary<string, object>();
 
-                    SqliteColumnType columnType = _sqlite3.column_type(stmt, i);
-
-                    switch (columnType)
+                    for (int i = 0; i < _sqlite3.column_count(stmt); i++)
                     {
-                        case SqliteColumnType.Blob:
-                            record[fieldName] = _sqlite3.column_blob(stmt, i);
-                            break;
-                        case SqliteColumnType.Text:
-                            record[fieldName] = _sqlite3.column_text(stmt, i);
-                            break;
-                        case SqliteColumnType.Float:
-                            record[fieldName] = _sqlite3.column_double(stmt, i);
-                            break;
-                        case SqliteColumnType.Integer:
-                            record[fieldName] = _sqlite3.column_int64(stmt, i);
-                            break;
-                        case SqliteColumnType.Null:
-                            record[fieldName] = null;
-                            break;
+                        string fieldName = _sqlite3.column_name(stmt, i);
+
+                        SqliteColumnType columnType = _sqlite3.column_type(stmt, i);
+
+                        switch (columnType)
+                        {
+                            case SqliteColumnType.Blob:
+                                record[fieldName] = _sqlite3.column_blob(stmt, i);
+                                break;
+                            case SqliteColumnType.Text:
+                                record[fieldName] = _sqlite3.column_text(stmt, i);
+                                break;
+                            case SqliteColumnType.Float:
+                                record[fieldName] = _sqlite3.column_double(stmt, i);
+                                break;
+                            case SqliteColumnType.Integer:
+                                record[fieldName] = _sqlite3.column_int64(stmt, i);
+                                break;
+                            case SqliteColumnType.Null:
+                                record[fieldName] = null;
+                                break;
+
+                        }
 
                     }
 
+                    yield return record;
+
                 }
-
-                yield return record;
-
             }
-            _sqlite3.finalize(stmt);
+            finally
+            {
+                _sqlite3.finalize(stmt);
+            }
 
         }
 
