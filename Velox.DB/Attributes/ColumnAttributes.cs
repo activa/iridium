@@ -28,6 +28,14 @@ using System;
 
 namespace Velox.DB
 {
+    public sealed class Field
+    {
+        [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+        public sealed class Composition : Attribute
+        {
+        }
+    }
+
     public sealed class Column
     {
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]

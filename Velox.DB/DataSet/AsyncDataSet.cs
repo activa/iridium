@@ -101,6 +101,11 @@ namespace Velox.DB
             return Task.Factory.StartNew( () => _dataSet.Read(key, relationsToLoad));
         }
 
+        public Task<T> Read(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] relationsToLoad)
+        {
+            return Task.Factory.StartNew(() => _dataSet.Read(condition, relationsToLoad));
+        }
+
         public Task<T> Load(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad)
         {
             return Task.Factory.StartNew( () => _dataSet.Load(obj, key, relationsToLoad));
@@ -119,6 +124,11 @@ namespace Velox.DB
         public Task<bool> Delete(T obj)
         {
             return Task.Factory.StartNew( () => _dataSet.Delete(obj));
+        }
+
+        public Task<bool> DeleteAll()
+        {
+            return Task.Factory.StartNew(() => _dataSet.DeleteAll());
         }
 
         public Task<bool> Delete(Expression<Func<T, bool>> filter)
@@ -230,5 +240,46 @@ namespace Velox.DB
         {
             return Task.Factory.StartNew(() => _dataSet.ToArray());
         }
+
+        public Task<Dictionary<TKey, T>> ToDictionary<TKey>(Func<T, TKey> keySelector)
+        {
+            return Task.Factory.StartNew(() => _dataSet.ToDictionary(keySelector));
+        }
+
+        public Task<Dictionary<TKey, T>> ToDictionary<TKey>(Func<T, TKey> keySelector, IEqualityComparer<TKey> comparer)
+        {
+            return Task.Factory.StartNew(() => _dataSet.ToDictionary(keySelector, comparer));
+        }
+
+        public Task<Dictionary<TKey, TValue>> ToDictionary<TKey, TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector)
+        {
+            return Task.Factory.StartNew(() => _dataSet.ToDictionary(keySelector, valueSelector));
+        }
+
+        public Task<Dictionary<TKey, TValue>> ToDictionary<TKey, TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector, IEqualityComparer<TKey> comparer)
+        {
+            return Task.Factory.StartNew(() => _dataSet.ToDictionary(keySelector, valueSelector, comparer));
+        }
+
+        public Task<ILookup<TKey, T>> ToLookup<TKey>(Func<T, TKey> keySelector)
+        {
+            return Task.Factory.StartNew(() => _dataSet.ToLookup(keySelector));
+        }
+
+        public Task<ILookup<TKey, T>> ToLookup<TKey>(Func<T, TKey> keySelector, IEqualityComparer<TKey> comparer)
+        {
+            return Task.Factory.StartNew(() => _dataSet.ToLookup(keySelector, comparer));
+        }
+
+        public Task<ILookup<TKey, TValue>> ToLookup<TKey,TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector)
+        {
+            return Task.Factory.StartNew(() => _dataSet.ToLookup(keySelector, valueSelector));
+        }
+
+        public Task<ILookup<TKey, TValue>> ToLookup<TKey, TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector, IEqualityComparer<TKey> comparer)
+        {
+            return Task.Factory.StartNew(() => _dataSet.ToLookup(keySelector, valueSelector, comparer));
+        }
+
     }
 }

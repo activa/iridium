@@ -82,10 +82,12 @@ namespace Velox.DB
             return new AsyncDataSet<T>(this);
         }
 
+        /*
         public Repository<T> Repository
         {
             get { return _repository; }
         }
+        */
 
         public IDataSet<T> Where(Expression<Func<T, bool>> whereExpression)
         {
@@ -138,6 +140,11 @@ namespace Velox.DB
             return _repository.Read(key,relationsToLoad);
         }
 
+        public T Read(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] relationsToLoad)
+        {
+            return WithRelations(relationsToLoad).FirstOrDefault(condition);
+        }
+
         public T Load(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad)
         {
             return _repository.Load(obj, key, relationsToLoad);
@@ -158,9 +165,14 @@ namespace Velox.DB
             return _repository.Delete(obj);
         }
 
+        public bool DeleteAll()
+        {
+            return _repository.Delete(_repository.CreateQuerySpec(_filter));
+        }
+
         public bool Delete(Expression<Func<T, bool>> filter)
         {
-            return _repository.Delete(_repository.CreateQuerySpec(new FilterSpec(filter)));
+            return Where(filter).DeleteAll();
         }
 
         public bool Delete(QueryExpression filterExpression)

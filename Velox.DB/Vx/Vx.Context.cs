@@ -96,7 +96,6 @@ namespace Velox.DB
                 return new DataSet<T>(GetRepository<T>());
             }
 
-
             public void CreateTable<T>(bool recreateTable = false, bool recreateIndexes = false)
             {
                 DataProvider.CreateOrUpdateTable(GetRepository<T>().Schema, recreateTable, recreateIndexes);
@@ -105,6 +104,11 @@ namespace Velox.DB
             public T Read<T>(object key, params Expression<Func<T, object>>[] relationsToLoad)
             {
                 return GetRepository<T>().Read(key, relationsToLoad);
+            }
+
+            public T Read<T>(Expression<Func<T,bool>> condition,  params Expression<Func<T, object>>[] relationsToLoad)
+            {
+                return DataSet<T>().WithRelations(relationsToLoad).FirstOrDefault(condition);
             }
 
             public T Load<T>(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad)
@@ -125,6 +129,13 @@ namespace Velox.DB
             public bool Delete<T>(T obj)
             {
                 return GetRepository<T>().Delete(obj);
+            }
+
+            public bool Delete<T>(Expression<Func<T, bool>> condition)
+            {
+                var repository = GetRepository<T>();
+
+                return repository.Delete(repository.CreateQuerySpec(new FilterSpec(condition)));
             }
 
             public int Execute(string sql, object parameters)
@@ -182,6 +193,11 @@ namespace Velox.DB
             public Task<T> ReadAsync<T>(object key, params Expression<Func<T, object>>[] relationsToLoad)
             {
                 return Task.Factory.StartNew(() => GetRepository<T>().Read(key, relationsToLoad));
+            }
+
+            public Task<T> ReadAsync<T>(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] relationsToLoad)
+            {
+                return AsyncDataSet<T>().WithRelations(relationsToLoad).FirstOrDefault(condition);
             }
 
             public Task<T> LoadAsync<T>(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad)

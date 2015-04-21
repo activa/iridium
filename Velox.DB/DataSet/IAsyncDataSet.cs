@@ -26,6 +26,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
@@ -33,11 +34,24 @@ namespace Velox.DB
 {
     public interface IAsyncDataSet<T>
     {
+        IAsyncDataSet<T> Where(Expression<Func<T, bool>> whereExpression);
+        IAsyncDataSet<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector);
+        IAsyncDataSet<T> OrderByDescending<TKey>(Expression<Func<T, TKey>> keySelector);
+        IAsyncDataSet<T> ThenBy<TKey>(Expression<Func<T, TKey>> keySelector);
+        IAsyncDataSet<T> ThenByDescending<TKey>(Expression<Func<T, TKey>> keySelector);
+        IAsyncDataSet<T> OrderBy(QueryExpression expression, SortOrder sortOrder);
+        IAsyncDataSet<T> WithRelations(params Expression<Func<T, object>>[] relationsToLoad);
+        IAsyncDataSet<T> Where(QueryExpression filterExpression);
+        IAsyncDataSet<T> Skip(int n);
+        IAsyncDataSet<T> Take(int n);
+
         Task<T> Read(object key, params Expression<Func<T, object>>[] relationsToLoad);
+        Task<T> Read(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] relationsToLoad);
         Task<T> Load(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad);
         Task<bool> Save(T obj, bool saveRelations = false, bool? create = null);
         Task<bool> Create(T obj, bool saveRelations = false);
         Task<bool> Delete(T obj);
+        Task<bool> DeleteAll();
         Task<bool> Delete(Expression<Func<T, bool>> filter);
         Task<bool> Delete(QueryExpression filterExpression);
         Task<T> First();
@@ -58,19 +72,17 @@ namespace Velox.DB
         Task<TScalar> Average<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter);
         Task<bool> Any(Expression<Func<T, bool>> filter);
         Task<T> ElementAt(int index);
-        IAsyncDataSet<T> Where(Expression<Func<T, bool>> whereExpression);
-        IAsyncDataSet<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector);
-        IAsyncDataSet<T> OrderByDescending<TKey>(Expression<Func<T, TKey>> keySelector);
-        IAsyncDataSet<T> ThenBy<TKey>(Expression<Func<T, TKey>> keySelector);
-        IAsyncDataSet<T> ThenByDescending<TKey>(Expression<Func<T, TKey>> keySelector);
-        IAsyncDataSet<T> OrderBy(QueryExpression expression, SortOrder sortOrder);
-        IAsyncDataSet<T> WithRelations(params Expression<Func<T, object>>[] relationsToLoad);
-        IAsyncDataSet<T> Where(QueryExpression filterExpression);
-        IAsyncDataSet<T> Skip(int n);
-        IAsyncDataSet<T> Take(int n);
 
         Task<List<T>> ToList();
         Task<T[]> ToArray();
+        Task<Dictionary<TKey, T>> ToDictionary<TKey>(Func<T, TKey> keySelector);
+        Task<Dictionary<TKey, T>> ToDictionary<TKey>(Func<T, TKey> keySelector, IEqualityComparer<TKey> comparer);
+        Task<Dictionary<TKey, TValue>> ToDictionary<TKey, TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector);
+        Task<Dictionary<TKey, TValue>> ToDictionary<TKey, TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector, IEqualityComparer<TKey> comparer);
+        Task<ILookup<TKey, T>> ToLookup<TKey>(Func<T, TKey> keySelector);
+        Task<ILookup<TKey, T>> ToLookup<TKey>(Func<T, TKey> keySelector, IEqualityComparer<TKey> comparer);
+        Task<ILookup<TKey, TValue>> ToLookup<TKey,TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector);
+        Task<ILookup<TKey, TValue>> ToLookup<TKey, TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector, IEqualityComparer<TKey> comparer);
 
         IDataSet<T> Sync();
     }

@@ -76,11 +76,13 @@ namespace Velox.DB
         void Purge();
 
         T Read(object key, params Expression<Func<T, object>>[] relationsToLoad);
+        T Read(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] relationsToLoad);
         T Load(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad);
         bool Save(T obj, bool saveRelations = false, bool? create = null);
         bool Create(T obj, bool saveRelations = false);
 
         bool Delete(T obj);
+        bool DeleteAll();
         bool Delete(Expression<Func<T, bool>> filter);
         bool Delete(QueryExpression filterExpression);
 

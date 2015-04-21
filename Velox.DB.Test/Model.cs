@@ -39,6 +39,7 @@ namespace Velox.DB.Test
 		public int CustomerID { get; set; }
         public int ProductID { get; set; }
 
+        [Relation]
 	    public Product Product;
 
         public int? SalesPersonID { get;set; }
@@ -48,11 +49,12 @@ namespace Velox.DB.Test
 
 		public string Remark { get; set; }
 
-		[Relation.ManyToOne(LocalKey = "SalesPersonID")]
+		[Relation(LocalKey = "SalesPersonID")]
         public SalesPerson SalesPerson { get; set; }
         
 		public Customer Customer { get; set; }
-		
+
+		[Relation]
         public ICollection<OrderItem> OrderItems { get; set; }
 	}
 
@@ -66,7 +68,9 @@ namespace Velox.DB.Test
 		public string Description { get; set; }
         public string ProductID { get; set; }
 		
+        [Relation]
         public Order Order { get; set; }
+        [Relation]
 	    public Product Product;
 	}
 
@@ -81,15 +85,17 @@ namespace Velox.DB.Test
 		public SalesPersonType? SalesPersonType { get; set; }
 		public int? Test { get; set; }
 
+        [Relation]
         public IList<Order> Orders { get; set; }
 	}
 
-	public class Customer
+	public class Customer : IEntity
 	{
 		public int CustomerID { get; set; }
 		public string Name { get; set; }
 	    public int? Age;
 
+        [Relation]
 		public ICollection<CustomerPaymentMethodLink> LinkedPaymentMethods { get; set; }
 		
 		public IDataSet<Order> Orders { get; set; }
@@ -101,6 +107,7 @@ namespace Velox.DB.Test
 		public string Name { get; set; }
 		public int MonthlyCost { get; set; }
 
+        [Relation]
 		public ICollection<CustomerPaymentMethodLink> LinkedCustomers { get; set; }
 	}
 
@@ -109,7 +116,9 @@ namespace Velox.DB.Test
 		public int CustomerID { get; set; }
 		public long PaymentMethodID { get; set; }
 
+        
 	    public Customer Customer;
+        [Relation]
 	    public PaymentMethod PaymentMethod;
 	}
 

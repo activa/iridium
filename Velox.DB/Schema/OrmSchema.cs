@@ -78,7 +78,7 @@ namespace Velox.DB
             {
                 var fieldInspector = field.Inspector();
 
-                if (fieldInspector.HasAttribute<Column.IgnoreAttribute>())
+                if (fieldInspector.HasAttribute<Column.IgnoreAttribute>() || (!fieldInspector.IsWritePublic))
                     continue;
 
                 var schemaField = new Field(field);
@@ -189,8 +189,11 @@ namespace Velox.DB
             foreach (var field in ObjectType.Inspector().GetFieldsAndProperties(BindingFlags.Instance | BindingFlags.Public).Where(field => !_mappableTypes.Any(f => f(field.FieldType.Inspector()))))
             {
                 Type collectionType = field.FieldType.Inspector().GetInterfaces().FirstOrDefault(tI => tI.IsConstructedGenericType && tI.GetGenericTypeDefinition() == typeof (IEnumerable<>));
-                
-                if (field.Inspector().HasAttribute<DB.Relation.IgnoreAttribute>())
+                bool isDataSet = field.FieldType.IsConstructedGenericType && field.FieldType.GetGenericTypeDefinition() == typeof(IDataSet<>);
+
+                var relationAttribute = field.Inspector().GetAttribute<RelationAttribute>();
+
+                if (!field.FieldType.Inspector().ImplementsOrInherits<IEntity>() && relationAttribute == null && !isDataSet)
                     continue;
 
                 Relation relation = new Relation(field)
@@ -202,8 +205,6 @@ namespace Velox.DB
                 {
                     if (PrimaryKeys.Length != 1)
                         continue;
-
-                    bool isDataSet = field.FieldType.IsConstructedGenericType && field.FieldType.GetGenericTypeDefinition() == typeof (IDataSet<>);
 
                     Type elementType = collectionType.GenericTypeArguments[0];
 
@@ -224,8 +225,6 @@ namespace Velox.DB
                     Type objectType = field.FieldType;
 
                     var foreignSchema = Repository.Context.GetSchema(objectType);
-
-                    var relationAttribute = field.Inspector().GetAttribute<DB.Relation.ManyToOneAttribute>();
 
                     if (foreignSchema == null)
                         continue;
@@ -254,8 +253,6 @@ namespace Velox.DB
                 {
                     relations[field.Name] = relation;
                 }
-
-
             }
 
             var dataSetRelations = new HashSet<Relation>(relations.Values.Where(r => r.IsDataSet));
