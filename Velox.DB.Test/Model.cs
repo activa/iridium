@@ -148,6 +148,8 @@ namespace Velox.DB.Test
         [Column.PrimaryKeyAttribute(AutoIncrement = true)]
         public int PK;
 
+        public bool BooleanField;
+        public bool? BooleanFieldNullable;
         public byte ByteField;
         public byte? ByteFieldNullable;
         public short ShortField;

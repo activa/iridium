@@ -68,6 +68,7 @@ namespace Velox.DB.MySql
 
             var columnMappings = new[]
             {
+                new {Flags = TypeFlags.Boolean, ColumnType = "BOOLEAN"},
                 new {Flags = TypeFlags.Byte, ColumnType = "TINYINT UNSIGNED"},
                 new {Flags = TypeFlags.SByte, ColumnType = "TINYINT"},
                 new {Flags = TypeFlags.Int16, ColumnType = "SMALLINT"},
@@ -84,6 +85,9 @@ namespace Velox.DB.MySql
                 new {Flags = TypeFlags.DateTime, ColumnType = "DATETIME"}
             };
 
+            if (recreateTable)
+                recreateIndexes = true;
+
             var existingColumns = datProvider.ExecuteSqlReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=DATABASE() and TABLE_NAME=@name", new QueryParameterCollection(new { name = schema.MappedName })).ToLookup(rec => rec["COLUMN_NAME"].ToString());
 
             var parts = new List<string>();
@@ -97,7 +101,7 @@ namespace Velox.DB.MySql
                 if (columnMapping == null)
                     continue;
 
-                if (existingColumns.Contains(field.MappedName))
+                if (existingColumns.Contains(field.MappedName)/* && !recreateTable*/)
                 {
                     createNew = false;
                     continue;
@@ -122,7 +126,7 @@ namespace Velox.DB.MySql
                 parts.Add(part);
             }
 
-            if (parts.Any() && schema.PrimaryKeys.Length > 0)
+            if (parts.Any() && schema.PrimaryKeys.Length > 0 && createNew)
             {
                 parts.Add("PRIMARY KEY (" + string.Join(",", schema.PrimaryKeys.Select(pk => QuoteField(pk.MappedName))) + ")");
             }
@@ -132,9 +136,13 @@ namespace Velox.DB.MySql
 
             string sql = (createNew ? "CREATE TABLE " : "ALTER TABLE ") + QuoteTable(schema.MappedName);
 
-            sql += createNew ? " (" : " ADD COLUMN ";
+            if (createNew)
+                sql += " (";
 
-            sql += string.Join(",", parts);
+            if (createNew)
+                sql += string.Join(",", parts);
+            else
+                sql += string.Join(",", parts.Select(s => "ADD COLUMN " + s));
 
             if (createNew)
                 sql += ")";

@@ -170,6 +170,45 @@ namespace Velox.DB.Test
 
         }
 
+        [Test]
+        public void FieldBoolean()
+        {
+            RecordWithAllTypes rec;
+
+            rec = SaveAndReload(new RecordWithAllTypes() { BooleanField = true });
+
+            rec.BooleanField.Should().BeTrue();
+
+            rec = SaveAndReload(new RecordWithAllTypes() { BooleanField = false });
+
+            rec.BooleanField.Should().BeFalse();
+
+            rec = SaveAndReload(new RecordWithAllTypes() {  });
+
+            rec.BooleanField.Should().BeFalse();
+            rec.BooleanFieldNullable.Should().NotHaveValue();
+
+            rec = SaveAndReload(new RecordWithAllTypes() { BooleanFieldNullable = true });
+
+            rec.BooleanFieldNullable.Should().HaveValue();
+            rec.BooleanFieldNullable.Should().BeTrue();
+
+            rec = SaveAndReload(new RecordWithAllTypes() { BooleanFieldNullable = false });
+
+            rec.BooleanFieldNullable.Should().HaveValue();
+            rec.BooleanFieldNullable.Should().BeFalse();
+
+
+            DB.RecordsWithAllTypes.Count(r => r.BooleanField).Should().Be(1);
+            DB.RecordsWithAllTypes.Count(r => !r.BooleanField).Should().Be(4);
+            DB.RecordsWithAllTypes.Count(r => r.BooleanFieldNullable == null).Should().Be(3);
+            DB.RecordsWithAllTypes.Count(r => r.BooleanFieldNullable != null).Should().Be(2);
+            DB.RecordsWithAllTypes.Count(r => r.BooleanFieldNullable == true).Should().Be(1);
+            DB.RecordsWithAllTypes.Count(r => r.BooleanFieldNullable == false).Should().Be(1);
+            DB.RecordsWithAllTypes.Count(r => (r.BooleanFieldNullable ?? false)).Should().Be(1);
+            DB.RecordsWithAllTypes.Count(r => !(r.BooleanFieldNullable ?? false)).Should().Be(4);
+        }
+
 
     }
 }

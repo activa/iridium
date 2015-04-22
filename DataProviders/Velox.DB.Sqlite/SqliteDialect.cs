@@ -74,6 +74,7 @@ namespace Velox.DB.Sqlite
 
             var columnMappings = new[]
             {
+                new {Flags = TypeFlags.Boolean, ColumnType = "TINYINT"},
                 new {Flags = TypeFlags.Integer, ColumnType = "INTEGER"},
                 new {Flags = TypeFlags.Decimal, ColumnType = "DECIMAL({0},{1})"},
                 new {Flags = TypeFlags.FloatingPoint, ColumnType = "REAL"},

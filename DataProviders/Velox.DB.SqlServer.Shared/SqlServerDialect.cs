@@ -127,6 +127,7 @@ namespace Velox.DB.SqlServer
 
             var columnMappings = new[]
             {
+                new {Flags = TypeFlags.Boolean, ColumnType = "BIT"},
                 new {Flags = TypeFlags.Integer8, ColumnType = "TINYINT"},
                 new {Flags = TypeFlags.Integer16, ColumnType = "SMALLINT"},
                 new {Flags = TypeFlags.Integer32, ColumnType = "INT"},

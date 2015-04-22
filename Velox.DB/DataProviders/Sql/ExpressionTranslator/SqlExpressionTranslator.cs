@@ -308,7 +308,14 @@ namespace Velox.DB.Sql
             string sql = ProcessRelation(node, node.Expression, node.Member.Name);
 
             if (sql != null)
-                return _sqlDialect.QuoteField(sql);
+            {
+                if (node.Type == typeof (bool))
+                {
+                    return "(" + _sqlDialect.QuoteField(sql) + " <> " + Translate(Expression.Constant(false,typeof(bool))) + ")";
+                }
+                else
+                    return _sqlDialect.QuoteField(sql);
+            }
 
             return null;
         }

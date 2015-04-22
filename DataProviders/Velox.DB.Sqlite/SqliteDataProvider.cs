@@ -143,7 +143,9 @@ namespace Velox.DB.Sqlite
                     {
                         var parameterType = value.GetType().Inspector();
 
-                        if (parameterType.Is(TypeFlags.Integer64))
+                        if (parameterType.Is(TypeFlags.Boolean))
+                            _sqlite3.bind_int(stmt, paramNumber, value.Convert<bool>() ? 1 : 0);
+                        else if (parameterType.Is(TypeFlags.Integer64))
                             _sqlite3.bind_int64(stmt, paramNumber, value.Convert<long>());
                         else if (parameterType.Is(TypeFlags.Integer))
                             _sqlite3.bind_int(stmt, paramNumber, value.Convert<int>());

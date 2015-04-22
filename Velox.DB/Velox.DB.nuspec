@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>velox.db</id>
-    <version>0.9.35</version>
+    <version>0.9.36</version>
     <title>Velox.DB</title>
     <authors>Philippe Leybaert</authors>
     <projectUrl>http://github.com/velox/db</projectUrl>
