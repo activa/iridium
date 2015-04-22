@@ -168,6 +168,11 @@ namespace Velox.DB
                 return DataProvider.Query(sql, new QueryParameterCollection(parameters)).Select(entity => entity.CreateObject<T>());
             }
 
+            public IEnumerable<Dictionary<string,object>> Query(string sql, object parameters = null)
+            {
+                return DataProvider.Query(sql, new QueryParameterCollection(parameters)).Select(entity => entity.AsDictionary());
+            }
+
             public T QueryScalar<T>(string sql, object parameters = null) where T : new()
             {
                 return DataProvider.QueryScalar(sql, new QueryParameterCollection(parameters)).Convert<T>();
