@@ -23,21 +23,13 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Velox.DB.SqlServer.Shared",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Velox.DB.SqlServer", "DataProviders\Velox.DB.SqlServer\Velox.DB.SqlServer.csproj", "{680C31CA-C072-4AF7-BCFC-8BD270BEE7BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Velox.DB.SqlServer.iOS", "DataProviders\Velox.DB.SqlServer.iOS\Velox.DB.SqlServer.iOS.csproj", "{58368073-CE91-440C-948A-B75235B72CFC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Velox.DB.SqlServer.Android", "DataProviders\Velox.DB.SqlServer.Android\Velox.DB.SqlServer.Android.csproj", "{C791357B-B3A6-4904-8170-4D405F49B71A}"
-EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Velox.DB.SqlADO", "DataProviders\Velox.DB.SqlADO\Velox.DB.SqlADO.shproj", "{C87CA7D9-C64F-4001-86C8-444255165594}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		DataProviders\Velox.DB.SqlServer.Shared\Velox.DB.SqlServer.Shared.projitems*{3f04700d-5917-4596-a2b2-873d4d320892}*SharedItemsImports = 13
-		DataProviders\Velox.DB.SqlServer.Shared\Velox.DB.SqlServer.Shared.projitems*{58368073-ce91-440c-948a-b75235b72cfc}*SharedItemsImports = 4
-		DataProviders\Velox.DB.SqlADO\Velox.DB.SqlADO.projitems*{58368073-ce91-440c-948a-b75235b72cfc}*SharedItemsImports = 4
 		DataProviders\Velox.DB.SqlServer.Shared\Velox.DB.SqlServer.Shared.projitems*{680c31ca-c072-4af7-bcfc-8bd270bee7bc}*SharedItemsImports = 4
 		DataProviders\Velox.DB.SqlADO\Velox.DB.SqlADO.projitems*{680c31ca-c072-4af7-bcfc-8bd270bee7bc}*SharedItemsImports = 4
-		DataProviders\Velox.DB.SqlServer.Shared\Velox.DB.SqlServer.Shared.projitems*{c791357b-b3a6-4904-8170-4d405f49b71a}*SharedItemsImports = 4
-		DataProviders\Velox.DB.SqlADO\Velox.DB.SqlADO.projitems*{c791357b-b3a6-4904-8170-4d405f49b71a}*SharedItemsImports = 4
 		DataProviders\Velox.DB.SqlADO\Velox.DB.SqlADO.projitems*{a74d8405-74ee-482d-a03e-92b45c17f9f5}*SharedItemsImports = 4
 		DataProviders\Velox.DB.SqlADO\Velox.DB.SqlADO.projitems*{c87ca7d9-c64f-4001-86c8-444255165594}*SharedItemsImports = 13
 	EndGlobalSection
@@ -331,70 +323,6 @@ Global
 		{680C31CA-C072-4AF7-BCFC-8BD270BEE7BC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{680C31CA-C072-4AF7-BCFC-8BD270BEE7BC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{680C31CA-C072-4AF7-BCFC-8BD270BEE7BC}.Release|x86.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Ad-Hoc|Any CPU.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Ad-Hoc|Any CPU.Build.0 = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Ad-Hoc|ARM.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Ad-Hoc|iPhone.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Ad-Hoc|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Ad-Hoc|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Ad-Hoc|Mixed Platforms.Build.0 = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Ad-Hoc|x86.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.AppStore|Any CPU.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.AppStore|Any CPU.Build.0 = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.AppStore|ARM.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.AppStore|iPhone.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.AppStore|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.AppStore|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.AppStore|Mixed Platforms.Build.0 = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.AppStore|x86.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Debug|iPhone.ActiveCfg = Debug|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Release|ARM.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Release|iPhone.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{58368073-CE91-440C-948A-B75235B72CFC}.Release|x86.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Ad-Hoc|Any CPU.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Ad-Hoc|Any CPU.Build.0 = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Ad-Hoc|ARM.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Ad-Hoc|iPhone.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Ad-Hoc|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Ad-Hoc|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Ad-Hoc|Mixed Platforms.Build.0 = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Ad-Hoc|x86.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.AppStore|Any CPU.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.AppStore|Any CPU.Build.0 = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.AppStore|ARM.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.AppStore|iPhone.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.AppStore|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.AppStore|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.AppStore|Mixed Platforms.Build.0 = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.AppStore|x86.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Debug|iPhone.ActiveCfg = Debug|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Release|ARM.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Release|iPhone.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{C791357B-B3A6-4904-8170-4D405F49B71A}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -407,8 +335,6 @@ Global
 		{A74D8405-74EE-482D-A03E-92B45C17F9F5} = {869B052F-0EAD-4489-89B6-DBADBC8F4F58}
 		{3F04700D-5917-4596-A2B2-873D4D320892} = {869B052F-0EAD-4489-89B6-DBADBC8F4F58}
 		{680C31CA-C072-4AF7-BCFC-8BD270BEE7BC} = {869B052F-0EAD-4489-89B6-DBADBC8F4F58}
-		{58368073-CE91-440C-948A-B75235B72CFC} = {869B052F-0EAD-4489-89B6-DBADBC8F4F58}
-		{C791357B-B3A6-4904-8170-4D405F49B71A} = {869B052F-0EAD-4489-89B6-DBADBC8F4F58}
 		{C87CA7D9-C64F-4001-86C8-444255165594} = {869B052F-0EAD-4489-89B6-DBADBC8F4F58}
 	EndGlobalSection
 EndGlobal
