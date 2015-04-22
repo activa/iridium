@@ -118,12 +118,27 @@ namespace Velox.DB
 
             public bool Save<T>(T obj, bool saveRelations = false, bool? create = null)
             {
-                return GetRepository<T>().Save(obj, saveRelations, create);
+                return GetRepository<T>().Save(obj, saveRelations, create: create);
+            }
+
+            public bool InsertOrUpdate<T>(T obj, bool saveRelations = false)
+            {
+                return GetRepository<T>().Save(obj, saveRelations, create: null);
+            }
+
+            public bool Update<T>(T obj, bool saveRelations = false)
+            {
+                return GetRepository<T>().Save(obj, saveRelations, create: false);
             }
 
             public bool Create<T>(T obj, bool saveRelations = false)
             {
-                return GetRepository<T>().Save(obj, saveRelations, true);
+                return GetRepository<T>().Save(obj, saveRelations, create: true);
+            }
+
+            public bool Insert<T>(T obj, bool saveRelations = false)
+            {
+                return GetRepository<T>().Save(obj, saveRelations, create: true);
             }
 
             public bool Delete<T>(T obj)

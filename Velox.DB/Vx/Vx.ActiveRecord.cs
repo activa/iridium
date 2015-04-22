@@ -31,14 +31,19 @@ namespace Velox.DB
 {
     public static class VxExtensions
     {
-        public static bool Save<T>(this T entity, bool saveRelations = false, bool? create = null) where T:IEntity
+        public static bool InsertOrUpdate<T>(this T entity, bool saveRelations = false, bool? create = null) where T:IEntity
         {
-            return Vx.DataSet<T>().Save(entity, saveRelations, create);
+            return Vx.DataSet<T>().InsertOrUpdate(entity, saveRelations);
         }
 
-        public static bool Create<T>(this T entity, bool saveRelations = false) where T : IEntity
+        public static bool Insert<T>(this T entity, bool saveRelations = false) where T : IEntity
         {
-            return Vx.DataSet<T>().Create(entity, saveRelations);
+            return Vx.DataSet<T>().Insert(entity, saveRelations);
+        }
+
+        public static bool Update<T>(this T entity, bool saveRelations = false) where T : IEntity
+        {
+            return Vx.DataSet<T>().Update(entity, saveRelations);
         }
 
         public static T Load<T>(this T obj, object key, params Expression<Func<T, object>>[] relationsToLoad) where T : IEntity

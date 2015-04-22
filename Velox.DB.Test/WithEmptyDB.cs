@@ -151,7 +151,7 @@ namespace Velox.DB.Test
                 CustomerID = customer.CustomerID
             };
 
-            DB.Orders.Save(order);
+            DB.Orders.Insert(order);
 
             int id = order.OrderID;
 
@@ -197,7 +197,7 @@ namespace Velox.DB.Test
                 Customer customer = new Customer { Name = name };
 
                 customers[i] = customer;
-                saveTasks[i] = DB.Customers.Async().Save(customer);
+                saveTasks[i] = DB.Customers.Async().Insert(customer);
 
                 saveTasks[i].ContinueWith(t =>
                 {
@@ -306,7 +306,7 @@ namespace Velox.DB.Test
             var products = Enumerable.Range(1, 20).Select(i => new Product() { ProductID = "P" + i, Description = "Product " + i, Price = (decimal)(rnd.NextDouble() * 100), MinQty = 1 });
 
             foreach (var product in products)
-                DB.Products.Create(product);
+                DB.Products.Insert(product);
 
 
         }
@@ -320,7 +320,7 @@ namespace Velox.DB.Test
             });
 
             foreach (var product in products)
-                DB.Products.Create(product);
+                DB.Products.Insert(product);
 
             var pr = (from p in DB.Products where p.Description.StartsWith("B") select p).ToArray();
 
@@ -341,7 +341,7 @@ namespace Velox.DB.Test
             });
 
             foreach (var product in products)
-                DB.Products.Create(product);
+                DB.Products.Insert(product);
 
             var pr = (from p in DB.Products where p.Description.EndsWith("B") select p).ToArray();
 

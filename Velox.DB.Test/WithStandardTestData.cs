@@ -45,7 +45,7 @@ namespace Velox.DB.Test
                     Price = (decimal) (rnd.Next(100, 20000) / 100.0)
                 };
 
-                DB.Products.Save(product, create:true);
+                DB.Products.Insert(product);
 
                 products[productIndex] = product;
             }

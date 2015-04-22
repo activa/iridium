@@ -36,7 +36,7 @@ namespace Velox.DB.Test
 
         private RecordWithAllTypes SaveAndReload(RecordWithAllTypes rec)
         {
-            DB.RecordsWithAllTypes.Save(rec);
+            DB.RecordsWithAllTypes.Insert(rec);
 
             return DB.RecordsWithAllTypes.Read(rec.PK);
         }
