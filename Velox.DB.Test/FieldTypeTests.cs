@@ -46,6 +46,11 @@ namespace Velox.DB.Test
         {
             RecordWithAllTypes rec;
 
+            rec = SaveAndReload(new RecordWithAllTypes { });
+
+            rec.IntField.Should().Be(default(int));
+            rec.IntFieldNullable.Should().NotHaveValue();
+
             rec = SaveAndReload(new RecordWithAllTypes {IntField = 111});
 
             rec.IntField.Should().Be(111);
@@ -55,6 +60,14 @@ namespace Velox.DB.Test
 
             rec.IntField.Should().Be(0);
             rec.IntFieldNullable.Should().Be(111);
+
+            DB.RecordsWithAllTypes.Count(r => r.IntField == 111).Should().Be(1);
+            DB.RecordsWithAllTypes.Count(r => r.IntField == 0).Should().Be(2);
+            DB.RecordsWithAllTypes.Count(r => r.IntFieldNullable == null).Should().Be(2);
+            DB.RecordsWithAllTypes.Count(r => r.IntFieldNullable != null).Should().Be(1);
+            DB.RecordsWithAllTypes.Count(r => r.IntFieldNullable == 111).Should().Be(1);
+            DB.RecordsWithAllTypes.Count(r => (r.IntFieldNullable ?? 0) == 111).Should().Be(1);
+            DB.RecordsWithAllTypes.Count(r => (r.IntFieldNullable ?? 0) == 0).Should().Be(2);
         }
 
         [Test]
@@ -162,12 +175,33 @@ namespace Velox.DB.Test
             RecordWithAllTypes rec;
 
             DateTime now = DateTime.Now;
+            DateTime defaultDate = new DateTime(1970, 1, 1);
 
             rec = SaveAndReload(new RecordWithAllTypes { DateTimeField = now});
 
-            rec.DateTimeField.Should().BeCloseTo(now, 1000);
+            rec.DateTimeField.Should().BeCloseTo(now, 1000); // some data providers have a 1 second precision on DateTime
             rec.DateTimeFieldNullable.Should().NotHaveValue();
 
+            now = rec.DateTimeField; // to get the actual value in the database, rounded to database precision
+
+            rec = SaveAndReload(new RecordWithAllTypes { });
+
+            rec.DateTimeField.Should().Be(defaultDate);
+            rec.DateTimeFieldNullable.Should().NotHaveValue();
+
+            rec = SaveAndReload(new RecordWithAllTypes { DateTimeFieldNullable = now });
+
+            rec.DateTimeField.Should().Be(defaultDate);
+            rec.DateTimeFieldNullable.Should().HaveValue();
+            rec.DateTimeFieldNullable.Should().BeCloseTo(now, 1000);
+
+            DB.RecordsWithAllTypes.Count(r => r.DateTimeField == now).Should().Be(1);
+            DB.RecordsWithAllTypes.Count(r => r.DateTimeField == defaultDate).Should().Be(2);
+            DB.RecordsWithAllTypes.Count(r => r.DateTimeFieldNullable == null).Should().Be(2);
+            DB.RecordsWithAllTypes.Count(r => r.DateTimeFieldNullable != null).Should().Be(1);
+            DB.RecordsWithAllTypes.Count(r => r.DateTimeFieldNullable == now).Should().Be(1);
+            DB.RecordsWithAllTypes.Count(r => (r.DateTimeFieldNullable ?? defaultDate) == now).Should().Be(1);
+            DB.RecordsWithAllTypes.Count(r => (r.DateTimeFieldNullable ?? defaultDate) == defaultDate).Should().Be(2);
         }
 
         [Test]
@@ -178,10 +212,12 @@ namespace Velox.DB.Test
             rec = SaveAndReload(new RecordWithAllTypes() { BooleanField = true });
 
             rec.BooleanField.Should().BeTrue();
+            rec.BooleanFieldNullable.Should().NotHaveValue();
 
             rec = SaveAndReload(new RecordWithAllTypes() { BooleanField = false });
 
             rec.BooleanField.Should().BeFalse();
+            rec.BooleanFieldNullable.Should().NotHaveValue();
 
             rec = SaveAndReload(new RecordWithAllTypes() {  });
 
@@ -190,11 +226,13 @@ namespace Velox.DB.Test
 
             rec = SaveAndReload(new RecordWithAllTypes() { BooleanFieldNullable = true });
 
+            rec.BooleanField.Should().BeFalse();
             rec.BooleanFieldNullable.Should().HaveValue();
             rec.BooleanFieldNullable.Should().BeTrue();
 
             rec = SaveAndReload(new RecordWithAllTypes() { BooleanFieldNullable = false });
 
+            rec.BooleanField.Should().BeFalse();
             rec.BooleanFieldNullable.Should().HaveValue();
             rec.BooleanFieldNullable.Should().BeFalse();
 

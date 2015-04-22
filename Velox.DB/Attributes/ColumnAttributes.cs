@@ -109,5 +109,16 @@ namespace Velox.DB
         {
         }
 
+        [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+        public sealed class NullValueAttribute : Attribute
+        {
+            public object NullValue { get; set; }
+
+            public NullValueAttribute(object value)
+            {
+                NullValue = value;
+            }
+        }
+
     }
 }

@@ -38,7 +38,10 @@ namespace Velox.DB.Sql
             StringLength,
             BlobLength,
             Coalesce,
-            Trim
+            Trim,
+            Sum,
+            Average,
+            Count
         }
 
         public virtual string SelectSql(SqlTableNameWithAlias tableName, IEnumerable<SqlExpressionWithAlias> columns, string sqlWhere, IEnumerable<SqlJoinDefinition> joins = null, string sqlSortExpression = null, int? start = null, int? numRecords = null, string afterSelect = null)
@@ -147,7 +150,7 @@ namespace Velox.DB.Sql
 
         public abstract void CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes, SqlDataProvider dataProvider);
 
-        public virtual string SqlFunctionName(Function function, params string[] parameters)
+        public virtual string SqlFunction(Function function, params string[] parameters)
         {
             switch (function)
             {
@@ -157,6 +160,15 @@ namespace Velox.DB.Sql
                     return string.Format("length({0})", parameters[0]);
                 case Function.Coalesce:
                     return string.Format("coalesce({0},{1})", parameters[0], parameters[1]);
+                case Function.Trim:
+                    return string.Format("trim({0}", parameters[0]);
+                case Function.Sum:
+                    return string.Format("sum({0})", parameters[0]);
+                case Function.Average:
+                    return string.Format("avg({0})", parameters[0]);
+                case Function.Count:
+                    return string.Format("count({0})", parameters[0]);
+
                 default:
                     return null;
             }

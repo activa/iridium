@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using Velox.DB.Core;
@@ -138,8 +139,9 @@ namespace Velox.DB.Sql
             {
                 return Translate(lambda);
             }
-            catch (SqlExpressionTranslatorException)
+            catch (SqlExpressionTranslatorException ex)
             {
+                Debug.WriteLine("Sql Translator exception: {0}",ex.Message);
                 return null; // we couldn't translate the given expression
             }
         }
@@ -247,7 +249,7 @@ namespace Velox.DB.Sql
                     case "EndsWith":
                         return string.Format("({0} like {1})", arg, CreateParameter("%" + stringArguments[0]));
                     case "Trim":
-                        return string.Format(_sqlDialect.SqlFunctionName(SqlDialect.Function.Trim), stringArguments[0]);
+                        return string.Format(_sqlDialect.SqlFunction(SqlDialect.Function.Trim), stringArguments[0]);
                 }
 
                 throw new SqlExpressionTranslatorException(node.ToString());
@@ -292,11 +294,18 @@ namespace Velox.DB.Sql
             throw new SqlExpressionTranslatorException(node.ToString());
         }
 
+
+        private string TranslateTrue(string sql)
+        {
+            return "(" + sql + " <> " + Translate(Expression.Constant(false, typeof(bool))) + ")";
+        }
+
+
         private string TranslateMember(MemberExpression node)
         {
             if (node.Expression.Type == typeof(string) && node.Member.Name == "Length")
             {
-                string fnName = _sqlDialect.SqlFunctionName(SqlDialect.Function.StringLength, Translate(node.Expression));
+                string fnName = _sqlDialect.SqlFunction(SqlDialect.Function.StringLength, Translate(node.Expression));
 
                 if (fnName != null)
                     return fnName;
@@ -311,7 +320,7 @@ namespace Velox.DB.Sql
             {
                 if (node.Type == typeof (bool))
                 {
-                    return "(" + _sqlDialect.QuoteField(sql) + " <> " + Translate(Expression.Constant(false,typeof(bool))) + ")";
+                    return TranslateTrue(_sqlDialect.QuoteField(sql));
                 }
                 else
                     return _sqlDialect.QuoteField(sql);
@@ -346,6 +355,12 @@ namespace Velox.DB.Sql
                 case ExpressionType.AndAlso:
                     op = "AND";
                     break;
+                case ExpressionType.Coalesce:
+                {
+                    string sql = _sqlDialect.SqlFunction(SqlDialect.Function.Coalesce, Translate(expression.Left), Translate(expression.Right));
+
+                    return expression.Type == typeof (bool) ? TranslateTrue(sql) : sql;
+                }
                 case ExpressionType.Divide:
                     op = "/";
                     break;

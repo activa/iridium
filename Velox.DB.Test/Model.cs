@@ -168,7 +168,7 @@ namespace Velox.DB.Test
         [Column.LargeText]
         public string LongStringField;
 
-        public DateTime DateTimeField = DateTime.Now;
+        public DateTime DateTimeField = new DateTime(1970,1,1);
         public DateTime? DateTimeFieldNullable;
 
         public TestEnum EnumField;

@@ -106,7 +106,7 @@ namespace Velox.DB.SqlServer
             return "select SCOPE_IDENTITY() as " + alias;
         }
 
-        public override string SqlFunctionName(Function function, params string[] parameters)
+        public override string SqlFunction(Function function, params string[] parameters)
         {
             switch (function)
             {
@@ -114,10 +114,9 @@ namespace Velox.DB.SqlServer
                     return string.Format("len({0})", parameters[0]);
                 case Function.BlobLength:
                     return string.Format("datalength({0})", parameters[0]);
-                case Function.Coalesce:
-                    return string.Format("coalesce({0},{1})", parameters[0], parameters[1]);
+
                 default:
-                    return null;
+                    return base.SqlFunction(function, parameters);
             }
         }
 
