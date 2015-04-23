@@ -79,6 +79,7 @@ namespace Velox.DB
         T Read(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] relationsToLoad);
         T Load(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad);
 
+        bool Save(T obj, bool saveRelations = false, bool? create = null);
         bool Update(T obj, bool saveRelations = false);
         bool Insert(T obj, bool saveRelations = false);
         bool InsertOrUpdate(T obj, bool saveRelations);

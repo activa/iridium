@@ -25,6 +25,7 @@
 #endregion
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -258,7 +259,7 @@ namespace Velox.DB
             throw new NotSupportedException();
         }
 
-        public object QueryScalar(string sql, QueryParameterCollection parameters)
+        public IEnumerable<object> QueryScalar(string sql, QueryParameterCollection parameters)
         {
             throw new NotSupportedException();
         }

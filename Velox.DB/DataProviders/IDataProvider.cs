@@ -25,6 +25,7 @@
 #endregion
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
@@ -50,6 +51,6 @@ namespace Velox.DB
 
         int ExecuteSql(string sql, QueryParameterCollection parameters);
         IEnumerable<SerializedEntity> Query(string sql, QueryParameterCollection parameters);
-        object QueryScalar(string sql, QueryParameterCollection parameters);
+        IEnumerable<object> QueryScalar(string sql, QueryParameterCollection parameters);
     }
 }

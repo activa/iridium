@@ -25,6 +25,7 @@
 #endregion
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Velox.DB.Core;
@@ -424,12 +425,12 @@ namespace Velox.DB.Sql
             return ExecuteSqlReader(sql, parameters).Select(rec => new SerializedEntity(rec));
         }
 
-        public virtual object QueryScalar(string sql, QueryParameterCollection parameters)
+        public virtual IEnumerable<object> QueryScalar(string sql, QueryParameterCollection parameters)
         {
-            var result = ExecuteSqlReader(sql, parameters).FirstOrDefault();
+            var results = ExecuteSqlReader(sql, parameters);
 
-            if (result != null)
-                return result.First().Value;
+            if (results != null)
+                return results.Select(r => r.First().Value);
             else
                 return null;
         }

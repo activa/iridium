@@ -111,6 +111,11 @@ namespace Velox.DB
             return Task.Factory.StartNew( () => _dataSet.Load(obj, key, relationsToLoad));
         }
 
+        public Task<bool> Save(T obj, bool saveRelations = false, bool? create = null)
+        {
+            return Task.Factory.StartNew(() => _dataSet.Save(obj, saveRelations, create));
+        }
+
         public Task<bool> InsertOrUpdate(T obj, bool saveRelations = false)
         {
             return Task.Factory.StartNew( () => _dataSet.InsertOrUpdate(obj, saveRelations));

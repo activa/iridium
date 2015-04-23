@@ -704,15 +704,14 @@ namespace Velox.DB.Test
         [Test]
         public void CompositeKeyCreateAndRead()
         {
-            RecordWithCompositeKey rec = new RecordWithCompositeKey();
+            DB.Insert(new RecordWithCompositeKey
+            {
+                Key1 = 1, 
+                Key2 = 2, 
+                Name = "John"
+            });
 
-            rec.Key1 = 1;
-            rec.Key2 = 2;
-            rec.Name = "John";
-
-            DB.Create(rec);
-
-            rec = DB.Read<RecordWithCompositeKey>(new {Key1 = 1, Key2 = 2});
+            var rec = DB.Read<RecordWithCompositeKey>(new {Key1 = 1, Key2 = 2});
 
             rec.Should().NotBeNull();
             rec.Key1.Should().Be(1);

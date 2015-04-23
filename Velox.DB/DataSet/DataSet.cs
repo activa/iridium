@@ -150,9 +150,14 @@ namespace Velox.DB
             return _repository.Load(obj, key, relationsToLoad);
         }
 
+        public bool Save(T obj, bool saveRelations = false, bool? create = null)
+        {
+            return _repository.Save(obj, saveRelations, create);
+        }
+
         public bool InsertOrUpdate(T obj, bool saveRelations = false)
         {
-            return _repository.Save(obj, saveRelations);
+            return _repository.Save(obj, saveRelations, create:null);
         }
 
         public bool Insert(T obj, bool saveRelations = false)

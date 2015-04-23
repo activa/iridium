@@ -2,10 +2,10 @@
 <package>
   <metadata>
     <id>velox.db.sqlite</id>
-    <version>0.9.38</version>
+    <version>0.9.39</version>
     <title>Velox.DB.Sqlite</title>
     <authors>Philippe Leybaert</authors>
-    <licenseUrl>http://github.com/velox/db/LICENSE</licenseUrl>
+    <licenseUrl>https://github.com/velox/DB/blob/master/LICENSE</licenseUrl>
     <projectUrl>http://github.com/velox/db</projectUrl>
     <iconUrl>http://dstyler.com/vici/32x32/im-_IconPlain100-w32-h32.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>

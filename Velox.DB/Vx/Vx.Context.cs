@@ -131,11 +131,6 @@ namespace Velox.DB
                 return GetRepository<T>().Save(obj, saveRelations, create: false);
             }
 
-            public bool Create<T>(T obj, bool saveRelations = false)
-            {
-                return GetRepository<T>().Save(obj, saveRelations, create: true);
-            }
-
             public bool Insert<T>(T obj, bool saveRelations = false)
             {
                 return GetRepository<T>().Save(obj, saveRelations, create: true);
@@ -175,7 +170,12 @@ namespace Velox.DB
 
             public T QueryScalar<T>(string sql, object parameters = null) where T : new()
             {
-                return DataProvider.QueryScalar(sql, new QueryParameterCollection(parameters)).Convert<T>();
+                return DataProvider.QueryScalar(sql, new QueryParameterCollection(parameters)).FirstOrDefault().Convert<T>();
+            }
+
+            public IEnumerable<T> QueryScalars<T>(string sql, object parameters = null) where T : new()
+            {
+                return DataProvider.QueryScalar(sql, new QueryParameterCollection(parameters)).Select(scalar => scalar.Convert<T>());
             }
 
             // Async methods
@@ -210,6 +210,11 @@ namespace Velox.DB
                 return Task.Factory.StartNew(() => QueryScalar<T>(sql, parameters));
             }
 
+            public Task<T[]> QueryScalarsAsync<T>(string sql, object parameters = null) where T : new()
+            {
+                return Task.Factory.StartNew(() => QueryScalars<T>(sql, parameters).ToArray());
+            }
+
             public Task<T> ReadAsync<T>(object key, params Expression<Func<T, object>>[] relationsToLoad)
             {
                 return Task.Factory.StartNew(() => GetRepository<T>().Read(key, relationsToLoad));
@@ -230,9 +235,14 @@ namespace Velox.DB
                 return Task.Factory.StartNew(() => GetRepository<T>().Save(obj, saveRelations, create));
             }
 
-            public Task<bool> CreateAsync<T>(T obj, bool saveRelations = false)
+            public Task<bool> InsertAsync<T>(T obj, bool saveRelations = false)
             {
                 return Task.Factory.StartNew(() => GetRepository<T>().Save(obj, saveRelations, true));
+            }
+
+            public Task<bool> UpdateAsync<T>(T obj, bool saveRelations = false)
+            {
+                return Task.Factory.StartNew(() => GetRepository<T>().Save(obj, saveRelations, false));
             }
 
             public Task<bool> DeleteAsync<T>(T obj)
