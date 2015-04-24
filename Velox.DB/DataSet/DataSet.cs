@@ -87,6 +87,9 @@ namespace Velox.DB
                 else
                     _relationsToLoad.AddRange(additionalRelations);
             }
+
+            _parentRelation = parent._parentRelation;
+            _parentObject = parent._parentObject;
         }
 
         public IAsyncDataSet<T> Async()
