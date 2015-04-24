@@ -36,7 +36,7 @@ namespace Velox.DB
 
         public static IDataSet<T> DataSet<T>()
         {
-            return Repository.CreateDataSet<T>();
+            return _defaultContext.DataSet<T>();
         }
 
         public static Context DB
@@ -51,6 +51,13 @@ namespace Velox.DB
         public static List<T> CreateEmptyList<T>(T templateValue) { return new List<T>(); }
         public static Dictionary<TKey, TValue> CreateEmptyDictionary<TKey, TValue>(TKey keyTemplate, TValue valueTemplae) { return new Dictionary<TKey, TValue>(); }
 
+        public class SchemaException : Exception
+        {
+            public SchemaException(string msg) : base(msg)
+            {
+
+            }
+        }
 
     }
 }

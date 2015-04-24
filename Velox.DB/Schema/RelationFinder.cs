@@ -44,7 +44,7 @@ namespace Velox.DB
         {
             Visit(node.Expression);
 
-            var schema = _context.GetSchema(node.Expression.Type);
+            var schema = _context.GetSchema(node.Expression.Type, autoCreate: false);
 
             if (schema == null) 
                 return node;

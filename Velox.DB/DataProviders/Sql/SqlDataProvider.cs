@@ -108,7 +108,7 @@ namespace Velox.DB.Sql
             {
                 SqlQuerySpec sqlQuerySpec = ((SqlQuerySpec) filter) ?? new SqlQuerySpec {FilterSql = null, TableAlias = SqlNameGenerator.NextTableAlias()};
 
-                var fieldList = (from f in schema.Fields.Values select new {Field = f, Alias = SqlNameGenerator.NextFieldAlias()}).ToArray();
+                var fieldList = (from f in schema.FieldsByFieldName.Values select new {Field = f, Alias = SqlNameGenerator.NextFieldAlias()}).ToArray();
 
                 string sql = SqlDialect.SelectSql(
                     new SqlTableNameWithAlias(schema.MappedName, sqlQuerySpec.TableAlias),
@@ -142,7 +142,7 @@ namespace Velox.DB.Sql
             {
                 SqlQuerySpec sqlQuerySpec = ((SqlQuerySpec)filter) ?? new SqlQuerySpec { FilterSql = null, TableAlias = SqlNameGenerator.NextTableAlias() };
 
-                var fieldList = (from f in schema.Fields.Values select new { Field = f, Alias = SqlNameGenerator.NextFieldAlias() }).ToList();
+                var fieldList = (from f in schema.FieldsByFieldName.Values select new { Field = f, Alias = SqlNameGenerator.NextFieldAlias() }).ToList();
 
                 var joins = new HashSet<SqlJoinDefinition>(sqlQuerySpec.Joins);
                 var fieldsByRelation = new Dictionary<OrmSchema.Relation, PrefetchFieldDefinition[]>();
@@ -168,7 +168,7 @@ namespace Velox.DB.Sql
                         joins.Add(sqlJoin);
                     }
 
-                    fieldsByRelation[prefetchRelation] = prefetchRelation.ForeignSchema.FieldList.Select(f => new PrefetchFieldDefinition {Field = f, FieldAlias = SqlNameGenerator.NextFieldAlias(), TableAlias = sqlJoin.Right.Alias}).ToArray();
+                    fieldsByRelation[prefetchRelation] = prefetchRelation.ForeignSchema.Fields.Select(f => new PrefetchFieldDefinition {Field = f, FieldAlias = SqlNameGenerator.NextFieldAlias(), TableAlias = sqlJoin.Right.Alias}).ToArray();
                     foreignKeyAliases[prefetchRelation] = fieldList.First(f => f.Field == prefetchRelation.LocalField).Alias;
                 }
 
@@ -210,7 +210,7 @@ namespace Velox.DB.Sql
 
             string tableName = schema.MappedName;
             var autoIncrementField = schema.IncrementKeys.FirstOrDefault();
-            var columnList = (from f in schema.Fields.Values where !f.AutoIncrement select new { Field = f, ParameterName = SqlNameGenerator.NextParameterName()  }).ToArray();
+            var columnList = (from f in schema.FieldsByFieldName.Values where !f.AutoIncrement select new { Field = f, ParameterName = SqlNameGenerator.NextParameterName()  }).ToArray();
             var parameters = new QueryParameterCollection(columnList.ToDictionary(c => c.ParameterName, c => o[c.Field.MappedName]));
 
             string sql;
@@ -286,7 +286,7 @@ namespace Velox.DB.Sql
         public SerializedEntity ReadObject(Dictionary<string,object> keys, OrmSchema schema)
         {
             string tableName = schema.MappedName;
-            var columnList = (from f in schema.Fields.Values select new { Field = f, Alias = SqlNameGenerator.NextFieldAlias() }).ToArray();
+            var columnList = (from f in schema.FieldsByFieldName.Values select new { Field = f, Alias = SqlNameGenerator.NextFieldAlias() }).ToArray();
             var keyList = (from f in schema.PrimaryKeys select new {Field = f, ParameterName = SqlNameGenerator.NextParameterName()}).ToArray();
             var parameters = keyList.ToDictionary(key => key.ParameterName, key => keys[key.Field.MappedName]);
 

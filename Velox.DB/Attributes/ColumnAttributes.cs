@@ -120,5 +120,14 @@ namespace Velox.DB
             }
         }
 
+        public class ForeignKeyAttribute : Attribute
+        {
+            public Type RelatedClass { get; set; }
+
+            public ForeignKeyAttribute(Type relatedClass)
+            {
+                RelatedClass = relatedClass;
+            }
+        }
     }
 }

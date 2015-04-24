@@ -42,6 +42,8 @@ namespace Velox.DB
         private readonly List<Expression<Func<T, object>>> _relationsToLoad;
         private int? _skip;
         private int? _take;
+        private readonly OrmSchema.Relation _parentRelation;
+        private readonly object _parentObject;
 
         public DataSet(Repository repository)
         {
@@ -53,6 +55,16 @@ namespace Velox.DB
         {
             _repository = (Repository<T>)repository;
             _filter = filter;
+        }
+
+        [Preserve]
+        public DataSet(Repository repository, FilterSpec filter, OrmSchema.Relation parentRelation, object parentObject)
+        {
+            _repository = (Repository<T>)repository;
+            _filter = filter;
+
+            _parentRelation = parentRelation;
+            _parentObject = parentObject;
         }
 
         private DataSet(DataSet<T> parent, FilterSpec newFilterSpec = null, SortOrderSpec newSortSpec = null, IEnumerable<Expression<Func<T,object>>> additionalRelations = null)
@@ -121,7 +133,7 @@ namespace Velox.DB
 
         public IEnumerator<T> GetEnumerator()
         {
-            return _repository.List(_repository.CreateQuerySpec(_filter, sortSpec: _sortOrder, skip:_skip, take:_take), _relationsToLoad).GetEnumerator();
+            return _repository.List(_repository.CreateQuerySpec(_filter, sortSpec: _sortOrder, skip:_skip, take:_take), _relationsToLoad, _parentRelation, _parentObject).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -214,22 +226,22 @@ namespace Velox.DB
 
         public T First()
         {
-            return _repository.List(_repository.CreateQuerySpec(_filter, sortSpec: _sortOrder, skip: _skip, take: 1), _relationsToLoad).First();
+            return _repository.List(_repository.CreateQuerySpec(_filter, sortSpec: _sortOrder, skip: _skip, take: 1), _relationsToLoad, _parentRelation, _parentObject).First();
         }
 
         public T First(Expression<Func<T, bool>> filter)
         {
-            return _repository.List(_repository.CreateQuerySpec(new FilterSpec(filter, _filter), sortSpec: _sortOrder, skip: _skip, take: 1), _relationsToLoad).First();
+            return _repository.List(_repository.CreateQuerySpec(new FilterSpec(filter, _filter), sortSpec: _sortOrder, skip: _skip, take: 1), _relationsToLoad, _parentRelation, _parentObject).First();
         }
 
         public T FirstOrDefault()
         {
-            return _repository.List(_repository.CreateQuerySpec(_filter, sortSpec: _sortOrder, skip: _skip, take: 1), _relationsToLoad).FirstOrDefault();
+            return _repository.List(_repository.CreateQuerySpec(_filter, sortSpec: _sortOrder, skip: _skip, take: 1), _relationsToLoad, _parentRelation, _parentObject).FirstOrDefault();
         }
 
         public T FirstOrDefault(Expression<Func<T, bool>> filter)
         {
-            return _repository.List(_repository.CreateQuerySpec(new FilterSpec(filter, _filter), sortSpec: _sortOrder, skip: _skip, take: 1), _relationsToLoad).FirstOrDefault();
+            return _repository.List(_repository.CreateQuerySpec(new FilterSpec(filter, _filter), sortSpec: _sortOrder, skip: _skip, take: 1), _relationsToLoad, _parentRelation, _parentObject).FirstOrDefault();
         }
 
         public long Count()

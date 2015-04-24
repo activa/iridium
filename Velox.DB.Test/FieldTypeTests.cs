@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using FluentAssertions.Equivalency;
+using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -247,6 +248,14 @@ namespace Velox.DB.Test
             DB.RecordsWithAllTypes.Count(r => !(r.BooleanFieldNullable ?? false)).Should().Be(4);
         }
 
+        [Test]
+        public void CompareNullableWithNonNullable()
+        {
+            DB.Insert(new RecordWithAllTypes {IntField = 1, IntFieldNullable = 1});
+
+            DB.RecordsWithAllTypes.Count(rec => rec.IntField == rec.IntFieldNullable).Should().Be(1);
+
+        }
 
     }
 }

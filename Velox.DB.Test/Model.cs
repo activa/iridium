@@ -25,11 +25,6 @@ namespace Velox.DB.Test
 
 	public class Order
 	{
-        public static Order Read(int id, params Expression<Func<Order, object>>[] relations)
-        {
-            return Vx.DataSet<Order>().Read(id, relations);
-        }
-
 	    public Order()
 	    {
 	        OrderDate = DateTime.Now;
@@ -37,11 +32,8 @@ namespace Velox.DB.Test
 
         public int OrderID { get; set; }
 		public int CustomerID { get; set; }
-        public int ProductID { get; set; }
 
-        [Relation]
-	    public Product Product;
-
+        [Column.ForeignKey(typeof(SalesPerson))]
         public int? SalesPersonID { get;set; }
 
 		[Column.Name("Date")]
@@ -61,6 +53,7 @@ namespace Velox.DB.Test
 	public class OrderItem
 	{
         public int OrderItemID { get; set; }
+        
 		public int OrderID { get;set; }
 		public short Qty { get; set; }
 		public double Price { get; set; }
@@ -70,6 +63,7 @@ namespace Velox.DB.Test
 		
         [Relation]
         public Order Order { get; set; }
+
         [Relation]
 	    public Product Product;
 	}
@@ -85,8 +79,8 @@ namespace Velox.DB.Test
 		public SalesPersonType? SalesPersonType { get; set; }
 		public int? Test { get; set; }
 
-        [Relation]
-        public IList<Order> Orders { get; set; }
+        [Relation(ForeignKey = "SalesPersonID")]
+        public IDataSet<Order> Orders { get; set; }
 	}
 
 	public class Customer : IEntity
@@ -116,8 +110,9 @@ namespace Velox.DB.Test
 		public int CustomerID { get; set; }
 		public long PaymentMethodID { get; set; }
 
-        
+        [Relation]
 	    public Customer Customer;
+
         [Relation]
 	    public PaymentMethod PaymentMethod;
 	}

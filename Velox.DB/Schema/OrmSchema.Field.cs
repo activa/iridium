@@ -41,12 +41,14 @@ namespace Velox.DB
             public readonly FieldOrPropertyInfo Accessor;
             public readonly string FieldName;
             public readonly Type FieldType;
+            public readonly TypeInspector FieldTypeInspector;
 
             public FieldOrRelation(FieldOrPropertyInfo accessor)
             {
                 Accessor = accessor;
                 FieldName = accessor.Name;
                 FieldType = accessor.FieldType;
+                FieldTypeInspector = FieldType.Inspector();
             }
 
             public object SetField(object target, object value)
@@ -72,15 +74,13 @@ namespace Velox.DB
 
         public class Field : FieldOrRelation
         {
-            public readonly Type RealFieldType;
             public readonly bool CanBeNull;
 
             public Field(FieldOrPropertyInfo accessor) : base(accessor)
             {
                 MappedName = FieldName;
-                RealFieldType = FieldType.Inspector().RealType;
 
-                CanBeNull = FieldType.Inspector().CanBeNull;
+                CanBeNull = FieldTypeInspector.CanBeNull;
                 ColumnNullable = CanBeNull;
             }
 
@@ -105,6 +105,7 @@ namespace Velox.DB
             public OrmSchema LocalSchema;
             public Field ForeignField;
             public Field LocalField;
+            public Relation ReverseRelation;
 
             public Type ElementType;
 
@@ -115,7 +116,7 @@ namespace Velox.DB
             {
             }
 
-            internal object CreateCollection(IEnumerable objects)
+            private object CreateCollection(IEnumerable objects)
             {
                 Type genericTypeDefinition = FieldType.IsConstructedGenericType ? FieldType.GetGenericTypeDefinition() : null;
 
@@ -160,20 +161,21 @@ namespace Velox.DB
                 {
                     var parameter = Expression.Parameter(ElementType, "x");
 
-                    var lambda = Expression.Equal(
-                        Expression.MakeMemberAccess(parameter, ForeignField.Accessor.AsMember),
-                        Expression.Constant(localFieldValue)
-                        );
+                    Expression exp1 = Expression.MakeMemberAccess(parameter, ForeignField.Accessor.AsMember);
+                    Expression exp2 = Expression.Constant(localFieldValue, LocalField.FieldType);
 
-                    var filter = new FilterSpec(Expression.Lambda(lambda, parameter));
+                    if (exp2.Type != exp1.Type)
+                        exp2 = Expression.Convert(exp2, exp1.Type);
+
+                    var filter = new FilterSpec(Expression.Lambda(Expression.Equal(exp1,exp2), parameter));
 
                     if (IsDataSet)
                     {
-                        return Activator.CreateInstance(typeof (DataSet<>).MakeGenericType(ElementType), ForeignSchema.Repository, filter);
+                        return Activator.CreateInstance(typeof (DataSet<>).MakeGenericType(ElementType), ForeignSchema.Repository, filter, this, parentObject);
                     }
                     else
                     {
-                        return CreateCollection(foreignRepository.GetRelationObjects(foreignRepository.CreateQuerySpec(filter)));
+                        return CreateCollection(foreignRepository.GetRelationObjects(foreignRepository.CreateQuerySpec(filter), this, parentObject));
                     }
                 }
 

@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices.ComTypes;
 using FluentAssertions;
 using System;
 using System.Collections.Generic;
@@ -141,8 +142,8 @@ namespace Velox.DB.Test
 
             customer.Save();
 
-            SalesPerson salesPerson = new SalesPerson();
-            salesPerson.Name = "Test";
+            SalesPerson salesPerson = new SalesPerson {Name = "Test"};
+
             salesPerson.Save();
 
             var order = new Order
@@ -174,6 +175,85 @@ namespace Velox.DB.Test
 
             Assert.IsNull(order.SalesPerson);
             Assert.IsNull(order.SalesPersonID);
+        }
+
+        [Test]
+        public void ReverseRelation_Generic()
+        {
+            Order order = new Order()
+            {
+                Customer = new Customer() {Name = "A"},
+                OrderItems = new List<OrderItem>()
+                {
+                    new OrderItem() {Description = "X"},
+                    new OrderItem() {Description = "X"},
+                    new OrderItem() {Description = "X"},
+                    new OrderItem() {Description = "X"},
+                    new OrderItem() {Description = "X"},
+                }
+            };
+
+            var originalOrder = order;
+
+            DB.Orders.Insert(order, true);
+
+            order = DB.Orders.Read(originalOrder.OrderID);
+
+            Vx.LoadRelations(order, o => o.OrderItems);
+
+            order.OrderItems.Should().HaveCount(5).And.OnlyContain(item => item.Order == order);
+
+
+        }
+
+        [Test]
+        public void ReverseRelation_DataSet()
+        {
+            Customer customer = new Customer() {Name = "A"};
+
+            DB.Customers.Insert(customer);
+
+            for (int i = 0; i < 5; i++)
+                DB.Orders.Insert(new Order()
+                {
+                    CustomerID = customer.CustomerID
+                });
+
+            customer = DB.Customers.Read(customer.CustomerID);
+
+            customer.Orders.Should().HaveCount(5).And.OnlyContain(order => order.Customer == customer);
+
+
+        }
+
+        [Test]
+        public void OneToManyWithOptionalRelation()
+        {
+            Customer customer = new Customer { Name = "x" };
+
+            customer.Save();
+
+            SalesPerson salesPerson = new SalesPerson { Name = "Test" };
+
+            salesPerson.Save();
+
+            Order[] orders = new[]
+            {
+                new Order() { CustomerID = customer.CustomerID, OrderDate = DateTime.Today, SalesPersonID = null},
+                new Order() { CustomerID = customer.CustomerID, OrderDate = DateTime.Today, SalesPersonID = salesPerson.ID}
+            };
+
+            foreach (var order in orders)
+            {
+                DB.Insert(order);
+            }
+
+            salesPerson = DB.SalesPeople.First();
+
+            salesPerson.Orders.Count().Should().Be(1);
+            salesPerson.Orders.First().OrderID.Should().Be(orders[1].OrderID);
+            
+
 
 
         }

@@ -60,21 +60,38 @@ namespace Velox.DB
 
                     property.SetValue(this, dataSet);
                 }
+
+                GenerateRelations();
+
+                DB = this;
             }
 
-            internal OrmSchema GetSchema(Type objectType)
+            private void GenerateRelations()
+            {
+                Repository repository;
+
+                while ((repository = _repositories.Values.FirstOrDefault(rep => rep.Schema.Relations == null)) != null)
+                    repository.Schema.UpdateRelations();
+ 
+                foreach (var repo in _repositories.Values)
+                    repo.Schema.UpdateReverseRelations();
+            }
+
+            internal OrmSchema GetSchema(Type objectType, bool autoCreate = true)
             {
                 var repository = _repositories[objectType];
 
-                return repository == null ? null : repository.Schema;
-            }
-
-            private void InvalidateRelations()
-            {
-                foreach (var repository in _repositories.Values)
+                if (repository == null)
                 {
-                    repository.Schema.InvalidateRelations();
+                    if (!autoCreate)
+                        return null;
+
+                    _repositories[objectType] = (repository = (Repository) Activator.CreateInstance(typeof (Repository<>).MakeGenericType(objectType), this));
+
+                    GenerateRelations();
                 }
+
+                return repository.Schema;
             }
 
             private Repository<T> GetRepository<T>()
@@ -83,9 +100,9 @@ namespace Velox.DB
 
                 if (repository == null)
                 {
-                    InvalidateRelations();
-
                     _repositories[typeof(T)] = (repository = new Repository<T>(this));
+
+                    GenerateRelations();
                 }
 
                 return (Repository<T>) repository;

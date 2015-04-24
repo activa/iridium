@@ -36,7 +36,7 @@ namespace Velox.DB
 {
     internal abstract class Repository
     {
-        private static readonly SafeDictionary<Type, Repository> _activeRepositories = new SafeDictionary<Type, Repository>();
+        //private static readonly SafeDictionary<Type, Repository> _activeRepositories = new SafeDictionary<Type, Repository>();
 
         internal Vx.Context Context { get; private set; }
         internal OrmSchema Schema { get; private set; }
@@ -44,6 +44,7 @@ namespace Velox.DB
 
         protected Repository(Type type, Vx.Context context)
         {
+            /*
             lock (_activeRepositories)
             {
                 if (_activeRepositories.ContainsKey(type) && _activeRepositories[type] != this)
@@ -51,12 +52,13 @@ namespace Velox.DB
                 else
                     _activeRepositories[type] = this;
             }
-
+            */
             Context = context;
 
             Schema = new OrmSchema(type, this);
         }
 
+        /*
         internal static DataSet<T> CreateDataSet<T>()
         {
             lock (_activeRepositories)
@@ -72,11 +74,13 @@ namespace Velox.DB
                 return _activeRepositories[t];
             }
         }
+        */
 
-        protected internal IEnumerable<object> GetRelationObjects(QuerySpec filter)
+        protected internal IEnumerable<object> GetRelationObjects(QuerySpec filter, OrmSchema.Relation relation, object parentObject)
         {
-            var objects = from o in DataProvider.GetObjects(filter.Native,Schema) 
+            var objects = from o in DataProvider.GetObjects(filter.Native,Schema)
                           let x = Vx.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance(Schema.ObjectType), o),Schema.DatasetRelations) 
+                          let y = (relation == null || relation.ReverseRelation == null) ? x : relation.ReverseRelation.SetField(x, parentObject)
                           select x;
 
             if (filter.Code != null)
@@ -92,7 +96,7 @@ namespace Velox.DB
         protected bool Save(object obj, bool saveRelations = false, bool? create = null)
         {
             if (create == null)
-                create = Schema.IncrementKeys.Length > 0 && Equals(Schema.IncrementKeys[0].GetField(obj), Schema.IncrementKeys[0].FieldType.Inspector().DefaultValue());
+                create = Schema.IncrementKeys.Length > 0 && Equals(Schema.IncrementKeys[0].GetField(obj), Schema.IncrementKeys[0].FieldTypeInspector.DefaultValue());
 
             bool cancelSave = false;
 
@@ -172,7 +176,7 @@ namespace Velox.DB
         internal QuerySpec CreateQuerySpec(FilterSpec filter, ScalarSpec scalarSpec = null, int? skip = null, int? take = null, SortOrderSpec sortSpec = null)
         {
             if (DataProvider.SupportsQueryTranslation(null))
-                return DataProvider.CreateQuerySpec(filter, scalarSpec, sortSpec, skip, take, Schema); // TODO: implement support for hybrid providers
+                return DataProvider.CreateQuerySpec(filter, scalarSpec, sortSpec, skip, take, Schema);
 
             var querySpec = new QuerySpec(new CodeQuerySpec(), null);
 

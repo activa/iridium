@@ -10,8 +10,7 @@ namespace Velox.DB
     internal partial class Repository<T> : Repository
     {
         [Preserve]
-        public Repository(Vx.Context context)
-            : base(typeof(T), context)
+        public Repository(Vx.Context context) : base(typeof(T), context)
         {
         }
 
@@ -135,7 +134,7 @@ namespace Velox.DB
             }
         }
 
-        internal IEnumerable<T> List(QuerySpec filter, IEnumerable<Expression<Func<T, object>>> relationLambdas = null)
+        internal IEnumerable<T> List(QuerySpec filter, IEnumerable<Expression<Func<T, object>>> relationLambdas, OrmSchema.Relation parentRelation, object parentObject)
         {
             IEnumerable<T> objects;
 
@@ -176,6 +175,9 @@ namespace Velox.DB
             {
                 objects = from o in DataProvider.GetObjects(filter.Native, Schema) select Vx.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance<T>(), o), relations);
             }
+
+            if (parentRelation != null && parentRelation.ReverseRelation != null)
+                objects = from o in objects select parentRelation.ReverseRelation.SetField(o, parentObject);
 
             if (filter.Code != null)
             {

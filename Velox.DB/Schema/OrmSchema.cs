@@ -33,30 +33,25 @@ namespace Velox.DB
 {
     public partial class OrmSchema
     {
-
         private readonly string _mappedName;
         private readonly Type _objectType;
-        private readonly SafeDictionary<string, Field> _fields = new SafeDictionary<string, Field>();
-        private readonly SafeDictionary<string, Field> _mappedFields = new SafeDictionary<string, Field>();
-        private readonly Field[] _fieldList;
+        private readonly SafeDictionary<string, Field> _fieldsByFieldName = new SafeDictionary<string, Field>();
+        private readonly SafeDictionary<string, Field> _fieldsByMappedName = new SafeDictionary<string, Field>();
+        private Field[] _fields;
         
         private SafeDictionary<string, Relation> _relations;
-        private readonly Field[] _primaryKeys;
-        private readonly Field[] _incrementKeys;
-        private readonly Index[] _indexes;
+        private Field[] _primaryKeys;
+        private Field[] _incrementKeys;
+        private Index[] _indexes;
 
         private readonly Repository _repository;
+        private HashSet<Relation> _datasetRelations;
 
-        private static readonly List<Func<TypeInspector,bool>> _mappableTypes;
-
-        static OrmSchema()
-        {
-            _mappableTypes = new List<Func<TypeInspector, bool>>()
+        private static readonly List<Func<TypeInspector, bool>> _mappableTypes = new List<Func<TypeInspector, bool>>
             {
                 t => t.Is(TypeFlags.Array | TypeFlags.Byte),
                 t => t.Is(TypeFlags.Numeric | TypeFlags.String | TypeFlags.DateTime | TypeFlags.Boolean) && !t.Is(TypeFlags.Array)
             };
-        }
 
         internal OrmSchema(Type t, Repository repository)
         {
@@ -70,11 +65,16 @@ namespace Velox.DB
             if (tableNameAttribute != null)
                 _mappedName = tableNameAttribute.Name;
 
-            var indexedFields = Vx.CreateEmptyList(new { IndexName = "", Position = 0, SortOrder = SortOrder.Ascending, Field = (Field)null });
+            FindFields();
+        }
+
+        private void FindFields()
+        {
+            var indexedFields = Vx.CreateEmptyList(new {IndexName = "", Position = 0, SortOrder = SortOrder.Ascending, Field = (Field) null});
 
             var fieldList = new List<Field>();
 
-            foreach (var field in t.Inspector().GetFieldsAndProperties(BindingFlags.Instance|BindingFlags.Public).Where(field => _mappableTypes.Any(f => f(field.FieldType.Inspector()))))
+            foreach (var field in _objectType.Inspector().GetFieldsAndProperties(BindingFlags.Instance | BindingFlags.Public).Where(field => _mappableTypes.Any(f => f(field.FieldType.Inspector()))))
             {
                 var fieldInspector = field.Inspector();
 
@@ -161,32 +161,43 @@ namespace Velox.DB
                     }
                 }
 
-                _fields[schemaField.FieldName] = schemaField;
-                _mappedFields[schemaField.MappedName] = schemaField;
+                _fieldsByFieldName[schemaField.FieldName] = schemaField;
+                _fieldsByMappedName[schemaField.MappedName] = schemaField;
 
                 fieldList.Add(schemaField);
             }
 
             _indexes = indexedFields
-                        .ToLookup(indexField => indexField.IndexName)
-                        .Select(item => new Index
-                                            {
-                                                Name = item.Key,
-                                                FieldsWithOrder = item.OrderBy(f => f.Position).Select(f => new Tuple<Field, SortOrder>(f.Field, f.SortOrder)).ToArray()
-                                            })
-                        .ToArray();
+                .ToLookup(indexField => indexField.IndexName)
+                .Select(item => new Index
+                {
+                    Name = item.Key,
+                    FieldsWithOrder = item.OrderBy(f => f.Position).Select(f => new Tuple<Field, SortOrder>(f.Field, f.SortOrder)).ToArray()
+                })
+                .ToArray();
 
-            _fieldList = fieldList.ToArray();
+            _fields = fieldList.ToArray();
 
-            _primaryKeys = _fieldList.Where(f => f.PrimaryKey).ToArray();
-            _incrementKeys = _fieldList.Where(f => f.AutoIncrement).ToArray();
+            _primaryKeys = _fields.Where(f => f.PrimaryKey).ToArray();
+            _incrementKeys = _fields.Where(f => f.AutoIncrement).ToArray();
         }
 
-        private SafeDictionary<string,Relation> FindRelations()
+        internal void UpdateReverseRelations()
+        {
+            foreach (var relation in _relations.Values.Where(relation => relation.RelationType == RelationType.OneToMany))
+            {
+                relation.ReverseRelation = relation
+                    .ForeignSchema
+                    .Relations.Values
+                    .FirstOrDefault(r => r.RelationType == RelationType.ManyToOne && r.ForeignSchema == this && r.ForeignField == relation.LocalField);
+            }
+        }
+
+        internal void UpdateRelations()
         {
             var relations = new SafeDictionary<string, Relation>();
 
-            foreach (var field in ObjectType.Inspector().GetFieldsAndProperties(BindingFlags.Instance | BindingFlags.Public).Where(field => !_mappableTypes.Any(f => f(field.FieldType.Inspector()))))
+            foreach (var field in _objectType.Inspector().GetFieldsAndProperties(BindingFlags.Instance | BindingFlags.Public).Where(field => !_mappableTypes.Any(f => f(field.FieldType.Inspector()))))
             {
                 Type collectionType = field.FieldType.Inspector().GetInterfaces().FirstOrDefault(tI => tI.IsConstructedGenericType && tI.GetGenericTypeDefinition() == typeof (IEnumerable<>));
                 bool isDataSet = field.FieldType.IsConstructedGenericType && field.FieldType.GetGenericTypeDefinition() == typeof(IDataSet<>);
@@ -195,6 +206,10 @@ namespace Velox.DB
 
                 if (!field.FieldType.Inspector().ImplementsOrInherits<IEntity>() && relationAttribute == null && !isDataSet)
                     continue;
+
+                Field foreignField;
+                Field localField;
+                OrmSchema foreignSchema;
 
                 Relation relation = new Relation(field)
                 {
@@ -208,78 +223,75 @@ namespace Velox.DB
 
                     Type elementType = collectionType.GenericTypeArguments[0];
 
-                    var foreignSchema = Repository.Context.GetSchema(elementType);
+                    foreignSchema = Repository.Context.GetSchema(elementType);
 
                     if (foreignSchema == null)
-                        continue;
+                        throw new Vx.SchemaException(string.Format("Could not create relation {0}.{1}", ObjectType.Name, field.Name));
 
                     relation.RelationType = RelationType.OneToMany;
-                    relation.ForeignSchema = foreignSchema;
                     relation.ElementType = elementType;
                     relation.IsDataSet = isDataSet;
-                    relation.LocalField = PrimaryKeys[0];
-                    relation.ForeignField = Vx.Config.NamingConvention.GetRelationField(relation);
+                    relation.ForeignSchema = foreignSchema;
+
+                    localField = PrimaryKeys[0];
+                    foreignField = Vx.Config.NamingConvention.GetRelationField(relation);
                 }
                 else
                 {
                     Type objectType = field.FieldType;
 
-                    var foreignSchema = Repository.Context.GetSchema(objectType);
+                    foreignSchema = Repository.Context.GetSchema(objectType);
 
                     if (foreignSchema == null)
-                        continue;
+                        throw new Vx.SchemaException(string.Format("Could not create relation {0}.{1}", ObjectType.Name, field.Name));
 
                     relation.RelationType = RelationType.ManyToOne;
                     relation.ReadOnly = relationAttribute != null && relationAttribute.ReadOnly;
                     relation.ForeignSchema = foreignSchema;
 
-                    var localField = Vx.Config.NamingConvention.GetRelationField(relation);
-                    var foreignField = foreignSchema.PrimaryKeys.Length == 1 ? foreignSchema.PrimaryKeys[0] : null;
-
-                    if (relationAttribute != null)
-                    {
-                        if (relationAttribute.ForeignKey != null)
-                            foreignField = foreignSchema.Fields[relationAttribute.ForeignKey];
-
-                        if (relationAttribute.LocalKey != null)
-                            localField = Fields[relationAttribute.LocalKey];
-                    }
-
-                    relation.LocalField = localField;
-                    relation.ForeignField = foreignField;
+                    localField = Vx.Config.NamingConvention.GetRelationField(relation);
+                    foreignField = foreignSchema.PrimaryKeys.Length == 1 ? foreignSchema.PrimaryKeys[0] : null;
                 }
 
-                if (relation.ForeignField != null && relation.LocalField != null)
+                if (relationAttribute != null)
                 {
-                    relations[field.Name] = relation;
+                    if (relationAttribute.ForeignKey != null)
+                        foreignField = foreignSchema.FieldsByFieldName[relationAttribute.ForeignKey];
+
+                    if (relationAttribute.LocalKey != null)
+                        localField = FieldsByFieldName[relationAttribute.LocalKey];
                 }
+
+                if (localField == null || foreignField == null)
+                    throw new Vx.SchemaException(string.Format("Could not create relation {0}.{1}", ObjectType.Name, field.Name));
+
+                relation.LocalField = localField;
+                relation.ForeignField = foreignField;
+                
+
+                relations[field.Name] = relation;
             }
 
             var dataSetRelations = new HashSet<Relation>(relations.Values.Where(r => r.IsDataSet));
 
-            DatasetRelations = dataSetRelations.Any() ? new HashSet<Relation>(dataSetRelations) : null;
+            _datasetRelations = dataSetRelations.Any() ? new HashSet<Relation>(dataSetRelations) : null;
 
-            return relations;
+            _relations = relations;
         }
 
-        public SafeDictionary<string,Field> Fields
+        public SafeDictionary<string,Field> FieldsByFieldName
+        {
+            get { return _fieldsByFieldName; }
+        }
+
+        public Field[] Fields
         {
             get { return _fields; }
         }
 
-        public Field[] FieldList
-        {
-            get { return _fieldList; }
-        }
-
         public SafeDictionary<string, Relation> Relations
         {
-            get { return _relations ?? (_relations = FindRelations()); }
-        }
-
-        internal void InvalidateRelations()
-        {
-            _relations = null;
+            get { return _relations; }
         }
 
         public Field[] PrimaryKeys
@@ -307,7 +319,10 @@ namespace Velox.DB
             get { return _mappedName; }
         }
 
-        internal HashSet<Relation> DatasetRelations { get; private set; }
+        internal HashSet<Relation> DatasetRelations
+        {
+            get { return _datasetRelations; }
+        }
 
         public Index[] Indexes
         {
@@ -318,7 +333,7 @@ namespace Velox.DB
         {
             foreach (var fieldName in entity.FieldNames)
             {
-                _mappedFields[fieldName].SetField(o, entity[fieldName]);
+                _fieldsByMappedName[fieldName].SetField(o, entity[fieldName]);
             }
 
             return o;
@@ -328,7 +343,7 @@ namespace Velox.DB
         {
             foreach (var fieldName in entity.FieldNames)
             {
-                _mappedFields[fieldName].SetField(o, entity[fieldName]);
+                _fieldsByMappedName[fieldName].SetField(o, entity[fieldName]);
             }
 
             return o;
@@ -336,7 +351,7 @@ namespace Velox.DB
 
         internal SerializedEntity SerializeObject(object o)
         {
-            return new SerializedEntity((from field in _mappedFields select new { field.Key, Value = field.Value.GetField(o)}).ToDictionary(k => k.Key, k=> k.Value) );
+            return new SerializedEntity((from field in _fieldsByMappedName select new { field.Key, Value = field.Value.GetField(o)}).ToDictionary(k => k.Key, k=> k.Value) );
         }
 
 #if DEBUG
@@ -346,4 +361,5 @@ namespace Velox.DB
         }
 #endif
     }
+
 }

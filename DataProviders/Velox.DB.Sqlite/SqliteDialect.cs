@@ -102,9 +102,9 @@ namespace Velox.DB.Sqlite
 
             
 
-            foreach (var field in schema.FieldList)
+            foreach (var field in schema.Fields)
             {
-                var columnMapping = columnMappings.FirstOrDefault(mapping => field.FieldType.Inspector().Is(mapping.Flags));
+                var columnMapping = columnMappings.FirstOrDefault(mapping => field.FieldTypeInspector.Is(mapping.Flags));
 
                 if (columnMapping == null)
                     continue;

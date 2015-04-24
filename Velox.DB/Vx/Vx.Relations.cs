@@ -102,6 +102,9 @@ namespace Velox.DB
 
                 var deepRelations = splitRelations[false].ToList(); // avoid multiple enumerations
 
+                if (deepRelations.Count == 0)
+                    continue;
+
                 if (relation.RelationType == OrmSchema.RelationType.OneToMany)
                 {
                     foreach (var item in (IEnumerable)value)
@@ -118,11 +121,7 @@ namespace Velox.DB
 
         private static OrmSchema SchemaForObject(object obj)
         {
-            var objectType = obj.GetType();
-
-            var repository = Repository.GetRepository(objectType);
-
-            return repository == null ? null : repository.Schema;
+            return DB.GetSchema(obj.GetType());
         }
 
     }

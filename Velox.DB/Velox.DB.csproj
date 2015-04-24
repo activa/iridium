@@ -99,11 +99,6 @@
     <Compile Include="Vx\Vx.Context.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System.Runtime.InteropServices">
-      <HintPath>..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\WindowsPhoneApp\v8.1\System.Runtime.InteropServices.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Velox.DB.nuspec" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
