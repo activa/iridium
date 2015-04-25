@@ -28,6 +28,7 @@ public class Customer
    [Column.NotNull]
    public string Name;
    
+   [Relation]
    public IDataSet<Order> Orders;
 }
 
@@ -38,12 +39,14 @@ public class Order
    public int CustomerID;
    public DateTime Date;
    
+   [Relation]
    public Customer Customer;
 }
 ```
 
 - *Note 1: You can use public fields or properties*
-- *Note 2: There's actually no need to use the PrimaryKey attribute because you can define naming conventions for your classes. The default naming convention handles the case above.*
+- *Note 2: The [PrimaryKey] attribute is optional if the field names comply with the configured naming convention. The default naming convention handles the case above.*
+- *Note 3: The [Relation] attribute is optional if the field type is IDataSet<>*
 
 Connect to a storage backend:
 
@@ -61,7 +64,7 @@ Create a record in the database:
 ```csharp
 Customer customer = new Customer { Name = "John Doe" };
 
-dbContext.Save(customer);
+dbContext.Insert(customer);
 
 Console.WriteLine("Created customer ID {0}", customer.CustomerID");
 ```
@@ -71,23 +74,7 @@ Add a related record:
 ```csharp
 Order order = new Order { Date = DateTime.Today, Customer = customer };
 
-dbContext.Save(order);
-```
-
-Read relations:
-
-```csharp
-Customer customer = DB.Customers.Read(1);
-
-foreach (Order order in customer.Orders)
-   Console.WriteLine("Order ID = {0}" , order.OrderID);
-
-// The one-to-many relation was automatically (lazy) populated because
-// it was declared as DataSet<T>. You can declare relations using any 
-// collection type, like IEnumerable<Order> or Order[] but you
-// would need to tell Velox.DB explicitly to read the relation 
-// by calling Vx.LoadRelations(...) - the same is true for
-// many-to-one relations
+dbContext.Insert(order);
 ```
 
 Reading data from the database requires a DataSet, which can be retrieved by calling DataSet<T> from the context:
@@ -115,6 +102,21 @@ var customers = from customer in DB.Customers
                    select customer;
 ```
 
+Read relations:
+
+```csharp
+Customer customer = DB.Customers.Read(1);
+
+foreach (Order order in customer.Orders)
+   Console.WriteLine("Order ID = {0}" , order.OrderID);
+
+// The one-to-many relation was automatically (lazy) populated because
+// it was declared as DataSet<T>. You can declare relations using any 
+// collection type, like IEnumerable<Order> or Order[] but you
+// would need to tell Velox.DB explicitly to read the relation 
+// by calling Vx.LoadRelations(...) - the same is true for
+// many-to-one relations
+```
 
 LINQ queries:
 
