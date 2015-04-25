@@ -140,7 +140,7 @@ namespace Velox.DB
 
             var relations = LambdaRelationFinder.FindRelations(relationLambdas, Schema);
 
-            var prefetchRelations = relations == null ? null : relations.Where(r => r.RelationType == OrmSchema.RelationType.ManyToOne && r.LocalSchema == Schema).ToList();
+            var prefetchRelations = relations == null ? null : relations.Where(r => r.IsToOne && r.LocalSchema == Schema).ToList();
 
             if (Schema.DatasetRelations != null)
             {

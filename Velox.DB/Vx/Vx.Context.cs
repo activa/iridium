@@ -47,9 +47,9 @@ namespace Velox.DB
 
                 foreach (var property in GetType().Inspector().GetFieldsAndProperties(BindingFlags.Public | BindingFlags.Instance))
                 {
-                    var fieldTypeInspector = property.FieldType.Inspector();
+                    var fieldTypeInspector = property.Type.Inspector();
 
-                    if (!fieldTypeInspector.IsGenericType || property.FieldType.GetGenericTypeDefinition() != typeof (IDataSet<>))
+                    if (!fieldTypeInspector.IsGenericType || property.Type.GetGenericTypeDefinition() != typeof (IDataSet<>))
                         continue;
 
                     var objectType = fieldTypeInspector.GetGenericArguments()[0];
@@ -63,7 +63,8 @@ namespace Velox.DB
 
                 GenerateRelations();
 
-                DB = this;
+                if (DB == null)
+                    DB = this;
             }
 
             private void GenerateRelations()

@@ -77,7 +77,7 @@ namespace Velox.Core
 
 				if (result.Item2)
 				{
-					field.SetValue(o, result.Item1.Convert(field.FieldType));
+					field.SetValue(o, result.Item1.Convert(field.Type));
 					mappedNames.Add(field.Name);
 				}
 			}
@@ -139,7 +139,7 @@ namespace Velox.Core
 				foreach (var field in fields)
 					if (Comparer.Equals(name, field.Name))
 					{
-						field.SetValue(o, item.Item2.Convert(field.FieldType));
+						field.SetValue(o, item.Item2.Convert(field.Type));
 						break;
 					}
 			}

@@ -38,36 +38,34 @@ namespace Velox.DB
     {
         public class FieldOrRelation
         {
-            public readonly FieldOrPropertyInfo Accessor;
+            public readonly FieldOrPropertyInfo FieldInfo;
             public readonly string FieldName;
             public readonly Type FieldType;
-            public readonly TypeInspector FieldTypeInspector;
 
-            public FieldOrRelation(FieldOrPropertyInfo accessor)
+            public FieldOrRelation(FieldOrPropertyInfo fieldInfo)
             {
-                Accessor = accessor;
-                FieldName = accessor.Name;
-                FieldType = accessor.FieldType;
-                FieldTypeInspector = FieldType.Inspector();
+                FieldInfo = fieldInfo;
+                FieldName = fieldInfo.Name;
+                FieldType = fieldInfo.Type;
             }
 
             public object SetField(object target, object value)
             {
-                Accessor.SetValue(target, value);
+                FieldInfo.SetValue(target, value);
 
                 return target;
             }
 
             public T SetField<T>(T target, object value)
             {
-                Accessor.SetValue(target, value);
+                FieldInfo.SetValue(target, value);
 
                 return target;
             }
 
             public object GetField(object target)
             {
-                return Accessor.GetValue(target);
+                return FieldInfo.GetValue(target);
             }
 
         }
@@ -76,11 +74,11 @@ namespace Velox.DB
         {
             public readonly bool CanBeNull;
 
-            public Field(FieldOrPropertyInfo accessor) : base(accessor)
+            public Field(FieldOrPropertyInfo fieldInfo) : base(fieldInfo)
             {
                 MappedName = FieldName;
 
-                CanBeNull = FieldTypeInspector.CanBeNull;
+                CanBeNull = FieldInfo.TypeInspector.CanBeNull;
                 ColumnNullable = CanBeNull;
             }
 
@@ -95,7 +93,7 @@ namespace Velox.DB
 
         public enum RelationType
         {
-            OneToMany, ManyToOne
+            OneToMany, ManyToOne, OneToOne
         }
 
         public class Relation : FieldOrRelation
@@ -112,8 +110,13 @@ namespace Velox.DB
             public bool ReadOnly; // If true, setting a relation object will not update the key value(s)
             public bool IsDataSet;
 
-            internal Relation(FieldOrPropertyInfo accessor) : base(accessor)
+            internal Relation(FieldOrPropertyInfo fieldInfo) : base(fieldInfo)
             {
+            }
+
+            public bool IsToOne
+            {
+                get { return RelationType == RelationType.ManyToOne || RelationType == RelationType.OneToOne; }
             }
 
             private object CreateCollection(IEnumerable objects)
@@ -150,18 +153,23 @@ namespace Velox.DB
 
                 var foreignRepository = ForeignSchema.Repository;
 
-                if (RelationType == RelationType.ManyToOne)
+                if (IsToOne)
                 {
                     var serializedForeignObject = localFieldValue == null ? null : foreignRepository.DataProvider.ReadObject(new Dictionary<string, object> {{ForeignField.MappedName,localFieldValue}}, ForeignSchema);
 
-                    return serializedForeignObject != null ? ForeignSchema.UpdateObject(Activator.CreateInstance(FieldType), serializedForeignObject) : null;
+                    var relationObject = serializedForeignObject != null ? ForeignSchema.UpdateObject(Activator.CreateInstance(FieldType), serializedForeignObject) : null;
+
+                    if (ReverseRelation != null)
+                        relationObject = ReverseRelation.SetField(relationObject, parentObject);
+
+                    return relationObject;
                 }
 
                 if (RelationType == RelationType.OneToMany)
                 {
                     var parameter = Expression.Parameter(ElementType, "x");
 
-                    Expression exp1 = Expression.MakeMemberAccess(parameter, ForeignField.Accessor.AsMember);
+                    Expression exp1 = Expression.MakeMemberAccess(parameter, ForeignField.FieldInfo.AsMember);
                     Expression exp2 = Expression.Constant(localFieldValue, LocalField.FieldType);
 
                     if (exp2.Type != exp1.Type)

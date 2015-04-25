@@ -67,18 +67,18 @@ namespace Velox.DB
             _parentObject = parentObject;
         }
 
-        private DataSet(DataSet<T> parent, FilterSpec newFilterSpec = null, SortOrderSpec newSortSpec = null, IEnumerable<Expression<Func<T,object>>> additionalRelations = null)
+        private DataSet(DataSet<T> baseDataSet, FilterSpec newFilterSpec = null, SortOrderSpec newSortSpec = null, IEnumerable<Expression<Func<T,object>>> additionalRelations = null)
         {
-            _repository = parent._repository;
+            _repository = baseDataSet._repository;
 
-            _skip = parent._skip;
-            _take = parent._take;
+            _skip = baseDataSet._skip;
+            _take = baseDataSet._take;
 
-            _filter = newFilterSpec ?? parent._filter;
-            _sortOrder = newSortSpec ?? parent._sortOrder;
+            _filter = newFilterSpec ?? baseDataSet._filter;
+            _sortOrder = newSortSpec ?? baseDataSet._sortOrder;
 
-            if (parent._relationsToLoad != null)
-                _relationsToLoad = new List<Expression<Func<T, object>>>(parent._relationsToLoad);
+            if (baseDataSet._relationsToLoad != null)
+                _relationsToLoad = new List<Expression<Func<T, object>>>(baseDataSet._relationsToLoad);
 
             if (additionalRelations != null)
             {
@@ -88,21 +88,14 @@ namespace Velox.DB
                     _relationsToLoad.AddRange(additionalRelations);
             }
 
-            _parentRelation = parent._parentRelation;
-            _parentObject = parent._parentObject;
+            _parentRelation = baseDataSet._parentRelation;
+            _parentObject = baseDataSet._parentObject;
         }
 
         public IAsyncDataSet<T> Async()
         {
             return new AsyncDataSet<T>(this);
         }
-
-        /*
-        public Repository<T> Repository
-        {
-            get { return _repository; }
-        }
-        */
 
         public IDataSet<T> Where(Expression<Func<T, bool>> whereExpression)
         {

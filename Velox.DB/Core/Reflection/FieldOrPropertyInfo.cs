@@ -37,18 +37,25 @@ namespace Velox.Core
     public class FieldOrPropertyInfo
     {
         private readonly MemberInfo _memberInfo;
-        public readonly Type FieldType;
+        public readonly Type Type;
+        private TypeInspector _typeInspector;
+        private MemberInspector _memberInspector;
 
         public FieldOrPropertyInfo(MemberInfo memberInfo)
         {
             _memberInfo = memberInfo;
 
-            FieldType = ((_memberInfo is FieldInfo) ? ((FieldInfo)_memberInfo).FieldType : ((PropertyInfo)_memberInfo).PropertyType);//.Inspector().RealType;
+            Type = ((_memberInfo is FieldInfo) ? ((FieldInfo)_memberInfo).FieldType : ((PropertyInfo)_memberInfo).PropertyType);
         }
 
-        public MemberInspector Inspector()
+        public MemberInspector Inspector
         {
-            return new MemberInspector(_memberInfo);
+            get {return (_memberInspector ?? (_memberInspector = _memberInfo.Inspector())); }
+        }
+
+        public TypeInspector TypeInspector
+        {
+            get { return (_typeInspector ?? (_typeInspector = Type.Inspector())); }
         }
 
         public string Name

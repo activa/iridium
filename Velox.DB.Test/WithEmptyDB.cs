@@ -227,6 +227,27 @@ namespace Velox.DB.Test
         }
 
         [Test]
+        public void ReverseRelation_OneToOne()
+        {
+            OneToOneRec1 rec1 = new OneToOneRec1();
+            OneToOneRec2 rec2 = new OneToOneRec2();
+
+            DB.Insert(rec1);
+            DB.Insert(rec2);
+
+            rec1.OneToOneRec2ID = rec2.OneToOneRec2ID;
+            rec2.OneToOneRec1ID = rec1.OneToOneRec1ID;
+
+            DB.Update(rec1);
+            DB.Update(rec2);
+
+            rec1 = DB.Read<OneToOneRec1>(rec1.OneToOneRec1ID, r=> r.Rec2 );
+
+            rec1.Rec2.Rec1.Should().Be(rec1);
+
+        }
+
+        [Test]
         public void OneToManyWithOptionalRelation()
         {
             Customer customer = new Customer { Name = "x" };

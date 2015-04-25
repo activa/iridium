@@ -74,9 +74,9 @@ namespace Velox.DB
 
             var fieldList = new List<Field>();
 
-            foreach (var field in _objectType.Inspector().GetFieldsAndProperties(BindingFlags.Instance | BindingFlags.Public).Where(field => _mappableTypes.Any(f => f(field.FieldType.Inspector()))))
+            foreach (var field in _objectType.Inspector().GetFieldsAndProperties(BindingFlags.Instance | BindingFlags.Public).Where(field => _mappableTypes.Any(f => f(field.Type.Inspector()))))
             {
-                var fieldInspector = field.Inspector();
+                var fieldInspector = field.Inspector;
 
                 if (fieldInspector.HasAttribute<Column.IgnoreAttribute>() || (!fieldInspector.IsWritePublic))
                     continue;
@@ -98,14 +98,14 @@ namespace Velox.DB
                     schemaField.ColumnSize = fieldInspector.GetAttribute<Column.SizeAttribute>().Size;
                     schemaField.ColumnScale = fieldInspector.GetAttribute<Column.SizeAttribute>().Scale;
                 }
-                else if (field.FieldType == typeof (string))
+                else if (field.Type == typeof (string))
                 {
                     if (fieldInspector.HasAttribute<Column.LargeTextAttribute>())
                         schemaField.ColumnSize = int.MaxValue;
                     else
                         schemaField.ColumnSize = 50;
                 }
-                else if (field.FieldType.Inspector().Is(TypeFlags.Decimal))
+                else if (field.Type.Inspector().Is(TypeFlags.Decimal))
                 {
                     schemaField.ColumnSize = 10;
                     schemaField.ColumnScale = 5;
@@ -184,12 +184,22 @@ namespace Velox.DB
 
         internal void UpdateReverseRelations()
         {
-            foreach (var relation in _relations.Values.Where(relation => relation.RelationType == RelationType.OneToMany))
+            foreach (var relation in _relations.Values)
             {
-                relation.ReverseRelation = relation
-                    .ForeignSchema
-                    .Relations.Values
-                    .FirstOrDefault(r => r.RelationType == RelationType.ManyToOne && r.ForeignSchema == this && r.ForeignField == relation.LocalField);
+                if (relation.RelationType == RelationType.OneToMany)
+                {
+                    relation.ReverseRelation = relation
+                        .ForeignSchema
+                        .Relations.Values
+                        .FirstOrDefault(r => r.RelationType == RelationType.ManyToOne && r.ForeignSchema == this && r.ForeignField == relation.LocalField);
+                }
+                else if (relation.RelationType == RelationType.OneToOne)
+                {
+                    relation.ReverseRelation = relation
+                        .ForeignSchema
+                        .Relations.Values
+                        .FirstOrDefault(r => r.RelationType == RelationType.OneToOne && r.ForeignSchema == this);
+                }
             }
         }
 
@@ -197,14 +207,14 @@ namespace Velox.DB
         {
             var relations = new SafeDictionary<string, Relation>();
 
-            foreach (var field in _objectType.Inspector().GetFieldsAndProperties(BindingFlags.Instance | BindingFlags.Public).Where(field => !_mappableTypes.Any(f => f(field.FieldType.Inspector()))))
+            foreach (var field in _objectType.Inspector().GetFieldsAndProperties(BindingFlags.Instance | BindingFlags.Public).Where(field => !_mappableTypes.Any(f => f(field.Type.Inspector()))))
             {
-                Type collectionType = field.FieldType.Inspector().GetInterfaces().FirstOrDefault(tI => tI.IsConstructedGenericType && tI.GetGenericTypeDefinition() == typeof (IEnumerable<>));
-                bool isDataSet = field.FieldType.IsConstructedGenericType && field.FieldType.GetGenericTypeDefinition() == typeof(IDataSet<>);
+                Type collectionType = field.Type.Inspector().GetInterfaces().FirstOrDefault(tI => tI.IsConstructedGenericType && tI.GetGenericTypeDefinition() == typeof (IEnumerable<>));
+                bool isDataSet = field.Type.IsConstructedGenericType && field.Type.GetGenericTypeDefinition() == typeof(IDataSet<>);
 
-                var relationAttribute = field.Inspector().GetAttribute<RelationAttribute>();
+                var relationAttribute = field.Inspector.GetAttribute<RelationAttribute>();
 
-                if (!field.FieldType.Inspector().ImplementsOrInherits<IEntity>() && relationAttribute == null && !isDataSet)
+                if (!field.Type.Inspector().ImplementsOrInherits<IEntity>() && relationAttribute == null && !isDataSet)
                     continue;
 
                 Field foreignField;
@@ -238,14 +248,14 @@ namespace Velox.DB
                 }
                 else
                 {
-                    Type objectType = field.FieldType;
+                    Type objectType = field.Type;
 
                     foreignSchema = Repository.Context.GetSchema(objectType);
 
                     if (foreignSchema == null)
                         throw new Vx.SchemaException(string.Format("Could not create relation {0}.{1}", ObjectType.Name, field.Name));
 
-                    relation.RelationType = RelationType.ManyToOne;
+                    relation.RelationType = relationAttribute is DB.Relation.OneToOneAttribute ? RelationType.OneToOne : RelationType.ManyToOne;
                     relation.ReadOnly = relationAttribute != null && relationAttribute.ReadOnly;
                     relation.ForeignSchema = foreignSchema;
 

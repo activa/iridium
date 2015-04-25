@@ -36,59 +36,27 @@ namespace Velox.DB
 {
     internal abstract class Repository
     {
-        //private static readonly SafeDictionary<Type, Repository> _activeRepositories = new SafeDictionary<Type, Repository>();
-
         internal Vx.Context Context { get; private set; }
         internal OrmSchema Schema { get; private set; }
         internal IDataProvider DataProvider { get { return Context.DataProvider; } }
 
         protected Repository(Type type, Vx.Context context)
         {
-            /*
-            lock (_activeRepositories)
-            {
-                if (_activeRepositories.ContainsKey(type) && _activeRepositories[type] != this)
-                    _activeRepositories[type] = null; // Prevents usage of static repositories list when more than one context is used
-                else
-                    _activeRepositories[type] = this;
-            }
-            */
             Context = context;
 
             Schema = new OrmSchema(type, this);
         }
 
-        /*
-        internal static DataSet<T> CreateDataSet<T>()
-        {
-            lock (_activeRepositories)
-            {
-                return new DataSet<T>(_activeRepositories[typeof(T)]);
-            }
-        }
-
-        public static Repository GetRepository(Type t)
-        {
-            lock (_activeRepositories)
-            {
-                return _activeRepositories[t];
-            }
-        }
-        */
-
-        protected internal IEnumerable<object> GetRelationObjects(QuerySpec filter, OrmSchema.Relation relation, object parentObject)
+        protected internal IEnumerable<object> GetRelationObjects(QuerySpec filter, OrmSchema.Relation parentRelation, object parentObject)
         {
             var objects = from o in DataProvider.GetObjects(filter.Native,Schema)
-                          let x = Vx.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance(Schema.ObjectType), o),Schema.DatasetRelations) 
-                          let y = (relation == null || relation.ReverseRelation == null) ? x : relation.ReverseRelation.SetField(x, parentObject)
-                          select x;
+                          select Vx.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance(Schema.ObjectType), o),Schema.DatasetRelations) ;
+
+            if (parentRelation != null && parentRelation.ReverseRelation != null)
+                objects = from o in objects select parentRelation.ReverseRelation.SetField(o, parentObject);
 
             if (filter.Code != null)
-            {
-                objects = from o in objects 
-                          where filter.Code.IsFilterMatch(o) 
-                          select o;
-            }
+                objects = from o in objects where filter.Code.IsFilterMatch(o) select o;
 
             return objects;
         }
@@ -96,7 +64,7 @@ namespace Velox.DB
         protected bool Save(object obj, bool saveRelations = false, bool? create = null)
         {
             if (create == null)
-                create = Schema.IncrementKeys.Length > 0 && Equals(Schema.IncrementKeys[0].GetField(obj), Schema.IncrementKeys[0].FieldTypeInspector.DefaultValue());
+                create = Schema.IncrementKeys.Length > 0 && Equals(Schema.IncrementKeys[0].GetField(obj), Schema.IncrementKeys[0].FieldInfo.TypeInspector.DefaultValue());
 
             bool cancelSave = false;
 
@@ -108,7 +76,7 @@ namespace Velox.DB
             if (cancelSave)
                 return false;
 
-            var toOneRelations = Schema.Relations.Values.Where(r => r.RelationType == OrmSchema.RelationType.ManyToOne && !r.ReadOnly);
+            var toOneRelations = Schema.Relations.Values.Where(r => r.IsToOne && !r.ReadOnly);
             var toManyRelations = Schema.Relations.Values.Where(r => r.RelationType == OrmSchema.RelationType.OneToMany && !r.ReadOnly);
 
             // Update and save ManyToOne relations

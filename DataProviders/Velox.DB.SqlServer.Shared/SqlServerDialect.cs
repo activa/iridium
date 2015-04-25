@@ -27,7 +27,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Schema;
 using Velox.DB.Core;
 using Velox.DB.Sql;
 
@@ -153,7 +152,7 @@ namespace Velox.DB.SqlServer
 
             foreach (var field in schema.Fields)
             {
-                var columnMapping = columnMappings.FirstOrDefault(mapping => field.FieldTypeInspector.Is(mapping.Flags));
+                var columnMapping = columnMappings.FirstOrDefault(mapping => field.FieldInfo.TypeInspector.Is(mapping.Flags));
 
                 if (columnMapping == null)
                     continue;
@@ -173,11 +172,6 @@ namespace Velox.DB.SqlServer
                     part += " NOT";
 
                 part += " NULL";
-
-                /*
-                if (field.PrimaryKey)
-                    part += " PRIMARY KEY";
-                */
 
                 if (field.AutoIncrement)
                     part += " IDENTITY(1,1)";

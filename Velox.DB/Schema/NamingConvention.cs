@@ -65,7 +65,7 @@ namespace Velox.DB
             if (field.FieldName.Equals(pkName, StringComparison.OrdinalIgnoreCase))
             {
                 fieldProperties.PrimaryKey = true;
-                fieldProperties.AutoIncrement = UseAutoIncrement && field.FieldTypeInspector.Is(TypeFlags.Integer);
+                fieldProperties.AutoIncrement = UseAutoIncrement && field.FieldInfo.TypeInspector.Is(TypeFlags.Integer);
                 fieldProperties.Indexed = false;
             }
 
@@ -77,13 +77,13 @@ namespace Velox.DB
             //if (relation.LocalSchema.PrimaryKeys.Length < 1 || relation.ForeignSchema.PrimaryKeys.Length < 1)
             //    return null;
 
-            string relationKeyName = ((relation.RelationType == OrmSchema.RelationType.ManyToOne) ? ManyToOneLocalKeyName : OneToManyForeignKeyName)
+            string relationKeyName = (relation.IsToOne ? ManyToOneLocalKeyName : OneToManyForeignKeyName)
                 .Replace(RELATION_CLASS_PRIMARYKEY, relation.ForeignSchema.PrimaryKeys.Length > 0 ? relation.ForeignSchema.PrimaryKeys[0].FieldName : "?")
                 .Replace(RELATION_CLASS_NAME, relation.ForeignSchema.ObjectType.Name)
                 .Replace(CLASS_PRIMARYKEY, relation.LocalSchema.PrimaryKeys.Length > 0 ? relation.LocalSchema.PrimaryKeys[0].FieldName : "?")
                 .Replace(CLASS_NAME, relation.LocalSchema.ObjectType.Name);
 
-            return relation.RelationType == OrmSchema.RelationType.ManyToOne ? relation.LocalSchema.FieldsByFieldName[relationKeyName] : relation.ForeignSchema.FieldsByFieldName[relationKeyName];
+            return relation.IsToOne ? relation.LocalSchema.FieldsByFieldName[relationKeyName] : relation.ForeignSchema.FieldsByFieldName[relationKeyName];
         }
 
         public class FieldProperties

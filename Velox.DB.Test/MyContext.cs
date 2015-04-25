@@ -58,6 +58,8 @@ namespace Velox.DB.Test
             CreateTable<CustomerPaymentMethodLink>(recreateTable: true);
             CreateTable<RecordWithAllTypes>(recreateTable: true);
             CreateTable<RecordWithCompositeKey>(recreateTable: true);
+            CreateTable<OneToOneRec1>(recreateTable:true);
+            CreateTable<OneToOneRec2>(recreateTable:true);
         }
 
         private static MyContext _instance;

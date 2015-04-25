@@ -101,7 +101,7 @@ namespace Velox.DB.Sql
                 var relation = parentMetaData.Schema.Relations[memberName];
                 var leftAlias = _relationAliases[iterator][parentMetaData.Key];
 
-                if (relation != null && relation.RelationType == OrmSchema.RelationType.ManyToOne)
+                if (relation != null && relation.IsToOne)
                 {
                     if (!_relationAliases[iterator].ContainsKey(relation))
                     {
@@ -451,8 +451,8 @@ namespace Velox.DB.Sql
         private static LambdaExpression CreateToManyFilterExpression(OrmSchema.Relation relation, Expression localExpression, LambdaExpression filterLambda, ParameterExpression lambdaParameter)
         {
             var expression = Expression.Equal(
-                Expression.MakeMemberAccess(localExpression, relation.LocalField.Accessor.AsMember),
-                Expression.MakeMemberAccess(lambdaParameter, relation.ForeignField.Accessor.AsMember)
+                Expression.MakeMemberAccess(localExpression, relation.LocalField.FieldInfo.AsMember),
+                Expression.MakeMemberAccess(lambdaParameter, relation.ForeignField.FieldInfo.AsMember)
                 );
 
             if (filterLambda != null)

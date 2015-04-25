@@ -117,6 +117,27 @@ namespace Velox.DB.Test
 	    public PaymentMethod PaymentMethod;
 	}
 
+    public class OneToOneRec1
+    {
+        [Column.PrimaryKeyAttribute(AutoIncrement = true)]
+        public int OneToOneRec1ID;
+
+        public int OneToOneRec2ID;
+
+        [Relation.OneToOne] public OneToOneRec2 Rec2;
+
+    }
+
+    public class OneToOneRec2
+    {
+        [Column.PrimaryKeyAttribute(AutoIncrement = true)]
+        public int OneToOneRec2ID;
+
+        public int OneToOneRec1ID;
+
+        [Relation.OneToOne] public OneToOneRec1 Rec1;
+    }
+
     public enum TestEnumWithZero
     {
         Zero = 0,

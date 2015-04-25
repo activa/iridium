@@ -49,6 +49,11 @@ namespace Velox.DB
         }
 
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+        public sealed class OneToOneAttribute : RelationAttribute
+        {
+        }
+
+        [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
         public sealed class IgnoreAttribute : Attribute
         {
         }
