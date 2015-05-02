@@ -37,21 +37,13 @@ namespace Velox.DB.SqlServer
     public class SqlServerDataProvider : SqlAdoDataProvider<SqlConnection, SqlServerDialect>
     {
         public SqlServerDataProvider()
-        {
-        }
+        {}
 
         public SqlServerDataProvider(string connectionString) : base(connectionString)
-        {
-        }
+        {}
 
-        public override void ClearConnectionPool()
-        {
-            SqlConnection.ClearAllPools();
-        }
+        public override void ClearConnectionPool() => SqlConnection.ClearAllPools();
 
-        public override bool RequiresAutoIncrementGetInSameStatement
-        {
-            get { return true; }
-        }
+        public override bool RequiresAutoIncrementGetInSameStatement => true;
     }
 }

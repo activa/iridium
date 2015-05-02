@@ -110,9 +110,9 @@ namespace Velox.DB.SqlServer
             switch (function)
             {
                 case Function.StringLength:
-                    return string.Format("len({0})", parameters[0]);
+                    return $"len({parameters[0]})";
                 case Function.BlobLength:
-                    return string.Format("datalength({0})", parameters[0]);
+                    return $"datalength({parameters[0]})";
 
                 default:
                     return base.SqlFunction(function, parameters);
@@ -145,6 +145,9 @@ namespace Velox.DB.SqlServer
 
             var existingColumns = dataProvider.ExecuteSqlReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=@schema and TABLE_NAME=@name",
                 new QueryParameterCollection(new { schema = tableSchemaName, name = tableName })).ToLookup(rec => rec["COLUMN_NAME"].ToString());
+
+            var tableExists = dataProvider.ExecuteSqlReader("select count(*) from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=@schema and TABLE_NAME=@name",
+                new QueryParameterCollection(new {schema = tableSchemaName, name = tableName})).Select(rec => rec.First().Value.Convert<int>()).First() == 1;
 
             var parts = new List<string>();
 
@@ -184,7 +187,7 @@ namespace Velox.DB.SqlServer
                 parts.Add("PRIMARY KEY (" + string.Join(",", schema.PrimaryKeys.Select(pk => QuoteField(pk.MappedName))) + ")");
             }
 
-            if (recreateTable)
+            if (recreateTable && tableExists)
                 dataProvider.ExecuteSql("DROP TABLE " + QuoteTable(schema.MappedName), null);
 
             if (parts.Any())
@@ -209,12 +212,12 @@ namespace Velox.DB.SqlServer
                 if (existingIndexes["IX_" + index.Name].Any())
                 {
                     if (recreateIndexes || recreateTable)
-                        dataProvider.ExecuteSql("DROP INDEX " + QuoteTable("IX_" + index.Name) + " ON " + QuoteTable(schema.MappedName), null);
+                        dataProvider.ExecuteSql($"DROP INDEX {QuoteTable("IX_" + index.Name)} ON {QuoteTable(schema.MappedName)}", null);
                     else
                         continue;
                 }
 
-                string createIndexSql = "CREATE INDEX " + QuoteTable("IX_" + index.Name) + " ON " + QuoteTable(schema.MappedName) + " (";
+                string createIndexSql = $"CREATE INDEX {QuoteTable("IX_" + index.Name)} ON {QuoteTable(schema.MappedName)} (";
 
                 createIndexSql += string.Join(",", index.FieldsWithOrder.Select(field => QuoteField(field.Item1.MappedName) + " " + (field.Item2 == SortOrder.Ascending ? "ASC" : "DESC")));
 

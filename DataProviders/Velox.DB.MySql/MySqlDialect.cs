@@ -152,5 +152,18 @@ namespace Velox.DB.MySql
 
 
         }
+
+        public override string SqlFunction(Function function, params string[] parameters)
+        {
+            switch (function)
+            {
+                case Function.Coalesce:
+                    return $"ifnull({parameters[0]},{parameters[1]})";
+
+                default:
+                    return base.SqlFunction(function,parameters);
+            }
+        }
+
     }
 }

@@ -28,10 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Diagnostics;
-using System.Linq;
-using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Velox.DB.Sql;
@@ -44,9 +41,7 @@ namespace Velox.DB.MySql
 namespace Velox.DB.Sql
 #endif
 {
-    public abstract class SqlAdoDataProvider<TConnection, TDialect> : SqlDataProvider<TDialect>
-        where TConnection : DbConnection, new()
-        where TDialect : SqlDialect, new()
+    public abstract class SqlAdoDataProvider<TConnection, TDialect> : SqlDataProvider<TDialect> where TConnection : DbConnection, new() where TDialect : SqlDialect, new()
     {
         public string ConnectionString { get; set; }
 
@@ -96,7 +91,7 @@ namespace Velox.DB.Sql
 
         protected DbCommand CreateCommand(string sqlQuery, Dictionary<string, object> parameters)
         {
-            Debug.WriteLine(string.Format("{0}", sqlQuery));
+            Debug.WriteLine(sqlQuery);
 
             DbCommand dbCommand = Connection.CreateCommand();
 
