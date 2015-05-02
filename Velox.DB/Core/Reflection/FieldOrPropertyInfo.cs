@@ -48,20 +48,11 @@ namespace Velox.Core
             Type = ((_memberInfo is FieldInfo) ? ((FieldInfo)_memberInfo).FieldType : ((PropertyInfo)_memberInfo).PropertyType);
         }
 
-        public MemberInspector Inspector
-        {
-            get {return (_memberInspector ?? (_memberInspector = _memberInfo.Inspector())); }
-        }
+        public MemberInspector Inspector => (_memberInspector ?? (_memberInspector = _memberInfo.Inspector()));
 
-        public TypeInspector TypeInspector
-        {
-            get { return (_typeInspector ?? (_typeInspector = Type.Inspector())); }
-        }
+        public TypeInspector TypeInspector => (_typeInspector ?? (_typeInspector = Type.Inspector()));
 
-        public string Name
-        {
-            get { return _memberInfo.Name; }
-        }
+        public string Name => _memberInfo.Name;
 
         public object GetValue(object o)
         {
@@ -76,54 +67,30 @@ namespace Velox.Core
                 ((PropertyInfo)_memberInfo).SetValue(o, value, null);
         }
 
-		public bool IsField { get { return _memberInfo is FieldInfo; } }
-		public bool IsProperty { get { return _memberInfo is PropertyInfo; } }
+		public bool IsField => _memberInfo is FieldInfo;
+        public bool IsProperty => _memberInfo is PropertyInfo;
 
-		public FieldInfo AsField { get { return _memberInfo as FieldInfo; } }
-		public PropertyInfo AsProperty { get { return _memberInfo as PropertyInfo; } }
-        public MemberInfo AsMember { get { return _memberInfo; } }
+        public FieldInfo AsField => _memberInfo as FieldInfo;
+        public PropertyInfo AsProperty => _memberInfo as PropertyInfo;
+        public MemberInfo AsMember => _memberInfo;
 
-		public Action<object,object> Setter()
-		{
-			return SetValue;
-		}
+        public Action<object,object> Setter() => SetValue;
 
-		public Action<object> Setter(object target)
-		{
-			return value => SetValue(target, value);
-		}
+        public Action<object> Setter(object target) => value => SetValue(target, value);
 
-		public Action<object,T> Setter<T>()
-		{
-			return (target, value) => SetValue(target, value);
-		}
+        public Action<object,T> Setter<T>() => (target, value) => SetValue(target, value);
 
-		public Action<T> Setter<T>(object target)
-		{
-			return value => SetValue(target, value);
-		}
+        public Action<T> Setter<T>(object target) => value => SetValue(target, value);
 
-		public Func<object,object> Getter()
-		{
-			return GetValue;
-		}
+        public Func<object,object> Getter() => GetValue;
 
-		public Func<object,T> Getter<T>()
-		{
-			return target => (T) GetValue(target);
-		}
+        public Func<object,T> Getter<T>() => target => (T) GetValue(target);
 
-		public Func<object> Getter(object target)
-		{
-			return () => GetValue(target);
-		}
+        public Func<object> Getter(object target) => () => GetValue(target);
 
-		public Func<T> Getter<T>(object target)
-		{
-			return () => (T) GetValue(target);
-		}
+        public Func<T> Getter<T>(object target) => () => (T) GetValue(target);
 
-		public bool IsPrivate
+        public bool IsPrivate
 		{
 			get 
 			{ 
@@ -149,19 +116,10 @@ namespace Velox.Core
 			}
 		}
 
-        public Attribute[] GetCustomAttributes(Type type, bool inherit)
-        {
-            return _memberInfo.Inspector().GetAttributes(type, inherit);
-        }
+        public Attribute[] GetCustomAttributes(Type type, bool inherit) => _memberInfo.Inspector().GetAttributes(type, inherit);
 
-        public T[] GetCustomAttributes<T>(bool inherit) where T:Attribute
-        {
-            return _memberInfo.Inspector().GetAttributes<T>(inherit);
-        }
+        public T[] GetCustomAttributes<T>(bool inherit) where T:Attribute => _memberInfo.Inspector().GetAttributes<T>(inherit);
 
-        public bool IsDefined(Type type, bool b)
-        {
-            return _memberInfo.IsDefined(type, b);
-        }
+        public bool IsDefined(Type type, bool b) => _memberInfo.IsDefined(type, b);
     }
 }

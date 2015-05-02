@@ -50,12 +50,7 @@ namespace Velox.Core
 
     public class LazyBinder
     {
-        private static readonly LazyBinder _default = new LazyBinder();
-
-        public static LazyBinder Default
-        {
-            get { return _default; }
-        }
+        public static LazyBinder Default { get; } = new LazyBinder();
 
         private enum ParameterCompareType
         {

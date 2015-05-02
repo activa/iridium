@@ -15,15 +15,7 @@ namespace Velox.Core
             _propertyInfo = propertyInfo;
         }
 
-        public bool CanRead
-        {
-            get { return _propertyInfo.CanRead; }
-        }
-
-        public bool CanWrite
-        {
-            get { return _propertyInfo.CanWrite; }
-        }
-
+        public bool CanRead => _propertyInfo.CanRead;
+        public bool CanWrite => _propertyInfo.CanWrite;
     }
 }

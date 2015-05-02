@@ -7,7 +7,7 @@ namespace Velox.DB.Core
     {
         private readonly Dictionary<TK, TV> _dic;
 
-        private IDictionary<TK,TV> AsInterface() { return _dic; } 
+        private IDictionary<TK,TV> AsInterface() => _dic;
 
         public SafeDictionary()
         {
@@ -49,54 +49,18 @@ namespace Velox.DB.Core
             DefaultValue = defaultValue;
         }
 
-        public void Add(KeyValuePair<TK, TV> item)
-        {
-            AsInterface().Add(item);
-        }
-
-        public IEnumerator<KeyValuePair<TK, TV>> GetEnumerator()
-        {
-            return _dic.GetEnumerator();
-        }
-
-        public void Clear()
-        {
-            _dic.Clear();
-        }
-
-        public bool Contains(KeyValuePair<TK, TV> item)
-        {
-            return AsInterface().Contains(item);
-        }
-
-        public void CopyTo(KeyValuePair<TK, TV>[] array, int arrayIndex)
-        {
-            AsInterface().CopyTo(array,arrayIndex);
-        }
-
-        public bool Remove(KeyValuePair<TK, TV> item)
-        {
-            return AsInterface().Remove(item);
-        }
-
-        public int Count { get { return _dic.Count; } }
-        public bool IsReadOnly { get { return AsInterface().IsReadOnly; } }
-        public bool ContainsKey(TK key) { return _dic.ContainsKey(key); }
-
-        public void Add(TK key, TV value)
-        {
-            _dic.Add(key,value);
-        }
-
-        public bool Remove(TK key)
-        {
-            return _dic.Remove(key);
-        }
-
-        public bool TryGetValue(TK key, out TV value)
-        {
-            return _dic.TryGetValue(key, out value);
-        }
+        public void Add(KeyValuePair<TK, TV> item) => AsInterface().Add(item);
+        public IEnumerator<KeyValuePair<TK, TV>> GetEnumerator() => _dic.GetEnumerator();
+        public void Clear() => _dic.Clear();
+        public bool Contains(KeyValuePair<TK, TV> item) => AsInterface().Contains(item);
+        public void CopyTo(KeyValuePair<TK, TV>[] array, int arrayIndex) => AsInterface().CopyTo(array,arrayIndex);
+        public bool Remove(KeyValuePair<TK, TV> item) => AsInterface().Remove(item);
+        public int Count => _dic.Count;
+        public bool IsReadOnly => AsInterface().IsReadOnly;
+        public bool ContainsKey(TK key) => _dic.ContainsKey(key);
+        public void Add(TK key, TV value) => _dic.Add(key,value);
+        public bool Remove(TK key) => _dic.Remove(key);
+        public bool TryGetValue(TK key, out TV value) => _dic.TryGetValue(key, out value);
 
         public TV this[TK key]
         {
@@ -110,20 +74,10 @@ namespace Velox.DB.Core
             }
         }
 
-        public ICollection<TK> Keys 
-        {
-            get { return _dic.Keys; }
-        }
+        public ICollection<TK> Keys => _dic.Keys;
+        public ICollection<TV> Values => _dic.Values;
 
-        public ICollection<TV> Values 
-        {
-            get { return _dic.Values; }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public TV DefaultValue { get; set; }
 

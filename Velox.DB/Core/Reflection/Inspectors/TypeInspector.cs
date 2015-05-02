@@ -49,11 +49,12 @@ namespace Velox.Core
 
     public class TypeInspector
     {
-        private readonly Type _type;
         private readonly TypeInfo _typeInfo;
-        private readonly Type _realType;
         private readonly TypeInfo _realTypeInfo;
-        private readonly TypeFlags _typeFlags;
+
+        public Type Type { get; }
+        public Type RealType { get; }
+        public TypeFlags TypeFlags { get; }
 
         private static readonly Dictionary<Type, TypeFlags> _typeflagsMap = new Dictionary<Type, TypeFlags>()
         {
@@ -80,21 +81,22 @@ namespace Velox.Core
 
         public TypeInspector(Type type)
         {
-            _type = type;
-            _typeInfo = type.GetTypeInfo();
-            _realType = Nullable.GetUnderlyingType(_type) ?? _type;
-            _realTypeInfo = _realType.GetTypeInfo();
+            Type = type;
+            RealType = Nullable.GetUnderlyingType(Type) ?? Type;
 
-            _typeFlags = BuildTypeFlags();
+            _typeInfo = type.GetTypeInfo();
+            _realTypeInfo = RealType.GetTypeInfo();
+
+            TypeFlags = BuildTypeFlags();
         }
 
         private TypeFlags BuildTypeFlags()
         {
             TypeFlags flags;
 
-            _typeflagsMap.TryGetValue(_realType, out flags);
+            _typeflagsMap.TryGetValue(RealType, out flags);
 
-            if (_type != _realType)
+            if (Type != RealType)
                 flags |= TypeFlags.Nullable | TypeFlags.CanBeNull;
 
             if (_realTypeInfo.IsValueType)
@@ -106,18 +108,18 @@ namespace Velox.Core
             {
                 TypeFlags enumTypeFlags;
 
-                if (_typeflagsMap.TryGetValue(Enum.GetUnderlyingType(_realType), out enumTypeFlags))
+                if (_typeflagsMap.TryGetValue(Enum.GetUnderlyingType(RealType), out enumTypeFlags))
                     flags |= enumTypeFlags;
 
                 flags |= TypeFlags.Enum;
             }
-            else if (_type.IsArray)
+            else if (Type.IsArray)
             {
                 flags |= TypeFlags.Array;
 
                 TypeFlags arrayTypeFlags;
 
-                if (_typeflagsMap.TryGetValue(_type.GetElementType(), out arrayTypeFlags))
+                if (_typeflagsMap.TryGetValue(Type.GetElementType(), out arrayTypeFlags))
                     flags |= arrayTypeFlags;
             }
 
@@ -126,7 +128,7 @@ namespace Velox.Core
 
         private T WalkAndFindSingle<T>(Func<Type, T> f)
         {
-            Type t = _type;
+            Type t = Type;
 
             while (t != null)
             {
@@ -145,7 +147,7 @@ namespace Velox.Core
         {
             var list = new List<T>();
 
-            Type t = _type;
+            Type t = Type;
 
             while (t != null)
             {
@@ -160,87 +162,26 @@ namespace Velox.Core
             return list.ToArray();
         }
 
-        public Type Type
-        {
-            get { return _type; }
-        }
 
-        public Type RealType
-        {
-            get { return _realType; }
-        }
-
-        public bool IsArray
-        {
-            get { return Is(TypeFlags.Array); }
-        }
-
-        public Type ArrayElementType
-        {
-            get { return IsArray ? _type.GetElementType() : null; }
-        }
-
-        public bool IsGenericType
-        {
-            get { return _typeInfo.IsGenericType; }
-        }
-
-        public bool IsGenericTypeDefinition
-        {
-            get { return _typeInfo.IsGenericTypeDefinition; }
-        }
-
-        public bool IsNullable
-        {
-            get { return Is(TypeFlags.Nullable); }
-        }
-
-        public bool CanBeNull
-        {
-            get { return Is(TypeFlags.CanBeNull); }
-        }
-
-        public bool IsPrimitive
-        {
-            get { return Is(TypeFlags.Primitive); }
-        }
-
-        public bool IsValueType
-        {
-            get { return Is(TypeFlags.ValueType); }
-        }
-
-        public Type BaseType
-        {
-            get { return _typeInfo.BaseType; }
-        }
-
-        public bool IsEnum
-        {
-            get { return Is(TypeFlags.Enum); }
-        }
-
-        public TypeFlags TypeFlags
-        {
-            get { return _typeFlags; }
-        }
-
-        public bool Is(TypeFlags flags)
-        {
-            return (TypeFlags & flags) != 0;
-        }
-  
-        public bool IsSubclassOf(Type type)
-        {
-            return WalkAndFindSingle(t => t.GetTypeInfo().BaseType == type);
-        }
+        public bool IsArray => Is(TypeFlags.Array);
+        public Type ArrayElementType => IsArray ? Type.GetElementType() : null;
+        public bool IsGenericType => _typeInfo.IsGenericType;
+        public bool IsGenericTypeDefinition => _typeInfo.IsGenericTypeDefinition;
+        public bool IsNullable => Is(TypeFlags.Nullable);
+        public bool CanBeNull => Is(TypeFlags.CanBeNull);
+        public bool IsPrimitive => Is(TypeFlags.Primitive);
+        public bool IsValueType => Is(TypeFlags.ValueType);
+        public Type BaseType => _typeInfo.BaseType;
+        public bool IsEnum => Is(TypeFlags.Enum);
+        public bool Is(TypeFlags flags) => (TypeFlags & flags) != 0;
+        public bool IsSubclassOf(Type type) => WalkAndFindSingle(t => t.GetTypeInfo().BaseType == type);
 
         public object DefaultValue()
         {
             if (CanBeNull)
                 return null;
 
-            return Activator.CreateInstance(_realType);
+            return Activator.CreateInstance(RealType);
         }
 
         public MethodInfo GetMethod(string name, Type[] types)
@@ -328,11 +269,7 @@ namespace Velox.Core
             return WalkAndFindSingle(t => LazyBinder.SelectBestMethod(t.GetTypeInfo().GetDeclaredMethods(methodName),parameterTypes,bindingFlags));
         }
 
-        public Type[] GetGenericArguments()
-        {
-            return _type.GenericTypeArguments;
-        }
-
+        public Type[] GetGenericArguments() => Type.GenericTypeArguments;
 
         public FieldInfo[] GetFields(BindingFlags bindingFlags)
         {
@@ -358,13 +295,9 @@ namespace Velox.Core
             return WalkAndFindMultiple(t => t.GetTypeInfo().DeclaredMethods.Where(mi => mi.Inspector().MatchBindingFlags(bindingFlags)));
         }
 
+        public Type[] GetInterfaces() => _typeInfo.ImplementedInterfaces.ToArray();
 
-        public Type[] GetInterfaces()
-        {
-            return _typeInfo.ImplementedInterfaces.ToArray();
-        }
-
-		public FieldOrPropertyInfo[] GetFieldsAndProperties(BindingFlags bindingFlags)
+        public FieldOrPropertyInfo[] GetFieldsAndProperties(BindingFlags bindingFlags)
 		{
 			MemberInfo[] members;
 

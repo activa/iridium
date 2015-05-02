@@ -84,8 +84,7 @@ namespace Velox.Core
         {
             lock (_staticLock)
             {
-                if (_stringConverters != null)
-                    _stringConverters.Remove(stringConverter);
+                _stringConverters?.Remove(stringConverter);
             }
         }
 
