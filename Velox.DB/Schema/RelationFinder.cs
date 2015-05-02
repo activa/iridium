@@ -25,19 +25,18 @@
 #endregion
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq.Expressions;
 
 namespace Velox.DB
 {
     internal class LambdaRelationFinder : ExpressionVisitor
     {
-        public LambdaRelationFinder(Vx.Context context)
+        private LambdaRelationFinder(Vx.Context context)
         {
             _context = context;
         }
 
-        public readonly HashSet<OrmSchema.Relation> Relations = new HashSet<OrmSchema.Relation>();
+        private readonly HashSet<OrmSchema.Relation> _relations = new HashSet<OrmSchema.Relation>();
         private readonly Vx.Context _context;
 
         protected override Expression VisitMember(MemberExpression node)
@@ -54,7 +53,7 @@ namespace Velox.DB
             if (relation == null) 
                 return node;
 
-            Relations.Add(relation);
+            _relations.Add(relation);
 
             return node;
         }
@@ -65,7 +64,7 @@ namespace Velox.DB
 
             finder.Visit(expression.Body);
 
-            return finder.Relations;
+            return finder._relations;
         }
 
         public static HashSet<OrmSchema.Relation> FindRelations(IEnumerable<LambdaExpression> expressions, OrmSchema schema)

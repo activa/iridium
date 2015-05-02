@@ -26,6 +26,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Velox.DB.Sql
 {
@@ -38,40 +39,32 @@ namespace Velox.DB.Sql
         [ThreadStatic]
         private static int _currentParamCounter;
 
-        private static readonly string[] _tableAliases;
+        private static readonly string[] _aliases;
+
+        private static IEnumerable<string> CreatePermutations()
+        {
+            for (char c1 = 'a'; c1 <= 'z'; c1++)
+                for (char c2 = 'a'; c2 <= 'z'; c2++)
+                    yield return new string(new [] {c1,c2});
+        }
 
         static SqlNameGenerator()
         {
-            var reservedWords = new HashSet<string>(new[] { "is", "as", "in", "on", "to", "at", "go", "by", "of", "or", "if", "no" });
-
-            var aliasList = new List<string>();
-
-            for (char c1 = 'a'; c1 < 'z'; c1++)
-            {
-                for (char c2 = 'a'; c2 < 'z'; c2++)
-                {
-                    var alias = new string(new[] { c1, c2 });
-
-                    if (!reservedWords.Contains(alias))
-                        aliasList.Add(alias);
-                }
-            }
-
-            _tableAliases = aliasList.ToArray();
+            _aliases = CreatePermutations().Except(new[] { "is", "as", "in", "on", "to", "at", "go", "by", "of", "or", "if", "no" }).ToArray();
         }
 
         public static string NextTableAlias()
         {
-            _currentTableAlias = _currentTableAlias%_tableAliases.Length;
+            _currentTableAlias = _currentTableAlias%_aliases.Length;
 
-            return _tableAliases[_currentTableAlias++];
+            return _aliases[_currentTableAlias++];
         }
 
         public static string NextFieldAlias()
         {
-            _currentFieldAlias = _currentFieldAlias%_tableAliases.Length;
+            _currentFieldAlias = _currentFieldAlias%_aliases.Length;
 
-            return "f" + _tableAliases[_currentFieldAlias++];
+            return "f" + _aliases[_currentFieldAlias++];
         }
 
         public static string NextParameterName()

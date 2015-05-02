@@ -32,19 +32,12 @@ namespace Velox.DB
 {
     public static partial class Vx
     {
-        private static Context _defaultContext;
-
         public static IDataSet<T> DataSet<T>()
         {
-            return _defaultContext.DataSet<T>();
+            return DB.DataSet<T>();
         }
 
-        public static Context DB
-        {
-            get { return _defaultContext; }
-            set { _defaultContext = value; }
-        }
-
+        public static Context DB { get; set; }
 
         // TODO: move this somewhere else
 
@@ -55,7 +48,6 @@ namespace Velox.DB
         {
             public SchemaException(string msg) : base(msg)
             {
-
             }
         }
 

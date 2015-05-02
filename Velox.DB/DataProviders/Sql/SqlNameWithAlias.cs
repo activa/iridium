@@ -34,10 +34,10 @@ namespace Velox.DB.Sql
             Alias = alias;
         }
 
-        public string Expression;
-        public string Alias;
+        public readonly string Expression;
+        public readonly string Alias;
 
-        public virtual bool ShouldQuote { get { return false; } }
+        public virtual bool ShouldQuote => false;
     }
 
     public class SqlColumnNameWithAlias : SqlExpressionWithAlias
@@ -48,7 +48,7 @@ namespace Velox.DB.Sql
 
         //public string ColumnName { get {  return Expression; } }
 
-        public override bool ShouldQuote { get { return true; } }
+        public override bool ShouldQuote => true;
     }
 
     public class SqlTableNameWithAlias : SqlExpressionWithAlias
@@ -57,9 +57,9 @@ namespace Velox.DB.Sql
         {
         }
 
-        public string TableName { get { return Expression; } }
+        public string TableName => Expression;
 
-        public override bool ShouldQuote { get { return true; } }
+        public override bool ShouldQuote => true;
     }
 
 }

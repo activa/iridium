@@ -41,7 +41,7 @@ namespace Velox.DB.Sqlite
         private IntPtr? _db;
         private string _fileName;
         private readonly ThreadLocal<long?> _lastRowId = new ThreadLocal<long?>();
-        private ISqliteAPI _sqlite3;
+        private readonly ISqliteAPI _sqlite3;
 
         static SqliteDataProvider()
         {

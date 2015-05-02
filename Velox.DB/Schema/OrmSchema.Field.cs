@@ -42,7 +42,7 @@ namespace Velox.DB
             public readonly string FieldName;
             public readonly Type FieldType;
 
-            public FieldOrRelation(FieldOrPropertyInfo fieldInfo)
+            protected FieldOrRelation(FieldOrPropertyInfo fieldInfo)
             {
                 FieldInfo = fieldInfo;
                 FieldName = fieldInfo.Name;
@@ -134,7 +134,7 @@ namespace Velox.DB
                 }
 
                 if (!FieldType.IsArray && genericTypeDefinition != typeof (IEnumerable<>))
-                    throw new NotSupportedException(string.Format("Collection type {0} not supported", FieldType));
+                    throw new NotSupportedException($"Collection type {FieldType} not supported");
 
                 var tempArray = objects.Cast<object>().ToArray();
 
@@ -193,7 +193,7 @@ namespace Velox.DB
 #if DEBUG
             public override string ToString()
             {
-                return string.Format("{0}:{1}.{2} ({3}->{4})", RelationType, LocalSchema.ObjectType.Name, FieldName, LocalField.FieldName, ForeignField.FieldName);
+                return $"{RelationType}:{LocalSchema.ObjectType.Name}.{FieldName} ({LocalField.FieldName}->{ForeignField.FieldName})";
             }
 #endif
 

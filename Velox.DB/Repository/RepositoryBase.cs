@@ -36,9 +36,10 @@ namespace Velox.DB
 {
     internal abstract class Repository
     {
-        internal Vx.Context Context { get; private set; }
-        internal OrmSchema Schema { get; private set; }
-        internal IDataProvider DataProvider { get { return Context.DataProvider; } }
+        internal Vx.Context Context { get; }
+        internal OrmSchema Schema { get; }
+
+        internal IDataProvider DataProvider => Context.DataProvider;
 
         protected Repository(Type type, Vx.Context context)
         {
@@ -52,7 +53,7 @@ namespace Velox.DB
             var objects = from o in DataProvider.GetObjects(filter.Native,Schema)
                           select Vx.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance(Schema.ObjectType), o),Schema.DatasetRelations) ;
 
-            if (parentRelation != null && parentRelation.ReverseRelation != null)
+            if (parentRelation?.ReverseRelation != null)
                 objects = from o in objects select parentRelation.ReverseRelation.SetField(o, parentObject);
 
             if (filter.Code != null)
@@ -143,7 +144,7 @@ namespace Velox.DB
 
         internal QuerySpec CreateQuerySpec(FilterSpec filter, ScalarSpec scalarSpec = null, int? skip = null, int? take = null, SortOrderSpec sortSpec = null)
         {
-            if (DataProvider.SupportsQueryTranslation(null))
+            if (DataProvider.SupportsQueryTranslation())
                 return DataProvider.CreateQuerySpec(filter, scalarSpec, sortSpec, skip, take, Schema);
 
             var querySpec = new QuerySpec(new CodeQuerySpec(), null);

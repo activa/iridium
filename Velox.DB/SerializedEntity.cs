@@ -44,10 +44,7 @@ namespace Velox.DB
             return _dictionary.ContainsKey(field);
         }
 
-        public IEnumerable<string> FieldNames
-        {
-            get { return _dictionary.Keys; }
-        }
+        public IEnumerable<string> FieldNames => _dictionary.Keys;
 
         public object this[string fieldName]
         {

@@ -49,7 +49,7 @@ namespace Velox.DB.Sql
             var parts = new List<string>
             {
                 "select", 
-                string.Join(",", columns.Select(c => string.Format("{0} as {1}", c.ShouldQuote ? QuoteField(c.Expression) : c.Expression, c.Alias))), 
+                string.Join(",", columns.Select(c => $"{(c.ShouldQuote ? QuoteField(c.Expression) : c.Expression)} as {c.Alias}")), 
                 "from", 
                 QuoteTable(tableName.TableName)
             };
@@ -98,10 +98,10 @@ namespace Velox.DB.Sql
         {
             return string.Format("{0} join {1} {2} on {3}={4}",
                             join.Type == SqlJoinType.Inner ? "inner" : "left outer",
-                            QuoteTable(join.Right.Schema.MappedName),
+                            QuoteTable(@join.Right.Schema.MappedName),
                             join.Right.Alias,
-                            QuoteField(join.Left.Alias + "." + join.Left.Field.MappedName),
-                            QuoteField(join.Right.Alias + "." + join.Right.Field.MappedName)
+                            QuoteField(join.Left.Alias + "." + @join.Left.Field.MappedName),
+                            QuoteField(join.Right.Alias + "." + @join.Right.Field.MappedName)
                             );
         }
 
@@ -121,7 +121,7 @@ namespace Velox.DB.Sql
 
         public virtual string TruncateTableSql(string tableName)
         {
-            return string.Format("truncate table {0}", QuoteTable(tableName));
+            return $"truncate table {QuoteTable(tableName)}";
         }
 
         public abstract string QuoteField(string fieldName);
@@ -138,9 +138,9 @@ namespace Velox.DB.Sql
 
         public virtual string UpdateSql(SqlTableNameWithAlias table, IEnumerable<Tuple<string, string>> setColumns, string sqlWhere)
         {
-            return String.Format("update {0} set {1} where {2}",
+            return string.Format("update {0} set {1} where {2}",
                             QuoteTable(table.TableName),
-                            String.Join(",", setColumns.Select(c => QuoteField(c.Item1) + "=" + c.Item2)),
+                            string.Join(",", setColumns.Select(c => $"{QuoteField(c.Item1)}={c.Item2}")),
                             sqlWhere
                             );
 
@@ -155,19 +155,19 @@ namespace Velox.DB.Sql
             switch (function)
             {
                 case Function.StringLength:
-                    return string.Format("length({0})", parameters[0]);
+                    return $"length({parameters[0]})";
                 case Function.BlobLength:
-                    return string.Format("length({0})", parameters[0]);
+                    return $"length({parameters[0]})";
                 case Function.Coalesce:
-                    return string.Format("coalesce({0},{1})", parameters[0], parameters[1]);
+                    return $"coalesce({parameters[0]},{parameters[1]})";
                 case Function.Trim:
-                    return string.Format("trim({0}", parameters[0]);
+                    return $"trim({parameters[0]}";
                 case Function.Sum:
-                    return string.Format("sum({0})", parameters[0]);
+                    return $"sum({parameters[0]})";
                 case Function.Average:
-                    return string.Format("avg({0})", parameters[0]);
+                    return $"avg({parameters[0]})";
                 case Function.Count:
-                    return string.Format("count({0})", parameters[0]);
+                    return $"count({parameters[0]})";
 
                 default:
                     return null;

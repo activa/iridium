@@ -42,7 +42,7 @@ namespace Velox.DB.Sql
 
     public abstract class SqlDataProvider : IDataProvider
     {
-        public SqlDialect SqlDialect { get; private set; }
+        protected SqlDialect SqlDialect { get; }
 
         protected SqlDataProvider(SqlDialect sqlDialect)
         {
@@ -151,11 +151,11 @@ namespace Velox.DB.Sql
                 foreach (var prefetchRelation in prefetchRelations)
                 {
                     var sqlJoin = new SqlJoinDefinition
-                    {
-                        Left = new SqlJoinPart(schema, prefetchRelation.LocalField, sqlQuerySpec.TableAlias),
-                        Right = new SqlJoinPart(prefetchRelation.ForeignSchema, prefetchRelation.ForeignField, SqlNameGenerator.NextTableAlias()),
-                        Type = SqlJoinType.LeftOuter
-                    };
+                    (
+                        new SqlJoinPart(schema, prefetchRelation.LocalField, sqlQuerySpec.TableAlias),
+                        new SqlJoinPart(prefetchRelation.ForeignSchema, prefetchRelation.ForeignField, SqlNameGenerator.NextTableAlias()),
+                        SqlJoinType.LeftOuter
+                    );
 
                     if (joins.Contains(sqlJoin))
                     {
@@ -227,7 +227,7 @@ namespace Velox.DB.Sql
 
                 if (autoIncrementField != null)
                 {
-                    object autoIncrementValue = null;
+                    object autoIncrementValue;
 
                     if (RequiresAutoIncrementGetInSameStatement)
                     {
@@ -356,7 +356,7 @@ namespace Velox.DB.Sql
                 // We split the translatable and non-translatable expressions
                 var translationResults = filterSpec.Expressions.Select(e => new {Expression = e, Sql = sqlTranslator.Translate(e)}).ToLookup(result => result.Sql != null);
 
-                filterSql = string.Join(" AND ", translationResults[true].Where(result => result.Sql != null).Select(result => "(" + result.Sql + ")"));
+                filterSql = string.Join(" AND ", translationResults[true].Where(result => result.Sql != null).Select(result => $"({result.Sql})"));
 
                 if (translationResults[false].Any())
                 {
@@ -403,10 +403,7 @@ namespace Velox.DB.Sql
             return true;
         }
 
-        public bool SupportsRelationPrefetch
-        {
-            get { return true; }
-        }
+        public bool SupportsRelationPrefetch => true;
 
         public abstract bool RequiresAutoIncrementGetInSameStatement { get; }
 

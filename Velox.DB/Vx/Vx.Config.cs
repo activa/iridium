@@ -32,20 +32,9 @@ namespace Velox.DB
     {
         public class Configuration
         {
-            private NamingConvention _namingConvention = new NamingConvention();
-
-            public NamingConvention NamingConvention
-            {
-                get { return _namingConvention; }
-                set { _namingConvention = value; }
-            }
+            public NamingConvention NamingConvention { get; set; } = new NamingConvention();
         }
 
-        private static readonly Configuration _config = new Configuration();
-
-        public static Configuration Config
-        {
-            get { return _config; }
-        }
+        public static Configuration Config { get; } = new Configuration();
     }
 }

@@ -310,9 +310,6 @@ namespace Velox.DB
             return Skip(index).Take(1).FirstOrDefault();
         }
 
-        public Vx.IEvents<T> Events
-        {
-            get { return _repository.Events; }
-        }
+        public Vx.IEvents<T> Events => _repository.Events;
     }
 }

@@ -27,6 +27,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using Velox.DB.Core;
 
 
@@ -36,35 +37,11 @@ namespace Velox.DB
     {
         private readonly Dictionary<string, object> _dic;
 
-        public QueryParameterCollection(IDictionary<string, object> parameters)
-        {
-            _dic = new Dictionary<string, object>(parameters);
-        }
-
-        public QueryParameterCollection(QueryParameterCollection parameters)
-        {
-            _dic = new Dictionary<string, object>(parameters.AsDictionary());
-        }
-
         public QueryParameterCollection(object o = null)
         {
             _dic = new Dictionary<string, object>();
 
             AddParametersFromObject(o, true);
-        }
-
-        public void Merge(Dictionary<string, object> parameters, bool important = false)
-        {
-            foreach (var parameter in parameters.Where(parameter => important || !_dic.ContainsKey(parameter.Key)))
-            {
-                _dic[parameter.Key] = parameter.Value;
-            }
-        }
-
-        public void Merge(QueryParameterCollection parameters, bool important = false)
-        {
-            if (parameters != null)
-                Merge(parameters.AsDictionary(), important);
         }
 
         public void Merge(object parameters, bool important = false)
@@ -88,20 +65,28 @@ namespace Velox.DB
             return _dic;
         }
 
+        private IEnumerable<KeyValuePair<string, object>> EnumerateObject(object obj)
+        {
+            if (obj is IDictionary)
+                return from object key in ((IDictionary) obj).Keys select new KeyValuePair<string, object>(key.ToString(), ((IDictionary) obj)[key]);
+            
+            if (obj is QueryParameterCollection)
+                return ((QueryParameterCollection) obj).AsDictionary();
+
+            var members = obj.GetType().Inspector().GetFieldsAndProperties(BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.Instance);
+
+            return members.Select(member => new KeyValuePair<string, object>(member.Name,member.GetValue(obj)));
+        }
+
         private void AddParametersFromObject(object parameters, bool important)
         {
             if (parameters == null)
                 return;
 
-            var members = parameters.GetType().Inspector().GetFieldsAndProperties(BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.Instance);
-
-            foreach (var member in members.Where(member => important || !_dic.ContainsKey(member.Name)))
-            {
-                _dic[member.Name] = member.GetValue(parameters);
-            }
+            foreach (var kv in EnumerateObject(parameters).Where(kv => important || !_dic.ContainsKey(kv.Key)))
+                _dic[kv.Key] = kv.Value;
         }
 
-        
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {

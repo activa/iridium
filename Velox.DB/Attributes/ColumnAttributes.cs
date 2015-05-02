@@ -41,7 +41,7 @@ namespace Velox.DB
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
         public sealed class NameAttribute : Attribute
         {
-            public string Name { get; private set; }
+            public string Name { get; }
 
             public NameAttribute(string name)
             {
@@ -57,7 +57,7 @@ namespace Velox.DB
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
         public sealed class IndexedAttribute : Attribute
         {
-            public string IndexName { get; private set; }
+            public string IndexName { get; }
             public int Position { get; set; }
             public bool Descending { get; set; }
 
@@ -90,7 +90,7 @@ namespace Velox.DB
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
         public sealed class SizeAttribute : Attribute
         {
-            public int Size { get; set; }
+            public int Size { get; }
             public int Scale { get; set; }
 
             public SizeAttribute(int size)
@@ -112,7 +112,7 @@ namespace Velox.DB
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
         public sealed class NullValueAttribute : Attribute
         {
-            public object NullValue { get; set; }
+            public object NullValue { get; }
 
             public NullValueAttribute(object value)
             {
@@ -122,7 +122,7 @@ namespace Velox.DB
 
         public class ForeignKeyAttribute : Attribute
         {
-            public Type RelatedClass { get; set; }
+            public Type RelatedClass { get; }
 
             public ForeignKeyAttribute(Type relatedClass)
             {

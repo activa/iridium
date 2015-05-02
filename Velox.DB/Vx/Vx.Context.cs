@@ -171,11 +171,6 @@ namespace Velox.DB
                 return DataProvider.ExecuteSql(sql, new QueryParameterCollection(parameters));
             }
 
-            public int Execute(string sql, QueryParameterCollection parameters = null)
-            {
-                return DataProvider.ExecuteSql(sql, parameters);
-            }
-
             public IEnumerable<T> Query<T>(string sql, object parameters = null) where T : new()
             {
                 return DataProvider.Query(sql, new QueryParameterCollection(parameters)).Select(entity => entity.CreateObject<T>());
@@ -209,11 +204,6 @@ namespace Velox.DB
             }
 
             public Task<int> ExecuteAsync(string sql, object parameters)
-            {
-                return Task.Factory.StartNew(() => Execute(sql, parameters));
-            }
-
-            public Task<int> ExecuteAsync(string sql, QueryParameterCollection parameters = null)
             {
                 return Task.Factory.StartNew(() => Execute(sql, parameters));
             }

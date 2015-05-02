@@ -15,7 +15,7 @@ namespace Velox.DB.Sql
             public OrmSchema.Relation Relation;
             public OrmSchema Schema;
 
-            public object Key { get { return (object)Relation ?? Schema; } }
+            public object Key => (object)Relation ?? Schema;
         }
 
         private class SubQuery
@@ -47,20 +47,11 @@ namespace Velox.DB.Sql
             return _rootIterators.ContainsKey(iterator) ? _rootIterators[iterator] : iterator;
         }
 
-        private SubQuery CurrentQuery
-        {
-            get { return _subQueries.Peek(); }
-        }
+        private SubQuery CurrentQuery => _subQueries.Peek();
 
-        public QueryParameterCollection SqlParameters
-        {
-            get { return _sqlParameters; }
-        }
+        public QueryParameterCollection SqlParameters => _sqlParameters;
 
-        public HashSet<SqlJoinDefinition> Joins
-        {
-            get { return CurrentQuery.Joins; }
-        }
+        public HashSet<SqlJoinDefinition> Joins => CurrentQuery.Joins;
 
 
         private void PrepareForNewExpression(ParameterExpression rootIterator, string tableAlias, OrmSchema schema)
@@ -105,12 +96,10 @@ namespace Velox.DB.Sql
                 {
                     if (!_relationAliases[iterator].ContainsKey(relation))
                     {
-                        var sqlJoin = new SqlJoinDefinition
-                        {
-                            Left = new SqlJoinPart(parentMetaData.Schema, relation.LocalField, leftAlias),
-                            Right = new SqlJoinPart(relation.ForeignSchema, relation.ForeignField, SqlNameGenerator.NextTableAlias()),
-                            Type = SqlJoinType.Inner
-                        };
+                        var sqlJoin = new SqlJoinDefinition(
+                            new SqlJoinPart(parentMetaData.Schema, relation.LocalField, leftAlias),
+                            new SqlJoinPart(relation.ForeignSchema, relation.ForeignField, SqlNameGenerator.NextTableAlias())
+                            );
 
                         CurrentQuery.Joins.Add(sqlJoin);
 
@@ -214,7 +203,7 @@ namespace Velox.DB.Sql
             {
                 case ExpressionType.Negate:
                 case ExpressionType.NegateChecked:
-                    return string.Format("(-{0})", sql);
+                    return $"(-{sql})";
 
                 case ExpressionType.UnaryPlus:
                 case ExpressionType.Unbox:
@@ -224,7 +213,7 @@ namespace Velox.DB.Sql
                     return sql;
 
                 case ExpressionType.Not:
-                    return string.Format("(NOT {0})", sql);
+                    return $"(NOT {sql})";
             }
 
             throw new SqlExpressionTranslatorException(expression.ToString());
@@ -248,10 +237,12 @@ namespace Velox.DB.Sql
                         return string.Format("({0} like {1})", arg, CreateParameter(stringArguments[0] + "%"));
                     case "EndsWith":
                         return string.Format("({0} like {1})", arg, CreateParameter("%" + stringArguments[0]));
+                    case "Contains":
+                        return string.Format("({0} like {1})", arg, CreateParameter("%" + stringArguments[0] + "%"));
                     case "Trim":
                         return string.Format(_sqlDialect.SqlFunction(SqlDialect.Function.Trim), stringArguments[0]);
                 }
-
+                
                 throw new SqlExpressionTranslatorException(node.ToString());
             }
 
@@ -397,7 +388,7 @@ namespace Velox.DB.Sql
                     throw new SqlExpressionTranslatorException(expression.ToString());
             }
 
-            return string.Format("({0} {1} {2})", Translate(expression.Left), op, Translate(expression.Right));
+            return $"({Translate(expression.Left)} {op} {Translate(expression.Right)})";
         }
 
         private static Expression UnQuote(Expression expression)

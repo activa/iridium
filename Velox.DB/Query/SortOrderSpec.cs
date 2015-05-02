@@ -42,8 +42,8 @@ namespace Velox.DB
                 SortOrder = sortOrder;
             }
 
-            public QueryExpression Expression;
-            public SortOrder SortOrder;
+            public readonly QueryExpression Expression;
+            public readonly SortOrder SortOrder;
         }
 
         public readonly List<ExpressionWithSortOrder> Expressions = new List<ExpressionWithSortOrder>();

@@ -30,9 +30,9 @@ namespace Velox.DB.Sql
 {
     public class SqlJoinPart : IEquatable<SqlJoinPart>
     {
-        public readonly OrmSchema Schema;
-        public readonly OrmSchema.Field Field;
-        public readonly string Alias;
+        public OrmSchema Schema { get; }
+        public OrmSchema.Field Field { get; }
+        public string Alias { get; }
 
         public SqlJoinPart(OrmSchema schema, OrmSchema.Field field, string alias)
         {
@@ -43,12 +43,12 @@ namespace Velox.DB.Sql
 
         public bool Equals(SqlJoinPart other)
         {
-            return /*Alias == other.Alias && */Schema == other.Schema && Field == other.Field;
+            return Schema == other.Schema && Field == other.Field;
         }
 
         public override int GetHashCode()
         {
-            return Schema.GetHashCode() ^ Field.GetHashCode();// ^ Alias.GetHashCode();
+            return Schema.GetHashCode() ^ Field.GetHashCode();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.Design;
+﻿using System;
+using System.ComponentModel.Design;
 using System.IO;
 using System.Linq.Expressions;
 using System.Runtime.Remoting;
@@ -70,6 +71,7 @@ namespace Velox.DB.Test
 //            get { return _instance ?? (_instance = new SqlServerStorage()); }
 //            get { return _instance ?? (_instance = new MySqlStorage()); }
             get { return _instance ?? (_instance = new SqliteStorage()); }
+//            get { return _instance ?? (_instance = new ServiceStorage()); }
         }
     }
 
@@ -91,5 +93,12 @@ namespace Velox.DB.Test
     public class MemoryStorage : MyContext
     {
         public MemoryStorage() : base(new MemoryDataProvider()) { }
+    }
+
+    public class ServiceStorage : MyContext
+    {
+        public ServiceStorage() : base(new SqlServiceDataProvider("http://localhost:55768",null,null))
+        {
+        }
     }
 }

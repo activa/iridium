@@ -25,10 +25,7 @@ namespace Velox.DB
 
             var propInfo = t.GetRuntimeProperty(fieldName);
 
-            if (propInfo != null)
-                return propInfo.GetValue(obj);
-
-            return null;
+            return propInfo?.GetValue(obj);
         }
 
         internal T Read(object key, params Expression<Func<T, object>>[] relationsToLoad)
@@ -41,16 +38,16 @@ namespace Velox.DB
         internal T Load(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
-            Dictionary<string, object> primaryKey = null;
+            Dictionary<string, object> primaryKey;
 
             var keyTypeInspector = key.GetType().Inspector();
 
             if (keyTypeInspector.Is(TypeFlags.Numeric | TypeFlags.Enum | TypeFlags.String))
             {
                 if (Schema.PrimaryKeys.Length != 1)
-                    throw new Exception(string.Format("Invalid key for {0}", typeof (T)));
+                    throw new Exception($"Invalid key for {typeof (T)}");
 
                 primaryKey = new Dictionary<string, object>() {{Schema.PrimaryKeys[0].MappedName, key}};
             }
@@ -130,7 +127,7 @@ namespace Velox.DB
                 case Aggregate.Any:
                     return objects.Any().Convert<TScalar>();
                 default:
-                    throw new ArgumentOutOfRangeException("aggregate");
+                    throw new ArgumentOutOfRangeException(nameof(aggregate));
             }
         }
 
@@ -140,7 +137,7 @@ namespace Velox.DB
 
             var relations = LambdaRelationFinder.FindRelations(relationLambdas, Schema);
 
-            var prefetchRelations = relations == null ? null : relations.Where(r => r.IsToOne && r.LocalSchema == Schema).ToList();
+            var prefetchRelations = relations?.Where(r => r.IsToOne && r.LocalSchema == Schema).ToList();
 
             if (Schema.DatasetRelations != null)
             {
@@ -176,7 +173,7 @@ namespace Velox.DB
                 objects = from o in DataProvider.GetObjects(filter.Native, Schema) select Vx.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance<T>(), o), relations);
             }
 
-            if (parentRelation != null && parentRelation.ReverseRelation != null)
+            if (parentRelation?.ReverseRelation != null)
                 objects = from o in objects select parentRelation.ReverseRelation.SetField(o, parentObject);
 
             if (filter.Code != null)

@@ -100,10 +100,7 @@ namespace Velox.DB
                 }
                 else if (field.Type == typeof (string))
                 {
-                    if (fieldInspector.HasAttribute<Column.LargeTextAttribute>())
-                        schemaField.ColumnSize = int.MaxValue;
-                    else
-                        schemaField.ColumnSize = 50;
+                    schemaField.ColumnSize = fieldInspector.HasAttribute<Column.LargeTextAttribute>() ? int.MaxValue : 50;
                 }
                 else if (field.Type.Inspector().Is(TypeFlags.Decimal))
                 {
@@ -236,7 +233,7 @@ namespace Velox.DB
                     foreignSchema = Repository.Context.GetSchema(elementType);
 
                     if (foreignSchema == null)
-                        throw new Vx.SchemaException(string.Format("Could not create relation {0}.{1}", ObjectType.Name, field.Name));
+                        throw new Vx.SchemaException($"Could not create relation {ObjectType.Name}.{field.Name}");
 
                     relation.RelationType = RelationType.OneToMany;
                     relation.ElementType = elementType;
@@ -253,7 +250,7 @@ namespace Velox.DB
                     foreignSchema = Repository.Context.GetSchema(objectType);
 
                     if (foreignSchema == null)
-                        throw new Vx.SchemaException(string.Format("Could not create relation {0}.{1}", ObjectType.Name, field.Name));
+                        throw new Vx.SchemaException($"Could not create relation {ObjectType.Name}.{field.Name}");
 
                     relation.RelationType = relationAttribute is DB.Relation.OneToOneAttribute ? RelationType.OneToOne : RelationType.ManyToOne;
                     relation.ReadOnly = relationAttribute != null && relationAttribute.ReadOnly;
@@ -289,55 +286,16 @@ namespace Velox.DB
             _relations = relations;
         }
 
-        public SafeDictionary<string,Field> FieldsByFieldName
-        {
-            get { return _fieldsByFieldName; }
-        }
-
-        public Field[] Fields
-        {
-            get { return _fields; }
-        }
-
-        public SafeDictionary<string, Relation> Relations
-        {
-            get { return _relations; }
-        }
-
-        public Field[] PrimaryKeys
-        {
-            get { return _primaryKeys; }
-        }
-
-        public Field[] IncrementKeys
-        {
-            get { return _incrementKeys; }
-        }
-
-        internal Repository Repository
-        {
-            get { return _repository; }
-        }
-
-        public Type ObjectType
-        {
-            get { return _objectType; }
-        }
-
-        public string MappedName
-        {
-            get { return _mappedName; }
-        }
-
-        internal HashSet<Relation> DatasetRelations
-        {
-            get { return _datasetRelations; }
-        }
-
-        public Index[] Indexes
-        {
-            get { return _indexes; }
-        }
+        public SafeDictionary<string,Field> FieldsByFieldName => _fieldsByFieldName;
+        public Field[] Fields => _fields;
+        public SafeDictionary<string, Relation> Relations => _relations;
+        public Field[] PrimaryKeys => _primaryKeys;
+        public Field[] IncrementKeys => _incrementKeys;
+        internal Repository Repository => _repository;
+        public Type ObjectType => _objectType;
+        public string MappedName => _mappedName;
+        internal HashSet<Relation> DatasetRelations => _datasetRelations;
+        public Index[] Indexes => _indexes;
 
         internal object UpdateObject(object o, SerializedEntity entity)
         {
@@ -367,7 +325,7 @@ namespace Velox.DB
 #if DEBUG
         public override string ToString()
         {
-            return "<" + ObjectType.Name + ">";
+            return $"<{ObjectType.Name}>";
         }
 #endif
     }

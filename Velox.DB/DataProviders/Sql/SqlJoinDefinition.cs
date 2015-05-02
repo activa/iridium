@@ -35,9 +35,17 @@ namespace Velox.DB.Sql
 
     public class SqlJoinDefinition : IEquatable<SqlJoinDefinition>
     {
-        public SqlJoinPart Left;
-        public SqlJoinPart Right;
-        public SqlJoinType Type;
+        public SqlJoinPart Left { get; }
+        public SqlJoinPart Right { get; }
+
+        public SqlJoinType Type { get; set; }
+
+        public SqlJoinDefinition(SqlJoinPart left, SqlJoinPart right, SqlJoinType type = SqlJoinType.Inner)
+        {
+            Left = left;
+            Right = right;
+            Type = type;
+        }
 
         public bool Equals(SqlJoinDefinition other)
         {

@@ -34,7 +34,7 @@ namespace Velox.DB
     {
         public readonly List<QueryExpression> Expressions = new List<QueryExpression>();
 
-        public FilterSpec(FilterSpec parentFilter = null)
+        private FilterSpec(FilterSpec parentFilter = null)
         {
             if (parentFilter != null)
             {
@@ -67,8 +67,8 @@ namespace Velox.DB
             {
                 var andAlsoExpression = (BinaryExpression) body;
 
-                Add(System.Linq.Expressions.Expression.Lambda(andAlsoExpression.Left, lambda.Parameters[0]));
-                Add(System.Linq.Expressions.Expression.Lambda(andAlsoExpression.Right, lambda.Parameters[0]));
+                Add(Expression.Lambda(andAlsoExpression.Left, lambda.Parameters[0]));
+                Add(Expression.Lambda(andAlsoExpression.Right, lambda.Parameters[0]));
             }
             else
             {

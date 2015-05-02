@@ -30,7 +30,7 @@ namespace Velox.DB
 {
     public class ScalarSpec
     {
-        internal readonly QueryExpression Expression;
+        internal QueryExpression Expression { get; }
 
         internal ScalarSpec(LambdaExpression scalarLambda)
         {

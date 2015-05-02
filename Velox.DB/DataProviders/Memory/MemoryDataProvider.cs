@@ -39,7 +39,7 @@ namespace Velox.DB
     {
         private class CompositeKey
         {
-            private Dictionary<string,object>  _keyValues;
+            private readonly Dictionary<string,object> _keyValues;
 
             public CompositeKey(Dictionary<string,object> keyValues)
             {
@@ -105,8 +105,8 @@ namespace Velox.DB
 
                 public long NextIncrementCounter(string fieldName) { return _bucket.NextIncrementCounter(fieldName); }
                 public void Purge() { _bucket.Purge(); }
-                public List<Dictionary<string, object>> Objects { get { return _bucket._objects; } }
-                public Dictionary<CompositeKey, Dictionary<string, object>> IndexedObjects { get { return _bucket._indexedObjects; } }
+                public List<Dictionary<string, object>> Objects => _bucket._objects;
+                public Dictionary<CompositeKey, Dictionary<string, object>> IndexedObjects => _bucket._indexedObjects;
             }
 
         }
@@ -239,10 +239,7 @@ namespace Velox.DB
             return false;
         }
 
-        public bool SupportsRelationPrefetch
-        {
-            get { return false; }
-        }
+        public bool SupportsRelationPrefetch => false;
 
         public bool CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes)
         {

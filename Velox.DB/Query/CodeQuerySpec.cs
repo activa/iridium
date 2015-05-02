@@ -27,8 +27,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-
 
 namespace Velox.DB
 {
@@ -99,10 +97,7 @@ namespace Velox.DB
 
         public object ExpressionValue(object o)
         {
-            return _scalarLambda != null ? 
-                _scalarLambda.Expression.Evaluate(_scalarLambda.ObjectWithRelations(o)) 
-                : 
-                null;
+            return _scalarLambda?.Expression.Evaluate(_scalarLambda.ObjectWithRelations(o));
         }
 
         public int Compare(object o1, object o2)

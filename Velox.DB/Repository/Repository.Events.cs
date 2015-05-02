@@ -68,14 +68,12 @@ namespace Velox.DB
 
             public void Fire_ObjectCreated(Vx.Context context, T obj)
             {
-                if (ObjectCreated != null)
-                    ObjectCreated(context, new Vx.ObjectEventArgs<T>(obj));
+                ObjectCreated?.Invoke(context, new Vx.ObjectEventArgs<T>(obj));
             }
 
             public void Fire_ObjectSaved(Vx.Context context, T obj)
             {
-                if (ObjectSaved != null)
-                    ObjectSaved(context, new Vx.ObjectEventArgs<T>(obj));
+                ObjectSaved?.Invoke(context, new Vx.ObjectEventArgs<T>(obj));
             }
 
             public void Fire_ObjectDeleting(Vx.Context context, T obj, ref bool cancel)
@@ -92,10 +90,8 @@ namespace Velox.DB
 
             public void Fire_ObjectDeleted(Vx.Context context, T obj)
             {
-                if (ObjectDeleted != null)
-                    ObjectDeleted(context, new Vx.ObjectEventArgs<T>(obj));
+                ObjectDeleted?.Invoke(context, new Vx.ObjectEventArgs<T>(obj));
             }
-
         }
 
         private readonly EventHandlers _events = new EventHandlers();

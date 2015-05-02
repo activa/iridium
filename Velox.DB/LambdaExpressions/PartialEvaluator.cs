@@ -101,13 +101,10 @@ namespace Velox.DB
 
                 var memberExpression = expression as MemberExpression;
 
-                if (memberExpression != null)
-                {
-                    var constantExpression = memberExpression.Expression as ConstantExpression;
+                var constantExpression = memberExpression?.Expression as ConstantExpression;
 
-                    if (constantExpression != null)
-                        return Expression.Constant(memberExpression.Member.Inspector().GetValue(constantExpression.Value), type);
-                }
+                if (constantExpression != null)
+                    return Expression.Constant(memberExpression.Member.Inspector().GetValue(constantExpression.Value), type);
 
                 if (type.Inspector().IsValueType)
                 {
