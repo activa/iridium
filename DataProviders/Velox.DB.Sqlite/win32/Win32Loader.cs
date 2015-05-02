@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -62,9 +63,14 @@ namespace Velox.DB.Sqlite.win32
             if (architecture != "x86" && architecture != "x64")
                 return;
 
-            string dllName = "win32\\" + architecture + "\\sqlite3.dll";
+            var getExecutingAssemblyMethod = typeof (Assembly).GetRuntimeMethod("GetExecutingAssembly", new Type[0]);
+            var locationProperty = typeof (Assembly).GetRuntimeProperty("CodeBase");
 
-            var dll = LoadLibrary("win32-" + architecture + "\\sqlite3.dll");
+            var assemblyPath = new Uri((string) locationProperty.GetValue((Assembly) getExecutingAssemblyMethod.Invoke(null, new object[0])));
+
+            var dllName = Path.Combine(Path.GetDirectoryName(assemblyPath.LocalPath), "win32-" + architecture + "\\sqlite3.dll");
+
+            var dll = LoadLibrary(dllName);
 
             if ((long)dll == 0)
             {
