@@ -1,8 +1,8 @@
-bin
-obj
-Bin
-Obj
-TestResults
+bin/
+obj/
+Bin/
+Obj/
+TestResults/
 *.user
 *.suo
 *.bak
@@ -11,3 +11,10 @@ TestResults
 Velox.DB.*.nupkg
 pushAll.cmd
 
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+*.nupkg
+**/packages/*
+!**/packages/build/
+!**/packages/repositories.config
