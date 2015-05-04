@@ -8,6 +8,6 @@ TestResults
 *.bak
 *.userprefs
 *.pidb
-*.nupkg
+Velox.DB.*.nupkg
 pushAll.cmd
 
