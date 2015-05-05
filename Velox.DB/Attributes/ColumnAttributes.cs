@@ -107,6 +107,13 @@ namespace Velox.DB
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
         public sealed class ReadbackAttribute : Attribute
         {
+            public bool OnInsert { get; set; }
+            public bool OnUpdate { get; set; }
+        }
+
+        [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+        public sealed class ReadOnlyAttribute : Attribute
+        {
         }
 
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]

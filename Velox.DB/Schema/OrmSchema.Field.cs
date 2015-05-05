@@ -36,6 +36,17 @@ namespace Velox.DB
 {
     public partial class OrmSchema
     {
+        [Flags]
+        public enum FieldFlags
+        {
+            PrimaryKey = 1<<1,
+            AutoIncrement = 1<<2,
+            Nullable = 1<<3,
+            ReadOnly = 1<<4,
+            ReadbackOnInsert = 1<<5,
+            ReadbackOnUpdate = 1<<6
+        }
+
         public class FieldOrRelation
         {
             public readonly FieldOrPropertyInfo FieldInfo;
@@ -79,16 +90,32 @@ namespace Velox.DB
                 MappedName = FieldName;
 
                 CanBeNull = FieldInfo.TypeInspector.CanBeNull;
-                ColumnNullable = CanBeNull;
+
+                if (CanBeNull)
+                    Flags |= FieldFlags.Nullable;
             }
 
             public string MappedName;
 
-            public bool PrimaryKey;
-            public bool AutoIncrement;
             public int? ColumnSize;
             public int? ColumnScale;
-            public bool ColumnNullable;
+
+            public FieldFlags Flags;
+
+            public bool PrimaryKey => (Flags & FieldFlags.PrimaryKey) != 0;
+            public bool AutoIncrement => (Flags & FieldFlags.AutoIncrement) != 0;
+            public bool ColumnNullable => (Flags & FieldFlags.Nullable) != 0;
+            public bool ColumnReadOnly => (Flags & FieldFlags.ReadOnly) != 0;
+            public bool ReadbackOnInsert => (Flags & FieldFlags.ReadbackOnInsert) != 0;
+            public bool ReadbackOnUpdate => (Flags & FieldFlags.ReadbackOnUpdate) != 0;
+
+            public void UpdateFlags(FieldFlags flags, bool? state)
+            {
+                if (state == true)
+                    Flags |= flags;
+                else if (state == false)
+                    Flags &= ~flags;
+            }
         }
 
         public enum RelationType
@@ -114,10 +141,7 @@ namespace Velox.DB
             {
             }
 
-            public bool IsToOne
-            {
-                get { return RelationType == RelationType.ManyToOne || RelationType == RelationType.OneToOne; }
-            }
+            public bool IsToOne => RelationType == RelationType.ManyToOne || RelationType == RelationType.OneToOne;
 
             private object CreateCollection(IEnumerable objects)
             {

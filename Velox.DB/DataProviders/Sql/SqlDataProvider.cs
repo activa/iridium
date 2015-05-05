@@ -210,7 +210,7 @@ namespace Velox.DB.Sql
 
             string tableName = schema.MappedName;
             var autoIncrementField = schema.IncrementKeys.FirstOrDefault();
-            var columnList = (from f in schema.FieldsByFieldName.Values where !f.AutoIncrement select new { Field = f, ParameterName = SqlNameGenerator.NextParameterName()  }).ToArray();
+            var columnList = (from f in schema.WriteFields where !f.AutoIncrement && !f.ColumnReadOnly select new { Field = f, ParameterName = SqlNameGenerator.NextParameterName()  }).ToArray();
             var parameters = new QueryParameterCollection(columnList.ToDictionary(c => c.ParameterName, c => o[c.Field.MappedName]));
 
             string sql;

@@ -38,6 +38,7 @@ namespace Velox.DB
         private readonly SafeDictionary<string, Field> _fieldsByFieldName = new SafeDictionary<string, Field>();
         private readonly SafeDictionary<string, Field> _fieldsByMappedName = new SafeDictionary<string, Field>();
         private Field[] _fields;
+        private Field[] _writeFields;
         
         private SafeDictionary<string, Relation> _relations;
         private Field[] _primaryKeys;
@@ -112,25 +113,33 @@ namespace Velox.DB
                 {
                     var pkAttribute = fieldInspector.GetAttribute<Column.PrimaryKeyAttribute>();
 
-                    schemaField.PrimaryKey = true;
-                    schemaField.AutoIncrement = pkAttribute.AutoIncrement;
+                    schemaField.UpdateFlags(FieldFlags.PrimaryKey, true);
+                    schemaField.UpdateFlags(FieldFlags.AutoIncrement, pkAttribute.AutoIncrement);
                 }
                 else if (fieldPropertiesFromConvention.PrimaryKey ?? false)
                 {
-                    schemaField.PrimaryKey = true;
-
-                    if (fieldPropertiesFromConvention.AutoIncrement != null)
-                        schemaField.AutoIncrement = fieldPropertiesFromConvention.AutoIncrement.Value;
+                    schemaField.UpdateFlags(FieldFlags.PrimaryKey, true);
+                    schemaField.UpdateFlags(FieldFlags.AutoIncrement, fieldPropertiesFromConvention.AutoIncrement);
                 }
 
-                if (fieldPropertiesFromConvention.Null != null)
-                    schemaField.ColumnNullable = fieldPropertiesFromConvention.Null.Value;
+                schemaField.UpdateFlags(FieldFlags.Nullable, fieldPropertiesFromConvention.Null);
 
                 if (fieldInspector.HasAttribute<Column.NotNullAttribute>())
-                    schemaField.ColumnNullable = false;
+                    schemaField.UpdateFlags(FieldFlags.Nullable, false);
 
                 if (fieldInspector.HasAttribute<Column.NullAttribute>())
-                    schemaField.ColumnNullable = true;
+                    schemaField.UpdateFlags(FieldFlags.Nullable, true);
+
+                if (fieldInspector.HasAttribute<Column.ReadOnlyAttribute>())
+                    schemaField.UpdateFlags(FieldFlags.ReadOnly, true);
+
+                if (fieldInspector.HasAttribute<Column.ReadbackAttribute>())
+                {
+                    var readbackAttribute = fieldInspector.GetAttribute<Column.ReadbackAttribute>();
+
+                    schemaField.UpdateFlags(FieldFlags.ReadbackOnInsert,readbackAttribute.OnInsert);
+                    schemaField.UpdateFlags(FieldFlags.ReadbackOnUpdate, readbackAttribute.OnUpdate);
+                }
 
                 if (fieldInspector.HasAttribute<Column.IndexedAttribute>() || (fieldPropertiesFromConvention.Indexed ?? false))
                 {
@@ -174,6 +183,7 @@ namespace Velox.DB
                 .ToArray();
 
             _fields = fieldList.ToArray();
+            _writeFields = fieldList.Where(f => !f.ColumnReadOnly && !f.AutoIncrement).ToArray();
 
             _primaryKeys = _fields.Where(f => f.PrimaryKey).ToArray();
             _incrementKeys = _fields.Where(f => f.AutoIncrement).ToArray();
@@ -288,6 +298,7 @@ namespace Velox.DB
 
         public SafeDictionary<string,Field> FieldsByFieldName => _fieldsByFieldName;
         public Field[] Fields => _fields;
+        public Field[] WriteFields => _writeFields;
         public SafeDictionary<string, Relation> Relations => _relations;
         public Field[] PrimaryKeys => _primaryKeys;
         public Field[] IncrementKeys => _incrementKeys;
@@ -319,7 +330,13 @@ namespace Velox.DB
 
         internal SerializedEntity SerializeObject(object o)
         {
-            return new SerializedEntity((from field in _fieldsByMappedName select new { field.Key, Value = field.Value.GetField(o)}).ToDictionary(k => k.Key, k=> k.Value) );
+            return new SerializedEntity(
+                (
+                    from field in _fieldsByMappedName
+                    select new { field.Key, Value = field.Value.GetField(o)}
+                )
+                .ToDictionary(k => k.Key, k=> k.Value) 
+            );
         }
 
 #if DEBUG
