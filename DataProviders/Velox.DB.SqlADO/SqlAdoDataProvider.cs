@@ -87,6 +87,16 @@ namespace Velox.DB.Sql
             return connection;
         }
 
+        private void CloseConnection()
+        {
+            var connection = _localConnection.Value;
+
+            if (connection != null && connection.State != ConnectionState.Closed)
+                connection.Close();
+
+            _localConnection.Value = null;
+        }
+
         public abstract void ClearConnectionPool();
 
         protected DbCommand CreateCommand(string sqlQuery, Dictionary<string, object> parameters)
@@ -128,39 +138,53 @@ namespace Velox.DB.Sql
 
         public override IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, QueryParameterCollection parameters)
         {
-            List<Dictionary<string, object>> records = new List<Dictionary<string, object>>();
-
-            using (var cmd = CreateCommand(sql, parameters == null ? null : parameters.AsDictionary()))
+            try
             {
-                using (var reader = cmd.ExecuteReader())
+                List<Dictionary<string, object>> records = new List<Dictionary<string, object>>();
+
+                using (var cmd = CreateCommand(sql, parameters?.AsDictionary()))
                 {
-                    while (reader.Read())
+                    using (var reader = cmd.ExecuteReader())
                     {
-                        Dictionary<string, object> rec = new Dictionary<string, object>();
-
-                        for (int i = 0; i < reader.FieldCount; i++)
+                        while (reader.Read())
                         {
-                            string fieldName = reader.GetName(i);
+                            Dictionary<string, object> rec = new Dictionary<string, object>();
 
-                            if (reader.IsDBNull(i))
-                                rec[fieldName] = null;
-                            else
-                                rec[fieldName] = reader.GetValue(i);
+                            for (int i = 0; i < reader.FieldCount; i++)
+                            {
+                                string fieldName = reader.GetName(i);
+
+                                if (reader.IsDBNull(i))
+                                    rec[fieldName] = null;
+                                else
+                                    rec[fieldName] = reader.GetValue(i);
+                            }
+
+                            records.Add(rec);
                         }
-
-                        records.Add(rec);
                     }
                 }
-            }
 
-            return records;
+                return records;
+            }
+            finally
+            {
+                CloseConnection();
+            }
         }
 
         public override int ExecuteSql(string sql, QueryParameterCollection parameters)
         {
-            using (var cmd = CreateCommand(sql, parameters == null ? null : parameters.AsDictionary()))
+            try
             {
-                return cmd.ExecuteNonQuery();
+                using (var cmd = CreateCommand(sql, parameters?.AsDictionary()))
+                {
+                    return cmd.ExecuteNonQuery();
+                }
+            }
+            finally
+            {
+                CloseConnection();
             }
         }
 
