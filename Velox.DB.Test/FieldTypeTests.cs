@@ -64,6 +64,7 @@ namespace Velox.DB.Test
 
             DB.RecordsWithAllTypes.Count(r => r.IntField == 111).Should().Be(1);
             DB.RecordsWithAllTypes.Count(r => r.IntField == 0).Should().Be(2);
+            DB.RecordsWithAllTypes.Count(r => r.IntField == r.IntFieldNullable).Should().Be(0);
             DB.RecordsWithAllTypes.Count(r => r.IntFieldNullable == null).Should().Be(2);
             DB.RecordsWithAllTypes.Count(r => r.IntFieldNullable != null).Should().Be(1);
             DB.RecordsWithAllTypes.Count(r => r.IntFieldNullable == 111).Should().Be(1);

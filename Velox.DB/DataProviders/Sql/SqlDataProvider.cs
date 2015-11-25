@@ -345,8 +345,6 @@ namespace Velox.DB.Sql
 
             SqlExpressionTranslator sqlTranslator = new SqlExpressionTranslator(SqlDialect, schema, tableAlias);
 
-//            SqlExpressionTranslator sqlTranslator = new SqlExpressionTranslator(SqlDialect,schema,tableAlias);
-
             string filterSql = null;
 
             CodeQuerySpec codeQuerySpec = null;
@@ -426,10 +424,7 @@ namespace Velox.DB.Sql
         {
             var results = ExecuteSqlReader(sql, parameters);
 
-            if (results != null)
-                return results.Select(r => r.First().Value);
-            else
-                return null;
+            return results?.Select(r => r.First().Value);
         }
 
         public virtual void Purge(OrmSchema schema)

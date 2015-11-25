@@ -441,10 +441,13 @@ namespace Velox.DB.Sql
 
         private static LambdaExpression CreateToManyFilterExpression(OrmSchema.Relation relation, Expression localExpression, LambdaExpression filterLambda, ParameterExpression lambdaParameter)
         {
-            var expression = Expression.Equal(
-                Expression.MakeMemberAccess(localExpression, relation.LocalField.FieldInfo.AsMember),
-                Expression.MakeMemberAccess(lambdaParameter, relation.ForeignField.FieldInfo.AsMember)
-                );
+            Expression exp1 = Expression.MakeMemberAccess(localExpression, relation.LocalField.FieldInfo.AsMember);
+            Expression exp2 = Expression.MakeMemberAccess(lambdaParameter, relation.ForeignField.FieldInfo.AsMember);
+
+            if (exp2.Type != exp1.Type)
+                exp2 = Expression.Convert(exp2, exp1.Type);
+
+            var expression = Expression.Equal(exp1,exp2);
 
             if (filterLambda != null)
                 expression = Expression.AndAlso(filterLambda.Body, expression);

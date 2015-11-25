@@ -14,10 +14,8 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyCulture("")]
 [assembly: NeutralResourcesLanguage("en")]
 
-[assembly: AssemblyVersion("0.9.44.*")]
-[assembly: AssemblyInformationalVersion("0.9.44")]
-
-[assembly: InternalsVisibleTo("Velox.DB.TextExpressions")]
+[assembly: AssemblyVersion("0.9.46.*")]
+[assembly: AssemblyInformationalVersion("0.9.46")]
 
 /*
 class LinkerSafeAttribute : System.Attribute

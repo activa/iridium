@@ -78,7 +78,6 @@ namespace Velox.DB
             {
                 return FieldInfo.GetValue(target);
             }
-
         }
 
         public class Field : FieldOrRelation
@@ -111,9 +110,12 @@ namespace Velox.DB
 
             public void UpdateFlags(FieldFlags flags, bool? state)
             {
-                if (state == true)
+                if (state == null)
+                    return;
+
+                if (state.Value)
                     Flags |= flags;
-                else if (state == false)
+                else
                     Flags &= ~flags;
             }
         }

@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>velox.db.sqlite</id>
-    <version>0.9.44</version>
+    <version>0.9.46</version>
     <title>Velox.DB.Sqlite</title>
     <authors>Philippe Leybaert</authors>
     <licenseUrl>https://github.com/velox/DB/blob/master/LICENSE</licenseUrl>
@@ -13,7 +13,7 @@
     <copyright>Copyright 2015</copyright>
     <tags>velox db sqlite</tags>
     <dependencies>
-      <dependency id="velox.db" version="0.9.28" />
+      <dependency id="velox.db" version="0.9.46" />
     </dependencies>
   </metadata>
   <files>

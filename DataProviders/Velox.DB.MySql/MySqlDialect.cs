@@ -62,7 +62,7 @@ namespace Velox.DB.MySql
             return "select last_insert_id() as " + alias;
         }
 
-        public override void CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes, SqlDataProvider datProvider)
+        public override void CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes, SqlDataProvider dataProvider)
         {
             const string longTextType = "LONGTEXT";
 
@@ -88,7 +88,7 @@ namespace Velox.DB.MySql
             if (recreateTable)
                 recreateIndexes = true;
 
-            var existingColumns = datProvider.ExecuteSqlReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=DATABASE() and TABLE_NAME=@name", new QueryParameterCollection(new { name = schema.MappedName })).ToLookup(rec => rec["COLUMN_NAME"].ToString());
+            var existingColumns = dataProvider.ExecuteSqlReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=DATABASE() and TABLE_NAME=@name", new QueryParameterCollection(new { name = schema.MappedName })).ToLookup(rec => rec["COLUMN_NAME"].ToString());
 
             var parts = new List<string>();
 
@@ -147,10 +147,7 @@ namespace Velox.DB.MySql
             if (createNew)
                 sql += ")";
 
-
-            datProvider.ExecuteSql(sql, null);
-
-
+            dataProvider.ExecuteSql(sql, null);
         }
 
         public override string SqlFunction(Function function, params string[] parameters)

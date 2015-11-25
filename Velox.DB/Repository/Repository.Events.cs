@@ -10,7 +10,7 @@ namespace Velox.DB
     {
         public override void Fire_ObjectCreating(object obj, ref bool cancel) { _events.Fire_ObjectCreating(Context, (T)obj, ref cancel); }
         public override void Fire_ObjectCreated(object obj) { _events.Fire_ObjectCreated(Context, (T)obj); }
-        public override void Fire_ObjectSaving(object obj, ref bool cancel) { _events.Fire_ObjectCreating(Context, (T)obj, ref cancel); }
+        public override void Fire_ObjectSaving(object obj, ref bool cancel) { _events.Fire_ObjectSaving(Context, (T)obj, ref cancel); }
         public override void Fire_ObjectSaved(object obj) { _events.Fire_ObjectSaved(Context, (T)obj); }
         public override void Fire_ObjectDeleting(object obj, ref bool cancel) { _events.Fire_ObjectDeleting(Context, (T)obj, ref cancel); }
         public override void Fire_ObjectDeleted(object obj) { _events.Fire_ObjectDeleted(Context, (T)obj); }
@@ -96,7 +96,6 @@ namespace Velox.DB
 
         private readonly EventHandlers _events = new EventHandlers();
 
-        internal Vx.IEvents<T> Events { get { return _events; } }
-
+        internal Vx.IEvents<T> Events => _events;
     }
 }

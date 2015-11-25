@@ -44,11 +44,7 @@ namespace Velox.DB
             Visit(node.Expression);
 
             var schema = _context.GetSchema(node.Expression.Type, autoCreate: false);
-
-            if (schema == null) 
-                return node;
-
-            var relation = schema.Relations[node.Member.Name];
+            var relation = schema?.Relations[node.Member.Name];
 
             if (relation == null) 
                 return node;
@@ -84,10 +80,5 @@ namespace Velox.DB
 
             return relations;
         }
-
-
     }
-
-
-    
 }

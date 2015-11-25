@@ -28,9 +28,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using Velox.DB.Core;
-using Velox.DB.Sql;
 
 namespace Velox.DB
 {
@@ -175,8 +172,4 @@ namespace Velox.DB
         public abstract void Fire_ObjectDeleting(object obj, ref bool cancel);
         public abstract void Fire_ObjectDeleted(object obj);
     }
-
-
-
-
 }
