@@ -261,6 +261,21 @@ namespace Velox.DB
             throw new NotSupportedException();
         }
 
+        public void BeginTransaction(Vx.IsolationLevel isolationLevel)
+        {
+            
+        }
+
+        public void CommitTransaction()
+        {
+            
+        }
+
+        public void RollbackTransaction()
+        {
+            
+        }
+
         public void Purge(OrmSchema schema)
         {
             using (var bucket = GetBucket(schema))

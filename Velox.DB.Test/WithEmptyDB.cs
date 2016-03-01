@@ -309,7 +309,7 @@ namespace Velox.DB.Test
                     lock (ids)
                     {
                         if (ids.Contains(customer.CustomerID))
-                            failedList.Add("Dupicate CustomerID " + customer.CustomerID + " for " + customer.Name);
+                            failedList.Add($"Dupicate CustomerID {customer.CustomerID} for {customer.Name}");
 
                         ids.Add(customer.CustomerID);
                     }
@@ -321,7 +321,7 @@ namespace Velox.DB.Test
                     {
                         if (customer.Name != tRead.Result.Name)
                             lock (failedList)
-                                failedList.Add(string.Format("Customer == ({0},{1})" + ", but should be ({2},{3})", tRead.Result.CustomerID, tRead.Result.Name, customer.CustomerID, customer.Name));
+                                failedList.Add($"Customer == ({tRead.Result.CustomerID},{tRead.Result.Name}), but should be ({customer.CustomerID},{customer.Name})");
                     });
                 });
             }
@@ -370,7 +370,7 @@ namespace Velox.DB.Test
                     lock (ids)
                     {
                         if (ids.Contains(customer.CustomerID))
-                            failedList.Add("Dupicate CustomerID " + customer.CustomerID + " for " + customer.Name);
+                            failedList.Add($"Duplicate CustomerID {customer.CustomerID} for {customer.Name}");
 
                         ids.Add(customer.CustomerID);
                     }
@@ -382,7 +382,7 @@ namespace Velox.DB.Test
 
                     if (customer.Name != newCustomer.Name)
                         lock (failedList)
-                            failedList.Add(string.Format("Customer == ({0},{1})" + ", but should be ({2},{3})", newCustomer.CustomerID, newCustomer.Name, customer.CustomerID, customer.Name));
+                            failedList.Add($"Customer == ({newCustomer.CustomerID},{newCustomer.Name}), but should be ({customer.CustomerID},{customer.Name})");
 
                 });
             }
@@ -819,5 +819,55 @@ namespace Velox.DB.Test
             rec.Key2.Should().Be(2);
             rec.Name.Should().Be("John");
         }
+
+        [Test]
+        public void TransactionRollback()
+        {
+            DB.Products.Count().Should().Be(0);
+
+            using (var transaction = new Vx.Transaction(DB))
+            {
+                DB.Products.Insert(new Product() {ProductID = "X", Description = "X"});
+
+                transaction.Rollback();
+            }
+
+            DB.Products.Count().Should().Be(0);
+
+
+        }
+
+        [Test]
+        public void TransactionImplicitRollback()
+        {
+            DB.Products.Count().Should().Be(0);
+
+            using (var transaction = new Vx.Transaction(DB))
+            {
+                DB.Products.Insert(new Product() { ProductID = "X", Description = "X" });
+            }
+
+            DB.Products.Count().Should().Be(0);
+
+
+        }
+
+        [Test]
+        public void TransactionCommit()
+        {
+            DB.Products.Count().Should().Be(0);
+
+            using (var transaction = new Vx.Transaction(DB))
+            {
+                DB.Products.Insert(new Product() { ProductID = "X", Description = "X" });
+
+                transaction.Commit();
+            }
+
+            DB.Products.Count().Should().Be(1);
+
+
+        }
+
     }
 }

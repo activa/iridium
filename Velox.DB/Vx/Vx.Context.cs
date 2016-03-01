@@ -267,5 +267,48 @@ namespace Velox.DB
                 DataProvider = null;
             }
         }
+
+        public enum IsolationLevel
+        {
+            None,
+            Chaos,
+            ReadUncommitted,
+            ReadCommitted,
+            RepeatableRead,
+            Serializable,
+            Snapshot,
+        }
+
+
+        public class Transaction : IDisposable
+        {
+            private Context _context;
+
+            public Transaction(Context context, IsolationLevel isolationLevel = IsolationLevel.Serializable)
+            {
+                _context = context;
+
+                _context.DataProvider.BeginTransaction(isolationLevel);
+            }
+
+            public void Commit()
+            {
+                _context.DataProvider.CommitTransaction();
+
+                _context = null;
+            }
+
+            public void Rollback()
+            {
+                _context.DataProvider.RollbackTransaction();
+
+                _context = null;
+            }
+
+            public void Dispose()
+            {
+                _context?.DataProvider.RollbackTransaction();
+            }
+        }
     }
 }

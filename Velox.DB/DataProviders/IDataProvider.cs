@@ -52,5 +52,9 @@ namespace Velox.DB
         int ExecuteSql(string sql, QueryParameterCollection parameters);
         IEnumerable<SerializedEntity> Query(string sql, QueryParameterCollection parameters);
         IEnumerable<object> QueryScalar(string sql, QueryParameterCollection parameters);
+
+        void BeginTransaction(Vx.IsolationLevel isolationLevel = Vx.IsolationLevel.None);
+        void CommitTransaction();
+        void RollbackTransaction();
     }
 }

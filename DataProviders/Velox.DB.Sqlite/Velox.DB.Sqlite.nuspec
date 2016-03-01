@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>velox.db.sqlite</id>
-    <version>0.9.46</version>
+    <version>0.9.49</version>
     <title>Velox.DB.Sqlite</title>
     <authors>Philippe Leybaert</authors>
     <licenseUrl>https://github.com/velox/DB/blob/master/LICENSE</licenseUrl>

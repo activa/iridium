@@ -88,6 +88,6 @@
       <VersionString>$([System.Text.RegularExpressions.Regex]::Match($(In), $(Pattern)))</VersionString>
     </PropertyGroup>
     <XmlPoke Namespaces="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd" XmlInputPath="$(MSBuildProjectName).nuspec" Query="package/metadata/version" Value="$(VersionString)" />
-    <Exec Condition="'$(Configuration)' == 'Release'" Command="nuget.exe pack $(MSBuildProjectName).nuspec" />
+    <Exec Condition="'$(Configuration)' == 'Release'" Command="c:\tools\nuget.exe pack $(MSBuildProjectName).nuspec" />
   </Target>
 </Project>

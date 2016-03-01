@@ -427,6 +427,10 @@ namespace Velox.DB.Sql
             return results?.Select(r => r.First().Value);
         }
 
+        public abstract void BeginTransaction(Vx.IsolationLevel isolationLevel);
+        public abstract void CommitTransaction();
+        public abstract void RollbackTransaction();
+
         public virtual void Purge(OrmSchema schema)
         {
             ExecuteSql(SqlDialect.TruncateTableSql(schema.MappedName), null);

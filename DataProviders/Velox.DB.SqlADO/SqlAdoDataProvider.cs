@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Velox.DB.Sql;
@@ -46,6 +47,7 @@ namespace Velox.DB.Sql
         public string ConnectionString { get; set; }
 
         private readonly ThreadLocal<DbConnection> _localConnection = new ThreadLocal<DbConnection>(true);
+        private readonly ThreadLocal<Stack<DbTransaction>> _transactionStack = new ThreadLocal<Stack<DbTransaction>>(() => new Stack<DbTransaction>());
 
         protected SqlAdoDataProvider()
         {
@@ -108,6 +110,9 @@ namespace Velox.DB.Sql
             dbCommand.CommandType = CommandType.Text;
             dbCommand.CommandText = sqlQuery;
 
+            dbCommand.Transaction = CurrentTransaction;
+
+
             dbCommand.CommandText = Regex.Replace(sqlQuery, @"@(?<name>[a-z0-9A-Z_]+)", match => SqlDialect.CreateParameterExpression(match.Value.Substring(1)));
 
             if (parameters != null)
@@ -140,6 +145,8 @@ namespace Velox.DB.Sql
         {
             try
             {
+                BeginTransaction(Vx.IsolationLevel.None);
+
                 List<Dictionary<string, object>> records = new List<Dictionary<string, object>>();
 
                 using (var cmd = CreateCommand(sql, parameters?.AsDictionary()))
@@ -169,7 +176,7 @@ namespace Velox.DB.Sql
             }
             finally
             {
-                CloseConnection();
+                CommitTransaction();
             }
         }
 
@@ -177,6 +184,8 @@ namespace Velox.DB.Sql
         {
             try
             {
+                BeginTransaction(Vx.IsolationLevel.None);
+
                 using (var cmd = CreateCommand(sql, parameters?.AsDictionary()))
                 {
                     return cmd.ExecuteNonQuery();
@@ -184,7 +193,7 @@ namespace Velox.DB.Sql
             }
             finally
             {
-                CloseConnection();
+                CommitTransaction();
             }
         }
 
@@ -194,6 +203,94 @@ namespace Velox.DB.Sql
             {
                 connection.Dispose();
             }
+        }
+
+        public override void BeginTransaction(Vx.IsolationLevel isolationLevel)
+        {
+            IsolationLevel adoIsolationLevel = IsolationLevel.Serializable;
+
+            switch (isolationLevel)
+            {
+                case Vx.IsolationLevel.None: _transactionStack.Value.Push(null);
+                    return;
+                    
+                case Vx.IsolationLevel.Chaos: adoIsolationLevel = IsolationLevel.Chaos;
+                    break;
+                case Vx.IsolationLevel.ReadUncommitted: adoIsolationLevel=IsolationLevel.ReadUncommitted;
+                    break;
+                case Vx.IsolationLevel.ReadCommitted: adoIsolationLevel = IsolationLevel.ReadCommitted;
+                    break;
+                case Vx.IsolationLevel.RepeatableRead: adoIsolationLevel = IsolationLevel.RepeatableRead;
+                    break;
+                case Vx.IsolationLevel.Serializable: adoIsolationLevel = IsolationLevel.Serializable;
+                    break;
+                case Vx.IsolationLevel.Snapshot: adoIsolationLevel = IsolationLevel.Snapshot;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(isolationLevel), isolationLevel, null);
+            }
+
+            var transaction = Connection.BeginTransaction(adoIsolationLevel);
+
+            _transactionStack.Value.Push(transaction);
+
+            //_currentTransaction = transaction;
+        }
+
+        public override void CommitTransaction()
+        {
+            var transaction = _transactionStack.Value.Pop();
+
+            transaction?.Commit();
+
+            if (_transactionStack.Value.Count == 0)
+                CloseConnection();
+        }
+
+        public override void RollbackTransaction()
+        {
+            _transactionStack.Value.Pop()?.Rollback();
+
+            if (_transactionStack.Value.Count == 0)
+                CloseConnection();
+        }
+
+        private DbTransaction CurrentTransaction
+        {
+            get { return _transactionStack.Value.Reverse().FirstOrDefault(t => t != null); }
+        }
+
+        //private DbTransaction _currentTransaction;
+
+        //private readonly Stack<DbTransaction> _transactionStack = new Stack<DbTransaction>();
+    }
+
+    public interface ITransaction
+    {
+    }
+
+    public class SqlAdoTransaction : ITransaction
+    {
+        private readonly DbTransaction _transaction;
+
+        public SqlAdoTransaction()
+        {
+            _transaction = null;
+        }
+
+        public SqlAdoTransaction(DbTransaction transaction)
+        {
+            _transaction = transaction;
+        }
+
+        public void Commit()
+        {
+            _transaction?.Commit();
+        }
+
+        public void Rollback()
+        {
+            _transaction?.Rollback();
         }
     }
 }

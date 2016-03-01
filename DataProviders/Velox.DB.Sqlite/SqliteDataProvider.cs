@@ -114,6 +114,38 @@ namespace Velox.DB.Sqlite
             }
         }
 
+        private readonly ThreadLocal<Stack<bool>> _transactionStack = new ThreadLocal<Stack<bool>>(() => new Stack<bool>());
+
+        public override void BeginTransaction(Vx.IsolationLevel isolationLevel)
+        {
+            if (isolationLevel == Vx.IsolationLevel.None)
+                _transactionStack.Value.Push(false);
+            else
+            {
+                ExecuteSql("BEGIN TRANSACTION", null);
+
+                _transactionStack.Value.Push(true);
+            }
+
+        }
+
+        public override void CommitTransaction()
+        {
+            bool realTransaction = _transactionStack.Value.Pop();
+
+            if (realTransaction)
+                ExecuteSql("COMMIT", null);
+
+        }
+
+        public override void RollbackTransaction()
+        {
+            bool realTransaction = _transactionStack.Value.Pop();
+
+            if (realTransaction)
+                ExecuteSql("ROLLBACK", null);
+        }
+
 
         private IntPtr CreateCommand(string sql, QueryParameterCollection parameters)
         {
