@@ -57,6 +57,9 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+    <None Include="Velox.DB.MySql.nuspec">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="..\Velox.DB.SqlADO\Velox.DB.SqlADO.projitems" Label="Shared" Condition="Exists('..\Velox.DB.SqlADO\Velox.DB.SqlADO.projitems')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

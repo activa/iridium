@@ -183,7 +183,7 @@ namespace Velox.DB
                 {
                     var serializedForeignObject = localFieldValue == null ? null : foreignRepository.DataProvider.ReadObject(new Dictionary<string, object> {{ForeignField.MappedName,localFieldValue}}, ForeignSchema);
 
-                    var relationObject = serializedForeignObject != null ? ForeignSchema.UpdateObject(Activator.CreateInstance(FieldType), serializedForeignObject) : null;
+                    var relationObject = serializedForeignObject != null ? Vx.WithLoadedRelations(ForeignSchema.UpdateObject(Activator.CreateInstance(FieldType), serializedForeignObject),ForeignSchema.DatasetRelations) : null;
 
                     if (ReverseRelation != null)
                         relationObject = ReverseRelation.SetField(relationObject, parentObject);

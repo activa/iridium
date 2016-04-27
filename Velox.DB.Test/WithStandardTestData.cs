@@ -1,5 +1,6 @@
 using FluentAssertions;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 #if MSTEST
@@ -179,6 +180,33 @@ namespace Velox.DB.Test
             customer.Should().NotBeNull();
             customer.Orders.Should().NotBeNull();
             customer.Orders.Count().Should().Be(1);
+        }
+
+
+        [Test]
+        public void AutoloadRelations_OneToMany_Deep()
+        {
+            var customer = DB.Customers.Read(2);//TODO
+
+            customer.Should().NotBeNull();
+            customer.Orders.Should().NotBeNull();
+            customer.Orders.Count().Should().Be(1);
+
+            Order order = DB.Orders.Read(customer.Orders.First().OrderID);
+
+            order.Should().NotBeNull();
+
+            Vx.LoadRelations(order, _ => _.Customer);
+
+            order.Customer.Should().NotBeNull();
+            order.Customer.CustomerID.Should().Be(customer.CustomerID);
+            order.Customer.Orders.Should().NotBeNull();
+            order.Customer.Orders.Count().Should().Be(1);
+
+
+
+
+
         }
 
 
