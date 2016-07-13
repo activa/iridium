@@ -110,7 +110,7 @@ namespace Velox.DB.Sql
                 }
                 else if (relation == null)
                 {
-                    return leftAlias + "." + memberName;
+					return leftAlias + "." + _schema.FieldsByFieldName[memberName]?.MappedName ?? memberName;
                 }
             }
 
