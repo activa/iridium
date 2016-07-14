@@ -34,6 +34,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Attributes\ColumnAttributes.cs" />
     <Compile Include="Attributes\PreserveAttribute.cs" />
     <Compile Include="Attributes\RelationAttributes.cs" />
