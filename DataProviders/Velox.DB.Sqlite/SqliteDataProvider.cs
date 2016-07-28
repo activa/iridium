@@ -39,7 +39,6 @@ namespace Velox.DB.Sqlite
     public class SqliteDataProvider : SqlDataProvider<SqliteDialect>
     {
         private IntPtr? _db;
-        private string _fileName;
         private readonly ThreadLocal<long?> _lastRowId = new ThreadLocal<long?>();
         private readonly ISqliteAPI _sqlite3;
 
@@ -53,10 +52,12 @@ namespace Velox.DB.Sqlite
             _sqlite3 = new SqliteAPI();
         }
 
-        public SqliteDataProvider(string fileName)
+        public SqliteDataProvider(string fileName = null, SqliteDateFormat dateFormat = SqliteDateFormat.String)
         {
             _sqlite3 = new SqliteAPI();
-            _fileName = fileName;
+
+            FileName = fileName;
+            DateFormat = dateFormat;
         }
 
         public IntPtr DbHandle
@@ -70,7 +71,7 @@ namespace Velox.DB.Sqlite
 
                     IntPtr db;
 
-                    _sqlite3.open_v2(_fileName, out db, (SqliteOpenFlags.ReadWrite | SqliteOpenFlags.Create | SqliteOpenFlags.FullMutex));
+                    _sqlite3.open_v2(FileName, out db, (SqliteOpenFlags.ReadWrite | SqliteOpenFlags.Create | SqliteOpenFlags.FullMutex));
 
                     _db = db;
                 }
@@ -79,16 +80,10 @@ namespace Velox.DB.Sqlite
             }
         }
 
-        public string FileName
-        {
-            get { return _fileName; }
-            set { _fileName = value; }
-        }
+        public string FileName { get; set; }
+        public SqliteDateFormat DateFormat { get; set; } = SqliteDateFormat.String;
 
-        public override bool RequiresAutoIncrementGetInSameStatement
-        {
-            get { return false; }
-        }
+        public override bool RequiresAutoIncrementGetInSameStatement => false;
 
         public override int ExecuteSql(string sql, QueryParameterCollection parameters)
         {
@@ -188,7 +183,25 @@ namespace Velox.DB.Sqlite
                         else if (parameterType.Is(TypeFlags.Array | TypeFlags.Byte))
                             _sqlite3.bind_blob(stmt, paramNumber, (byte[])value);
                         else if (parameterType.Is(TypeFlags.DateTime))
-                            _sqlite3.bind_int64(stmt, paramNumber, ((DateTime)value).Ticks);
+                        {
+                            switch (DateFormat)
+                            {
+                                case SqliteDateFormat.String:
+                                    _sqlite3.bind_text(stmt, paramNumber, ((DateTime)value).ToString("u"));
+                                    break;
+//                                case SqliteDateFormat.Julian:
+//                                    _sqlite3.bind_int64(stmt, paramNumber, ((DateTime)value).Ticks);
+//                                    break;
+//                                case SqliteDateFormat.Unix:
+//                                    _sqlite3.bind_int(stmt, paramNumber, ((DateTime)value).Ticks);
+//                                    break;
+                                case SqliteDateFormat.Ticks:
+                                    _sqlite3.bind_int64(stmt, paramNumber, ((DateTime)value).Ticks);
+                                    break;
+                                default:
+                                    throw new ArgumentOutOfRangeException();
+                            }
+                        }
                         else
                             _sqlite3.bind_text(stmt, paramNumber, value.Convert<string>());
                     }
@@ -204,8 +217,6 @@ namespace Velox.DB.Sqlite
 
             try
             {
-                
-
                 for (;;)
                 {
                     var returnCode = _sqlite3.step(stmt);
@@ -247,20 +258,16 @@ namespace Velox.DB.Sqlite
                             case SqliteColumnType.Null:
                                 record[fieldName] = null;
                                 break;
-
                         }
-
                     }
 
                     yield return record;
-
                 }
             }
             finally
             {
                 _sqlite3.finalize(stmt);
             }
-
         }
 
         public override void Purge(OrmSchema schema)
@@ -268,7 +275,7 @@ namespace Velox.DB.Sqlite
             var tableName = SqlDialect.QuoteTable(schema.MappedName);
 
             ExecuteSql("DELETE FROM " + tableName, null);
-            ExecuteSql("delete from sqlite_sequence where name=@name", new QueryParameterCollection(new { name = schema.MappedName }));
+            ExecuteSql("delete from sqlite_sequence where name=@name", new QueryParameterCollection(new {name = schema.MappedName}));
         }
 
         public override long GetLastAutoIncrementValue(OrmSchema schema)
@@ -288,4 +295,12 @@ namespace Velox.DB.Sqlite
         }
     }
 
+
+    public enum SqliteDateFormat
+    {
+        String,
+        //Julian,
+        //Unix,
+        Ticks
+    }
 }

@@ -57,8 +57,8 @@
       <HintPath>..\..\packages\Microsoft.Net.Http.2.2.29\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Primitives.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Velox.Core, Version=0.9.15.406, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\velox.core.0.9.15.406\lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\Velox.Core.dll</HintPath>
+    <Reference Include="Velox.Core, Version=1.0.0.27232, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\velox.core.1.0.0.5\lib\portable-net45+netcore45+wpa81+wp8\Velox.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

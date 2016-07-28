@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -17,64 +16,27 @@ namespace Velox.DB.Sqlite.win32
 
         public static void CheckAndLoadSqliteLibrary()
         {
-            bool isWindows = false;
-            string architecture = null;
-
-            var osVersionProp = typeof (System.Environment).GetRuntimeProperty("OSVersion");
-
-            if (osVersionProp != null)
+            if (RuntimePlatform.OperatingSystem == RuntimePlatform.OS.UWP)
             {
-                var platform = osVersionProp.PropertyType.GetRuntimeProperty("Platform").GetValue(osVersionProp.GetValue(null));
-                //var osVersion = osVersionProp.GetValue(null);
-
-                isWindows = platform.ToString() == "Win32NT";
+                LoadLibrary("sqlite3.dll");
+                return;
             }
 
-            if (!isWindows)
-                return;
-
-            var moduleProperty = typeof(Type).Inspector().GetProperty("Module");
-
-            if (moduleProperty == null)
-                return;
-
-            var getPeKindMethod = moduleProperty.PropertyType.Inspector().GetMember("GetPEKind").FirstOrDefault() as MethodInfo;
-
-            if (getPeKindMethod != null)
+            if (RuntimePlatform.OperatingSystem == RuntimePlatform.OS.Win32)
             {
-                object[] parameters = new object[] {null,null};
+                var getExecutingAssemblyMethod = typeof(Assembly).GetRuntimeMethod("GetExecutingAssembly", new Type[0]);
+                var locationProperty = typeof(Assembly).GetRuntimeProperty("CodeBase");
 
-                getPeKindMethod.Invoke(moduleProperty.GetValue(typeof (object)), parameters);
+                var assemblyPath = new Uri((string)locationProperty.GetValue((Assembly)getExecutingAssemblyMethod.Invoke(null, new object[0])));
 
-                switch (parameters[1].ToString())
+                var dllName = Path.Combine(Path.GetDirectoryName(assemblyPath.LocalPath), "win32-" + RuntimePlatform.Architecture + "\\sqlite3.dll");
+
+                var dll = LoadLibrary(dllName);
+
+                if ((long)dll == 0)
                 {
-                    case "I386":
-                        architecture = "x86";
-                        break;
-                    case "AMD64":
-                        architecture = "x64";
-                        break;
-                    case "ARM":
-                        architecture = "ARM";
-                        break;
+                    throw new Exception("Unable to load sqlite3 dll from " + dllName);
                 }
-            }
-
-            if (architecture != "x86" && architecture != "x64")
-                return;
-
-            var getExecutingAssemblyMethod = typeof (Assembly).GetRuntimeMethod("GetExecutingAssembly", new Type[0]);
-            var locationProperty = typeof (Assembly).GetRuntimeProperty("CodeBase");
-
-            var assemblyPath = new Uri((string) locationProperty.GetValue((Assembly) getExecutingAssemblyMethod.Invoke(null, new object[0])));
-
-            var dllName = Path.Combine(Path.GetDirectoryName(assemblyPath.LocalPath), "win32-" + architecture + "\\sqlite3.dll");
-
-            var dll = LoadLibrary(dllName);
-
-            if ((long)dll == 0)
-            {
-                throw new Exception("Unable to load sqlite3 dll from " + dllName);
             }
         }
 

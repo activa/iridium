@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Linq.Expressions;
@@ -63,6 +64,32 @@ namespace Velox.DB.Test
             CreateTable<OneToOneRec2>(recreateTable:true);
         }
 
+        private static Dictionary<string, Func<MyContext>> _contextFactories;
+        private static Dictionary<string,MyContext> _contexts = new Dictionary<string, MyContext>();
+
+        static MyContext()
+        {
+            _contextFactories = new Dictionary<string,Func<MyContext>>()
+            {
+               { "sqlite", () => new SqliteStorage() },
+                { "sqlserver", () => new SqlServerStorage() },
+                { "mysql", () => new MySqlStorage() },
+                { "memory", () => new MemoryStorage() }
+            };
+
+        }
+
+        public static MyContext Get(string driver)
+        {
+            if (_contexts.ContainsKey(driver))
+                return _contexts[driver];
+
+            _contexts[driver] = _contextFactories[driver]();
+
+            return _contexts[driver];
+        }
+
+        /*
         private static MyContext _instance;
 
         public static MyContext Instance
@@ -73,6 +100,7 @@ namespace Velox.DB.Test
             get { return _instance ?? (_instance = new SqliteStorage()); }
 //            get { return _instance ?? (_instance = new ServiceStorage()); }
         }
+        */
     }
 
     public class MySqlStorage : MyContext
@@ -82,7 +110,7 @@ namespace Velox.DB.Test
 
     public class SqlServerStorage : MyContext
     {
-        public SqlServerStorage() : base(new SqlServerDataProvider("Server=MINI;Database=velox;UID=velox;PWD=velox")) { }
+        public SqlServerStorage() : base(new SqlServerDataProvider("Server=NOOKIE;Database=velox;UID=velox;PWD=velox")) { }
     }
 
     public class SqliteStorage : MyContext

@@ -36,6 +36,11 @@ namespace Velox.DB
             return Vx.DataSet<T>().InsertOrUpdate(entity, saveRelations);
         }
 
+        public static bool Save<T>(this T entity, bool saveRelations = false, bool? create = null) where T : IEntity
+        {
+            return Vx.DataSet<T>().InsertOrUpdate(entity, saveRelations);
+        }
+
         public static bool Insert<T>(this T entity, bool saveRelations = false) where T : IEntity
         {
             return Vx.DataSet<T>().Insert(entity, saveRelations);

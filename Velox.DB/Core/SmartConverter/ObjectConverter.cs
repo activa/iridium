@@ -146,17 +146,38 @@ namespace Velox.Core
 
         private static DateTime? ToDateTime(object value, TypeInspector type)
         {
-            if (type.Is(TypeFlags.Integer64))
+            if (type.Is(TypeFlags.Integer64)) // Assume .NET ticks
             {
                 return new DateTime(System.Convert.ToInt64(value));
             }
 
-            if (type.Is(TypeFlags.Numeric))
+            if (type.Is(TypeFlags.Integer32)) // Assume Unix seconds since 1970-01-01
             {
-                return new DateTime(1970, 1, 1).AddSeconds(System.Convert.ToDouble(value));
+                return new DateTime(1970,1,1).AddSeconds(System.Convert.ToInt32(value));
+            }
+
+            if (type.Is(TypeFlags.FloatingPoint))
+            {
+                return JulianToDateTime(System.Convert.ToDouble(value));
             }
 
             return null;
+        }
+
+        private static DateTime JulianToDateTime(double julian)
+        {
+            long L = (long)julian + 68569;
+            long N = (4 * L) / 146097;
+            L = L - (146097 * N + 3) / 4;
+            long I = 4000 * (L + 1) / 1461001;
+            L = L - (1461 * I) / 4 + 31;
+            long J = (80 * L) / 2447;
+            int day = (int)(L - (long)((2447 * J) / 80));
+            L = J / 11;
+            int month = (int)(J + 2 - 12 * L);
+            int year = (int)(100 * (N - 49) + I + L);
+
+            return new DateTime(year,month,day).Add(TimeSpan.FromDays(julian-(long)julian));
         }
 
         private static TimeSpan? ToTimeSpan(object value, TypeInspector type)

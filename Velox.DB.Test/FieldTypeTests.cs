@@ -19,18 +19,19 @@ using NUnit.Framework;
 
 namespace Velox.DB.Test
 {
-    [TestFixture]
-    public class FieldTypeTests
+    [TestFixture("sqlite")]
+    [TestFixture("sqlserver")]
+    [TestFixture("memory")]
+    [TestFixture("mysql")]
+    public class FieldTypeTests : TestFixture
     {
-        private MyContext DB = MyContext.Instance;
-
         [SetUp]
         public void SetupTest()
         {
             DB.PurgeAll();
         }
 
-        public FieldTypeTests()
+        public FieldTypeTests(string driver) : base(driver)
         {
             DB.CreateAllTables();
         }

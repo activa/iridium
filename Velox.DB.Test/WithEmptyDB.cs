@@ -3,37 +3,31 @@ using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting;
 using System.Threading;
 using System.Threading.Tasks;
 
 
-#if MSTEST
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-
-using TestFixtureAttribute = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestClassAttribute;
-using SetUpAttribute = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestInitializeAttribute;
-using TestAttribute = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestMethodAttribute;
-
-#else
 using NUnit.Framework;
-#endif
 
 namespace Velox.DB.Test
 {
-    [TestFixture]
-    public class WithEmptyDB
+    [TestFixture("sqlite")]
+    [TestFixture("sqlserver")]
+    [TestFixture("memory")]
+    //[TestFixture("mysql")]
+    public class WithEmptyDB : TestFixture
     {
-        private MyContext DB = MyContext.Instance;
+        public WithEmptyDB(string driver) : base(driver)
+        {
+            DB.CreateAllTables();
+
+        }
 
         [SetUp]
         public void SetupTest()
         {
             DB.PurgeAll();
-        }
-
-        public WithEmptyDB()
-        {
-            DB.CreateAllTables();
         }
 
         [Test]
@@ -144,7 +138,7 @@ namespace Velox.DB.Test
 
             SalesPerson salesPerson = new SalesPerson {Name = "Test"};
 
-            salesPerson.Save();
+            DB.SalesPeople.Save(salesPerson);
 
             var order = new Order
             {
@@ -161,7 +155,7 @@ namespace Velox.DB.Test
             Assert.AreEqual(order.Customer.CustomerID, customer.CustomerID);
 
             order.SalesPersonID = salesPerson.ID;
-            order.Save();
+            DB.Orders.Save(order);
 
             order = DB.Orders.Read(id, (o) => o.SalesPerson);
 
@@ -169,7 +163,7 @@ namespace Velox.DB.Test
 
             order.SalesPersonID = null;
             order.SalesPerson = null;
-            order.Save();
+            DB.Orders.Save(order);
 
             order = DB.Orders.Read(id, o => o.SalesPerson);
 
@@ -256,7 +250,7 @@ namespace Velox.DB.Test
 
             SalesPerson salesPerson = new SalesPerson { Name = "Test" };
 
-            salesPerson.Save();
+            DB.SalesPeople.Save(salesPerson);
 
             Order[] orders = new[]
             {
@@ -474,8 +468,11 @@ namespace Velox.DB.Test
 
             Assert.IsTrue(customer.CustomerID > 0);
 
-            customer = DB.Customers.Read(customer.CustomerID);
+            int customerId = customer.CustomerID;
 
+            customer = DB.Customers.Read(customerId);
+
+            Assert.NotNull(customer,$"Customer ID {customerId}");
             Assert.AreEqual("A",customer.Name);
         }
 
@@ -519,7 +516,7 @@ namespace Velox.DB.Test
                 CustomerID = customer.CustomerID
             };
 
-            Assert.IsTrue(order.Save());
+            Assert.IsTrue(DB.Orders.Save(order));
 
             Order order2 = DB.Orders.Read(order.OrderID, o => o.Customer);
 
@@ -543,7 +540,7 @@ namespace Velox.DB.Test
                 Customer = customer
             };
 
-            Assert.IsTrue(order.Save());
+            Assert.IsTrue(DB.Orders.Save(order));
 
             Order order2 = DB.Orders.Read(order.OrderID, o => o.Customer);
 
@@ -565,7 +562,7 @@ namespace Velox.DB.Test
                 Customer = customer
             };
 
-            Assert.IsTrue(order.Save(true));
+            Assert.IsTrue(DB.Orders.Save(order,saveRelations: true));
 
             Order order2 = DB.Orders.Read(order.OrderID, o => o.Customer);
 
@@ -590,7 +587,7 @@ namespace Velox.DB.Test
                 CustomerID = customer.CustomerID
             };
 
-            Assert.IsTrue(order.Save());
+            Assert.IsTrue(DB.Orders.Save(order));
 
             Vx.LoadRelations(() => order.Customer);
 
@@ -618,7 +615,7 @@ namespace Velox.DB.Test
 
             order.CustomerID = cust.CustomerID;
 
-            Assert.IsTrue(order.Save());
+            Assert.IsTrue(DB.Orders.Save(order));
 
             order = DB.Orders.Read(order.OrderID);
 
@@ -705,7 +702,7 @@ namespace Velox.DB.Test
                 }
             };
 
-            Assert.IsTrue(order.Save(true));
+            Assert.IsTrue(DB.Orders.Save(order,saveRelations:true));
 
             order = DB.Orders.Read(order.OrderID, o => o.OrderItems);
 
@@ -716,7 +713,7 @@ namespace Velox.DB.Test
 
             order.OrderItems.Add(new OrderItem { Description = "test", Qty = 2, Price = 1000.0 });
 
-            Assert.IsTrue(order.Save(true));
+            Assert.IsTrue(DB.Orders.Save(order,saveRelations:true));
 
             order = DB.Orders.Read(order.OrderID, o => o.OrderItems);
 
@@ -756,7 +753,7 @@ namespace Velox.DB.Test
                 };
 
 
-                order.Save();
+                DB.Orders.Save(order);
 
                 for (int j = 0; j < 20; j++)
                 {
@@ -765,7 +762,7 @@ namespace Velox.DB.Test
 
                     OrderItem item = new OrderItem() { Description = "test", Qty = (short)qty, Price = price, OrderID = order.OrderID };
 
-                    item.Save();
+                    DB.OrderItems.Save(item);
 
                     total += qty * price;
                 }

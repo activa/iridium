@@ -110,7 +110,7 @@ namespace Velox.DB.Sql
                 }
                 else if (relation == null)
                 {
-					return leftAlias + "." + _schema.FieldsByFieldName[memberName]?.MappedName ?? memberName;
+					return leftAlias + "." + (_schema.FieldsByFieldName[memberName]?.MappedName ?? memberName);
                 }
             }
 
@@ -234,11 +234,11 @@ namespace Velox.DB.Sql
                 switch (methodName)
                 {
                     case "StartsWith":
-                        return string.Format("({0} like {1})", arg, CreateParameter(stringArguments[0] + "%"));
+                        return $"({arg} like {CreateParameter(stringArguments[0] + "%")})";
                     case "EndsWith":
-                        return string.Format("({0} like {1})", arg, CreateParameter("%" + stringArguments[0]));
+                        return $"({arg} like {CreateParameter("%" + stringArguments[0])})";
                     case "Contains":
-                        return string.Format("({0} like {1})", arg, CreateParameter("%" + stringArguments[0] + "%"));
+                        return $"({arg} like {CreateParameter("%" + stringArguments[0] + "%")})";
                     case "Trim":
                         return string.Format(_sqlDialect.SqlFunction(SqlDialect.Function.Trim), stringArguments[0]);
                 }

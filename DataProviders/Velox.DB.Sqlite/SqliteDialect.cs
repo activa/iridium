@@ -57,7 +57,6 @@ namespace Velox.DB.Sqlite
         public override string GetLastAutoincrementIdSql(string columnName, string alias, string tableName)
         {
             throw new NotSupportedException(); // Is handled in DataProvider class
-            return "select last_insert_rowid() as " + alias;
         }
 
         public override string DeleteSql(SqlTableNameWithAlias tableName, string sqlWhere)
@@ -118,7 +117,7 @@ namespace Velox.DB.Sqlite
                 if (columnMapping.Flags == TypeFlags.String && field.ColumnSize == int.MaxValue)
                     columnMapping = new { columnMapping.Flags, ColumnType = longTextType };
 
-                var part = string.Format("{0} {1}", QuoteField(field.MappedName), string.Format(columnMapping.ColumnType, field.ColumnSize, field.ColumnScale));
+                var part = $"{QuoteField(field.MappedName)} {string.Format(columnMapping.ColumnType, field.ColumnSize, field.ColumnScale)}";
 
                 if (!field.ColumnNullable || field.PrimaryKey)
                     part += " NOT";

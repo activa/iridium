@@ -16,17 +16,19 @@ using NUnit.Framework;
 
 namespace Velox.DB.Test
 {
-    [TestFixture]
-    public class WithStandardTestData
+    [TestFixture("sqlite")]
+    [TestFixture("sqlserver")]
+    [TestFixture("memory")]
+    //[TestFixture("mysql")]
+    public class WithStandardTestData : TestFixture
     {
-        private readonly MyContext DB = MyContext.Instance;
         
         private const int NUM_CUSTOMERS = 20;
         private const int NUM_PRODUCTS = 5;
         private int FIRST_CUSTOMERID = 0;
 
         
-        public WithStandardTestData()
+        public WithStandardTestData(string driver) : base(driver)
         {
             DB.CreateAllTables();
             DB.PurgeAll();
@@ -71,7 +73,7 @@ namespace Velox.DB.Test
                         OrderDate = DateTime.Now
                     };
 
-                    order.Save();
+                    DB.Orders.Save(order);
 
                     for (int itemIndex = 0; itemIndex < customerIndex%5; itemIndex++)
                     {
@@ -85,7 +87,7 @@ namespace Velox.DB.Test
                             ProductID = itemIndex == 0 ? null : products[itemIndex].ProductID
                         };
 
-                        item.Save();
+                        DB.OrderItems.Save(item);
                     }
                 }
             }
