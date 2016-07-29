@@ -13,8 +13,8 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <TargetFrameworkProfile>Profile111</TargetFrameworkProfile>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile151</TargetFrameworkProfile>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -49,7 +49,7 @@
     <Compile Include="Core\Reflection\LazyBinder.cs" />
     <Compile Include="Core\Reflection\ObjectMapper.cs" />
     <Compile Include="Core\Reflection\ReflectionExtensions.cs" />
-    <Compile Include="Core\Reflection\RuntimePlatform.cs" />
+    <Compile Include="Core\Reflection\Platform.cs" />
     <Compile Include="Core\SafeDictionary.cs" />
     <Compile Include="Core\SmartConverter\EnumConverter.cs" />
     <Compile Include="Core\SmartConverter\IStringConverter.cs" />
@@ -104,6 +104,7 @@
     <Compile Include="Vx\Vx.Context.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="project.json" />
     <None Include="Velox.DB.nuspec" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

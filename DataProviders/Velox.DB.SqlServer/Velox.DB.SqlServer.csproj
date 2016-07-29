@@ -56,15 +56,5 @@
   <Target Name="BeforeBuild">
   </Target>
   <Target Name="AfterBuild">
-    <ReadLinesFromFile File="Properties\AssemblyInfo.cs">
-      <Output TaskParameter="Lines" ItemName="ItemsFromFile" />
-    </ReadLinesFromFile>
-    <PropertyGroup>
-      <Pattern><![CDATA[(?<=\[assembly:\s*AssemblyInformationalVersion\s*\(\s*").+(?="\s*\)\s*\])]]></Pattern>
-      <In>@(ItemsFromFile)</In>
-      <VersionString>$([System.Text.RegularExpressions.Regex]::Match($(In), $(Pattern)))</VersionString>
-    </PropertyGroup>
-    <XmlPoke Namespaces="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd" XmlInputPath="$(MSBuildProjectName).nuspec" Query="package/metadata/version" Value="$(VersionString)" />
-    <Exec Condition="'$(Configuration)' == 'Release'" Command="c:\tools\nuget.exe pack $(MSBuildProjectName).nuspec" />
   </Target>
 </Project>

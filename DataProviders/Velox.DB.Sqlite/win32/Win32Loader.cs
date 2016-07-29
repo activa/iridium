@@ -16,20 +16,20 @@ namespace Velox.DB.Sqlite.win32
 
         public static void CheckAndLoadSqliteLibrary()
         {
-            if (RuntimePlatform.OperatingSystem == RuntimePlatform.OS.UWP)
+            if (Platform.Properties.OperatingSystem == Platform.OperatingSystem.UWP)
             {
                 LoadLibrary("sqlite3.dll");
                 return;
             }
 
-            if (RuntimePlatform.OperatingSystem == RuntimePlatform.OS.Win32)
+            if (Platform.Properties.OperatingSystem == Platform.OperatingSystem.Win32)
             {
                 var getExecutingAssemblyMethod = typeof(Assembly).GetRuntimeMethod("GetExecutingAssembly", new Type[0]);
                 var locationProperty = typeof(Assembly).GetRuntimeProperty("CodeBase");
 
                 var assemblyPath = new Uri((string)locationProperty.GetValue((Assembly)getExecutingAssemblyMethod.Invoke(null, new object[0])));
 
-                var dllName = Path.Combine(Path.GetDirectoryName(assemblyPath.LocalPath), "win32-" + RuntimePlatform.Architecture + "\\sqlite3.dll");
+                var dllName = Path.Combine(Path.GetDirectoryName(assemblyPath.LocalPath), "win32-" + Platform.Properties.Architecture + "\\sqlite3.dll");
 
                 var dll = LoadLibrary(dllName);
 

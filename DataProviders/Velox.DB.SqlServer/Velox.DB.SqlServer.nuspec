@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>velox.db.sqlserver</id>
-    <version>0.9.49</version>
+    <version>1.0.0</version>
     <title>Velox.DB.SqlServer</title>
     <authors>Philippe Leybaert</authors>
     <licenseUrl>http://github.com/velox/db/LICENSE</licenseUrl>
@@ -10,7 +10,7 @@
     <iconUrl>http://dstyler.com/vici/32x32/im-_IconPlain100-w32-h32.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Velox.DB data provider for SQL Server 2008+ for use in .NET 4.5, Xamarin.iOS and Xamarin.Android</description>
-    <copyright>Copyright 2015</copyright>
+    <copyright>Copyright 2015-2016 Philippe Leybaert</copyright>
     <tags>velox db sqlserver</tags>
     <dependencies>
       <dependency id="velox.db" version="0.9.49" />
