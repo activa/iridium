@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>iridium.db.sqlserver</id>
+    <version>1.0.0</version>
+    <title>Iridium SQL Server Driver</title>
+    <authors>Philippe Leybaert</authors>
+    <projectUrl>http://github.com/activa/iridium</projectUrl>
+    <licenseUrl>https://github.com/activa/iridium/blob/master/LICENSE</licenseUrl>
+    <iconUrl>http://dstyler.com/vici/32x32/im-_IconPlain100-w32-h32.png</iconUrl>
+    <tags>iridium orm sql sqlite sqlserver</tags>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Lightweight multi-platform ORM for mobile, desktop and servers. Support for Sqlite is built in for mobile and UWP platforms. For other database platforms and for Sqlite on Win32, a data provider is required to use this library. Providers for Sqlite (Win32), SQL Server and MySql are available on Nuget.</description>
+    <copyright>Copyright 2015-2016 Philippe Leybaert</copyright>
+    <dependencies>
+      <dependency id="iridium" version="1.0.0" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\Iridium.DB.SqlServer\bin\Release\Iridium.DB.SqlServer.dll" target="lib\net45" />
+    <file src="..\Iridium.DB.SqlServer.iOS\bin\iPhone\Release\Iridium.DB.SqlServer.iOS.dll" target="lib\Xamarin.iOS10" />
+    <file src="..\Iridium.DB.SqlServer.iOS\bin\iPhone\Release\Iridium.DB.SqlServer.iOS.dll" target="lib\MonoTouch10" />
+    <file src="..\Iridium.DB.SqlServer.Android\bin\Release\Iridium.DB.SqlServer.Android.dll" target="lib\MonoAndroid10" />
+  </files>
+</package>
