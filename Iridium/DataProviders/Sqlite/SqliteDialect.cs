@@ -155,7 +155,7 @@ namespace Iridium.DB
                 }
             }
 
-            var existingIndexes = dataProvider.ExecuteSqlReader("PRAGMA INDEX_LIST(' " + schema.MappedName + "')", null).ToLookup(rec => rec["name"].ToString());
+            var existingIndexes = dataProvider.ExecuteSqlReader("PRAGMA INDEX_LIST(" + QuoteTable(schema.MappedName) + ")", null).ToLookup(rec => rec["name"].ToString());
 
             foreach (var index in schema.Indexes)
             {
