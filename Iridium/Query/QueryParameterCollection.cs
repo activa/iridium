@@ -27,7 +27,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Iridium.DB.Core;
+using Iridium.DB.CoreUtil;
 
 namespace Iridium.DB
 {
@@ -53,10 +53,7 @@ namespace Iridium.DB
             set { _dic[key] = value; }
         }
 
-        public IEnumerable<string> Keys
-        {
-            get { return _dic.Keys; }
-        }
+        public IEnumerable<string> Keys => _dic.Keys;
 
         public Dictionary<string, object> AsDictionary()
         {

@@ -1,12 +1,7 @@
 namespace Iridium.DB
 {
-    public class SqliteContext : Vx.Context
+    public class SqliteContext : DbContext
     {
-        public static void Use(string dbFileName)
-        {
-            Vx.DB = new SqliteContext(dbFileName);
-        }
-
         public SqliteContext() : base(new SqliteDataProvider())
         {
         }

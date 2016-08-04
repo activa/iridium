@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Iridium.DB.Core;
+using Iridium.DB.CoreUtil;
 
 namespace Iridium.DB
 {
     internal partial class Repository<T> : Repository
     {
         [Preserve]
-        public Repository(Vx.Context context) : base(typeof(T), context)
+        public Repository(DbContext context) : base(typeof(T), context)
         {
         }
 
@@ -68,12 +68,12 @@ namespace Iridium.DB
             if (Schema.DatasetRelations != null)
             {
                 if (relations == null)
-                    relations = new HashSet<OrmSchema.Relation>(Schema.DatasetRelations);
+                    relations = new HashSet<TableSchema.Relation>(Schema.DatasetRelations);
                 else
                     relations.UnionWith(Schema.DatasetRelations);
             }
 
-            return Vx.WithLoadedRelations(obj, relations);
+            return Ir.WithLoadedRelations(obj, relations);
         }
 
         internal bool Save(T obj, bool saveRelations = false, bool? create = null)
@@ -106,7 +106,7 @@ namespace Iridium.DB
                 return DataProvider.GetScalar(aggregate, querySpec.Native, Schema).Convert<TScalar>();
 
             var objects = from o in DataProvider.GetObjects(querySpec.Native, Schema)
-                          let x = Vx.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance<T>(), o), Schema.DatasetRelations)
+                          let x = Ir.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance<T>(), o), Schema.DatasetRelations)
                           where querySpec.Code == null || querySpec.Code.IsFilterMatch(x)
                           select x;
 
@@ -131,7 +131,7 @@ namespace Iridium.DB
             }
         }
 
-        internal IEnumerable<T> List(QuerySpec filter, IEnumerable<Expression<Func<T, object>>> relationLambdas, OrmSchema.Relation parentRelation, object parentObject)
+        internal IEnumerable<T> List(QuerySpec filter, IEnumerable<Expression<Func<T, object>>> relationLambdas, TableSchema.Relation parentRelation, object parentObject)
         {
             IEnumerable<T> objects;
 
@@ -142,14 +142,14 @@ namespace Iridium.DB
             if (Schema.DatasetRelations != null)
             {
                 if (relations == null)
-                    relations = new HashSet<OrmSchema.Relation>(Schema.DatasetRelations);
+                    relations = new HashSet<TableSchema.Relation>(Schema.DatasetRelations);
                 else
                     relations.UnionWith(Schema.DatasetRelations);
             }
 
             if (prefetchRelations != null && prefetchRelations.Count > 0 && DataProvider.SupportsRelationPrefetch)
             {
-                IEnumerable<Dictionary<OrmSchema.Relation, SerializedEntity>> relatedEntities;
+                IEnumerable<Dictionary<TableSchema.Relation, SerializedEntity>> relatedEntities;
 
                 objects = DataProvider
                     .GetObjectsWithPrefetch(filter.Native, Schema, prefetchRelations, out relatedEntities)
@@ -165,12 +165,12 @@ namespace Iridium.DB
 
                         return obj;
                     })
-                    .Select(item => Vx.WithLoadedRelations(item, relations));
+                    .Select(item => Ir.WithLoadedRelations(item, relations));
 
             }
             else
             {
-                objects = from o in DataProvider.GetObjects(filter.Native, Schema) select Vx.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance<T>(), o), relations);
+                objects = from o in DataProvider.GetObjects(filter.Native, Schema) select Ir.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance<T>(), o), relations);
             }
 
             if (parentRelation?.ReverseRelation != null)

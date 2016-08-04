@@ -5,13 +5,8 @@ using Iridium.DB;
 
 namespace Iridium.DB.MySql
 {
-    public class MySqlContext : Vx.Context
+    public class MySqlContext : DbContext
     {
-        public static void Use(string connectionString)
-        {
-            Vx.DB = new MySqlContext(connectionString);
-        }
-
         public MySqlContext() : base(new MySqlDataProvider())
         {
         }

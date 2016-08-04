@@ -2,7 +2,7 @@
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Iridium.DB.Core;
+using Iridium.DB.CoreUtil;
 
 namespace Iridium.DB
 {

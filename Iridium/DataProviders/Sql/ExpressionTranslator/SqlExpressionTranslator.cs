@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
-using Iridium.DB.Core;
+using Iridium.DB.CoreUtil;
 
 namespace Iridium.DB
 {
@@ -12,8 +12,8 @@ namespace Iridium.DB
         private class ExpressionMetaData
         {
             public ParameterExpression Iterator;
-            public OrmSchema.Relation Relation;
-            public OrmSchema Schema;
+            public TableSchema.Relation Relation;
+            public TableSchema Schema;
 
             public object Key => (object)Relation ?? Schema;
         }
@@ -25,15 +25,14 @@ namespace Iridium.DB
 
         private readonly SafeDictionary<Expression, ExpressionMetaData> _metaData = new SafeDictionary<Expression, ExpressionMetaData>();
         private readonly Dictionary<ParameterExpression, Dictionary<object, string>> _relationAliases = new Dictionary<ParameterExpression, Dictionary<object, string>>();
-        private readonly QueryParameterCollection _sqlParameters = new QueryParameterCollection();
         private readonly Stack<SubQuery> _subQueries = new Stack<SubQuery>();
         private ParameterExpression _rootIterator;
         private readonly Dictionary<ParameterExpression, ParameterExpression> _rootIterators = new Dictionary<ParameterExpression, ParameterExpression>();
         private readonly SqlDialect _sqlDialect;
         private readonly string _tableAlias;
-        private readonly OrmSchema _schema;
+        private readonly TableSchema _schema;
 
-        public SqlExpressionTranslator(SqlDialect sqlDialect, OrmSchema schema, string tableAlias)
+        public SqlExpressionTranslator(SqlDialect sqlDialect, TableSchema schema, string tableAlias)
         {
             _schema = schema;
             _tableAlias = tableAlias;
@@ -49,12 +48,12 @@ namespace Iridium.DB
 
         private SubQuery CurrentQuery => _subQueries.Peek();
 
-        public QueryParameterCollection SqlParameters => _sqlParameters;
+        public QueryParameterCollection SqlParameters { get; } = new QueryParameterCollection();
 
         public HashSet<SqlJoinDefinition> Joins => CurrentQuery.Joins;
 
 
-        private void PrepareForNewExpression(ParameterExpression rootIterator, string tableAlias, OrmSchema schema)
+        private void PrepareForNewExpression(ParameterExpression rootIterator, string tableAlias, TableSchema schema)
         {
             if (_rootIterator == null)
             {
@@ -73,7 +72,7 @@ namespace Iridium.DB
             _rootIterators[rootIterator] = _rootIterator; // make additional root iterators equivalent to first one
         }
 
-        private OrmSchema.Relation GetRelation(Expression expression, string memberName)
+        private TableSchema.Relation GetRelation(Expression expression, string memberName)
         {
             return _metaData[expression].Schema.Relations[memberName];
         }
@@ -439,7 +438,7 @@ namespace Iridium.DB
                                 );
         }
 
-        private static LambdaExpression CreateToManyFilterExpression(OrmSchema.Relation relation, Expression localExpression, LambdaExpression filterLambda, ParameterExpression lambdaParameter)
+        private static LambdaExpression CreateToManyFilterExpression(TableSchema.Relation relation, Expression localExpression, LambdaExpression filterLambda, ParameterExpression lambdaParameter)
         {
             Expression exp1 = Expression.MakeMemberAccess(localExpression, relation.LocalField.FieldInfo.AsMember);
             Expression exp2 = Expression.MakeMemberAccess(lambdaParameter, relation.ForeignField.FieldInfo.AsMember);

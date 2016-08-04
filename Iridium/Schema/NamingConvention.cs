@@ -26,7 +26,7 @@
 
 using System;
 using System.Text.RegularExpressions;
-using Iridium.DB.Core;
+using Iridium.DB.CoreUtil;
 
 namespace Iridium.DB
 {
@@ -53,7 +53,7 @@ namespace Iridium.DB
             UseAutoIncrement = true;
         }
 
-        public virtual FieldProperties GetFieldProperties(OrmSchema schema, OrmSchema.Field field)
+        public virtual FieldProperties GetFieldProperties(TableSchema schema, TableSchema.Field field)
         {
             var fieldProperties = new FieldProperties();
 
@@ -72,7 +72,7 @@ namespace Iridium.DB
             return fieldProperties;
         }
 
-        public virtual OrmSchema.Field GetRelationField(OrmSchema.Relation relation)
+        public virtual TableSchema.Field GetRelationField(TableSchema.Relation relation)
         {
             //if (relation.LocalSchema.PrimaryKeys.Length < 1 || relation.ForeignSchema.PrimaryKeys.Length < 1)
             //    return null;

@@ -29,7 +29,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Iridium.DB.Core;
+using Iridium.DB.CoreUtil;
 
 namespace Iridium.DB
 {
@@ -108,9 +108,9 @@ namespace Iridium.DB
 
         private readonly ThreadLocal<Stack<bool>> _transactionStack = new ThreadLocal<Stack<bool>>(() => new Stack<bool>());
 
-        public override void BeginTransaction(Vx.IsolationLevel isolationLevel)
+        public override void BeginTransaction(IsolationLevel isolationLevel)
         {
-            if (isolationLevel == Vx.IsolationLevel.None)
+            if (isolationLevel == IsolationLevel.None)
                 _transactionStack.Value.Push(false);
             else
             {
@@ -184,14 +184,14 @@ namespace Iridium.DB
                             switch (DateFormat)
                             {
                                 case SqliteDateFormat.String:
-                                    _sqlite3.bind_text(stmt, paramNumber, ((DateTime)value).ToString("u"));
+                                    _sqlite3.bind_text(stmt, paramNumber, ((DateTime)value).ToString("yyyy-MM-dd HH:mm:ss.fff"));
                                     break;
 //                                case SqliteDateFormat.Julian:
 //                                    _sqlite3.bind_int64(stmt, paramNumber, ((DateTime)value).Ticks);
 //                                    break;
-//                                case SqliteDateFormat.Unix:
-//                                    _sqlite3.bind_int(stmt, paramNumber, ((DateTime)value).Ticks);
-//                                    break;
+                                case SqliteDateFormat.Unix:
+                                    _sqlite3.bind_int(stmt, paramNumber, (int) (((DateTime)value) -new DateTime(1970,1,1)).TotalSeconds);
+                                    break;
                                 case SqliteDateFormat.Ticks:
                                     _sqlite3.bind_int64(stmt, paramNumber, ((DateTime)value).Ticks);
                                     break;
@@ -267,7 +267,7 @@ namespace Iridium.DB
             }
         }
 
-        public override void Purge(OrmSchema schema)
+        public override void Purge(TableSchema schema)
         {
             var tableName = SqlDialect.QuoteTable(schema.MappedName);
 
@@ -275,7 +275,7 @@ namespace Iridium.DB
             ExecuteSql("delete from sqlite_sequence where name=@name", new QueryParameterCollection(new {name = schema.MappedName}));
         }
 
-        public override long GetLastAutoIncrementValue(OrmSchema schema)
+        public override long GetLastAutoIncrementValue(TableSchema schema)
         {
             return _lastRowId.Value ?? 0;
         }
@@ -297,7 +297,7 @@ namespace Iridium.DB
     {
         String,
         //Julian,
-        //Unix,
+        Unix,
         Ticks
     }
 }

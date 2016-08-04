@@ -32,7 +32,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
-using Velox.Core.Json;
+using Iridium.Core;
 
 namespace Iridium.DB.SqlService
 {
@@ -40,7 +40,7 @@ namespace Iridium.DB.SqlService
     {
         private readonly HttpClient _httpClient;
         private readonly ThreadLocal<long?> _lastRowId = new ThreadLocal<long?>();
-        private string _server;
+        private readonly string _server;
 
         public SqlServiceDataProvider()
         {
@@ -115,7 +115,7 @@ namespace Iridium.DB.SqlService
             }
         }
 
-        public override void Purge(OrmSchema schema)
+        public override void Purge(TableSchema schema)
         {
             var tableName = SqlDialect.QuoteTable(schema.MappedName);
 
@@ -123,16 +123,16 @@ namespace Iridium.DB.SqlService
             ExecuteSql("delete from sqlite_sequence where name=@name", new QueryParameterCollection(new { name = schema.MappedName }));
         }
 
-        public override long GetLastAutoIncrementValue(OrmSchema schema)
+        public override long GetLastAutoIncrementValue(TableSchema schema)
         {
             return _lastRowId.Value ?? 0;
         }
 
         private readonly ThreadLocal<Stack<bool>> _transactionStack = new ThreadLocal<Stack<bool>>(() => new Stack<bool>());
 
-        public override void BeginTransaction(Vx.IsolationLevel isolationLevel)
+        public override void BeginTransaction(IsolationLevel isolationLevel)
         {
-            if (isolationLevel == Vx.IsolationLevel.None)
+            if (isolationLevel == IsolationLevel.None)
                 _transactionStack.Value.Push(false);
             else
             {

@@ -35,11 +35,11 @@ namespace Iridium.DB
         private class ExpressionWithReferencedRelations
         {
             public QueryExpression Expression;
-            public HashSet<OrmSchema.Relation> Relations;
+            public HashSet<TableSchema.Relation> Relations;
 
             public object ObjectWithRelations(object o)
             {
-                return Vx.WithLoadedRelations(o, Relations);
+                return Ir.WithLoadedRelations(o, Relations);
             }
         }
 
@@ -56,7 +56,7 @@ namespace Iridium.DB
         public int? Skip { get; set; }
         public int? Take { get; set; }
 
-        public void AddFilter(OrmSchema schema, QueryExpression filter)
+        public void AddFilter(TableSchema schema, QueryExpression filter)
         {
             if (filter == null) 
                 return;
@@ -68,7 +68,7 @@ namespace Iridium.DB
             });
         }
 
-        public void AddScalar(OrmSchema schema, QueryExpression scalarExpression)
+        public void AddScalar(TableSchema schema, QueryExpression scalarExpression)
         {
             if (scalarExpression == null) 
                 return;
@@ -80,7 +80,7 @@ namespace Iridium.DB
             };
         }
 
-        public void AddSort(OrmSchema schema, QueryExpression expression, SortOrder sortOrder)
+        public void AddSort(TableSchema schema, QueryExpression expression, SortOrder sortOrder)
         {
             _sortExpressions.Add(new SortExpressionWithReferencedRelations()
             {

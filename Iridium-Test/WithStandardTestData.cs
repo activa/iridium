@@ -11,11 +11,9 @@ namespace Iridium.DB.Test
     [TestFixture("mysql")]
     public class WithStandardTestData : TestFixture
     {
-        
         private const int NUM_CUSTOMERS = 20;
         private const int NUM_PRODUCTS = 5;
         private int FIRST_CUSTOMERID = 0;
-
         
         public WithStandardTestData(string driver) : base(driver)
         {
@@ -187,7 +185,7 @@ namespace Iridium.DB.Test
 
             order.Should().NotBeNull();
 
-            Vx.LoadRelations(order, _ => _.Customer);
+            DB.LoadRelations(order, _ => _.Customer);
 
             order.Customer.Should().NotBeNull();
             order.Customer.CustomerID.Should().Be(customer.CustomerID);
@@ -432,18 +430,8 @@ namespace Iridium.DB.Test
         [Test]
         public void Adhoc_Mapped()
         {
-            try
-            {
-                DB.DataProvider.ExecuteSql(null, null);
-            }
-            catch (NotSupportedException)
-            {
+            if (!DB.DataProvider.SupportsSql)
                 return;
-            }
-            catch
-            {
-                // ignored
-            }
 
             var adhocProducts = DB.Query<Adhoc_Product>("select ProductID,Description,Price,Price as Price2 from Product order by ProductID", null).ToArray();
 
@@ -457,7 +445,10 @@ namespace Iridium.DB.Test
         [Test]
         public void Adhoc_Scalar()
         {
-            var maxPrice1 = DB.QueryScalar<decimal>("select max(Price) from Product where Price < @price",new{price = 100.0m});
+            if (!DB.DataProvider.SupportsSql)
+                return;
+
+            var maxPrice1 = DB.QueryScalar<decimal>("select max(Price) from Product where Price < @price", new { price = 100.0m });
             var maxPrice2 = DB.Products.Max(p => p.Price, p => p.Price < 100.0m);
 
             maxPrice1.Should().BeGreaterThan(0.0m);

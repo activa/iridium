@@ -52,7 +52,7 @@ namespace Iridium.DB
             }
         }
 
-        public override HashSet<OrmSchema.Relation> FindRelations(OrmSchema schema)
+        public override HashSet<TableSchema.Relation> FindRelations(TableSchema schema)
         {
             return LambdaRelationFinder.FindRelations(Expression, schema);
         }

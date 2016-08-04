@@ -49,8 +49,8 @@ namespace Iridium.DB.Test
         {
             int counter = 0;
 
-            EventHandler<Vx.ObjectWithCancelEventArgs<Customer>> ev1 = (sender, args) => { counter++; };
-            EventHandler<Vx.ObjectWithCancelEventArgs<Customer>> ev2 = (sender, args) => { counter++; };
+            EventHandler<ObjectWithCancelEventArgs<Customer>> ev1 = (sender, args) => { counter++; };
+            EventHandler<ObjectWithCancelEventArgs<Customer>> ev2 = (sender, args) => { counter++; };
 
             DB.Customers.Events.ObjectCreating += ev1;
             DB.Customers.Events.ObjectCreating += ev2;
@@ -77,8 +77,8 @@ namespace Iridium.DB.Test
         {
             int counter = 0;
 
-            EventHandler<Vx.ObjectWithCancelEventArgs<Customer>> ev = (sender, args) => { counter++; };
-            EventHandler<Vx.ObjectWithCancelEventArgs<Customer>> evWithCancel = (sender, args) => { counter++; args.Cancel = true; };
+            EventHandler<ObjectWithCancelEventArgs<Customer>> ev = (sender, args) => { counter++; };
+            EventHandler<ObjectWithCancelEventArgs<Customer>> evWithCancel = (sender, args) => { counter++; args.Cancel = true; };
 
             DB.Customers.Events.ObjectCreating += ev;
             DB.Customers.Events.ObjectCreating += evWithCancel;
@@ -105,8 +105,8 @@ namespace Iridium.DB.Test
         {
             int counter = 0;
 
-            EventHandler<Vx.ObjectWithCancelEventArgs<Customer>> ev = (sender, args) => { counter++; };
-            EventHandler<Vx.ObjectWithCancelEventArgs<Customer>> evWithCancel = (sender, args) => { counter++; args.Cancel = true; };
+            EventHandler<ObjectWithCancelEventArgs<Customer>> ev = (sender, args) => { counter++; };
+            EventHandler<ObjectWithCancelEventArgs<Customer>> evWithCancel = (sender, args) => { counter++; args.Cancel = true; };
 
             DB.Customers.Events.ObjectCreating += evWithCancel;
             DB.Customers.Events.ObjectCreating += ev;
@@ -193,7 +193,7 @@ namespace Iridium.DB.Test
 
             order = DB.Orders.Read(originalOrder.OrderID);
 
-            Vx.LoadRelations(order, o => o.OrderItems);
+            DB.LoadRelations(order, o => o.OrderItems);
 
             order.OrderItems.Should().HaveCount(5).And.OnlyContain(item => item.Order == order);
 
@@ -372,7 +372,7 @@ namespace Iridium.DB.Test
                     lock (createdCustomers)
                         createdCustomers.Add(customer);
 
-                    var newCustomer = Vx.DataSet<Customer>().Read(customer.CustomerID);
+                    var newCustomer = Ir.DataSet<Customer>().Read(customer.CustomerID);
 
                     if (customer.Name != newCustomer.Name)
                         lock (failedList)
@@ -520,7 +520,7 @@ namespace Iridium.DB.Test
 
             Order order2 = DB.Orders.Read(order.OrderID, o => o.Customer);
 
-            Vx.LoadRelations(() => order.Customer);
+            DB.LoadRelations(() => order.Customer);
 
             order2.Customer.Name.Should().Be(order.Customer.Name);
             order2.Customer.CustomerID.Should().Be(order.Customer.CustomerID);
@@ -544,7 +544,7 @@ namespace Iridium.DB.Test
 
             Order order2 = DB.Orders.Read(order.OrderID, o => o.Customer);
 
-            Vx.LoadRelations(() => order.Customer);
+            DB.LoadRelations(() => order.Customer);
 
             Assert.AreEqual(order2.Customer.Name, order.Customer.Name);
             Assert.AreEqual(order2.Customer.CustomerID, order.Customer.CustomerID);
@@ -566,7 +566,7 @@ namespace Iridium.DB.Test
 
             Order order2 = DB.Orders.Read(order.OrderID, o => o.Customer);
 
-            Vx.LoadRelations(() => order.Customer);
+            DB.LoadRelations(() => order.Customer);
 
             Assert.AreEqual(order2.Customer.Name, order.Customer.Name);
             Assert.AreEqual(order2.Customer.CustomerID, order.Customer.CustomerID);
@@ -589,7 +589,7 @@ namespace Iridium.DB.Test
 
             Assert.IsTrue(DB.Orders.Save(order));
 
-            Vx.LoadRelations(() => order.Customer);
+            DB.LoadRelations(() => order.Customer);
 
             Order order2 = DB.Orders.Read(order.OrderID , o => o.Customer);
 
@@ -597,7 +597,7 @@ namespace Iridium.DB.Test
             Assert.AreEqual(order2.Customer.CustomerID, order.Customer.CustomerID);
             Assert.AreEqual(order2.Customer.CustomerID, order.CustomerID);
 
-            Vx.LoadRelations(() => order2.Customer.Orders);
+            DB.LoadRelations(() => order2.Customer.Orders);
 
             Assert.AreEqual(order2.Customer.Orders.First().CustomerID, order.CustomerID);
         }
@@ -611,16 +611,15 @@ namespace Iridium.DB.Test
 
             cust = DB.Customers.Read(cust.CustomerID);
 
-            Order order = new Order();
+            Order order = new Order { CustomerID = cust.CustomerID };
 
-            order.CustomerID = cust.CustomerID;
 
             Assert.IsTrue(DB.Orders.Save(order));
 
             order = DB.Orders.Read(order.OrderID);
 
-            Vx.LoadRelations(() => order.Customer);
-            Vx.LoadRelations(() => order.Customer.Orders);
+            DB.LoadRelations(() => order.Customer);
+            DB.LoadRelations(() => order.Customer.Orders);
 
             Assert.AreEqual(order.Customer.Name, cust.Name);
             Assert.AreEqual(order.Customer.CustomerID, cust.CustomerID);
@@ -634,7 +633,7 @@ namespace Iridium.DB.Test
 
             order = DB.Orders.Read(order.OrderID);
 
-            Vx.LoadRelations(() => order.Customer);
+            DB.LoadRelations(() => order.Customer);
 
             Assert.AreEqual(order.CustomerID, cust.CustomerID);
 
@@ -739,8 +738,8 @@ namespace Iridium.DB.Test
         {
             Random rnd = new Random();
 
-            Customer cust = new Customer();
-            cust.Name = "A";
+            Customer cust = new Customer { Name = "A" };
+
             cust.Save();
 
             double total = 0.0;
@@ -782,7 +781,7 @@ namespace Iridium.DB.Test
 
             foreach (Order order in orders)
             {
-                Vx.LoadRelations(order, o => o.Customer, o => o.OrderItems);
+                DB.LoadRelations(order, o => o.Customer, o => o.OrderItems);
 
                 Assert.AreEqual(cust.CustomerID, order.Customer.CustomerID);
                 Assert.AreEqual(20, order.OrderItems.Count);
@@ -820,9 +819,12 @@ namespace Iridium.DB.Test
         [Test]
         public void TransactionRollback()
         {
+            if (!DB.DataProvider.SupportsTransactions)
+                return;
+
             DB.Products.Count().Should().Be(0);
 
-            using (var transaction = new Vx.Transaction(DB))
+            using (var transaction = new Transaction(DB))
             {
                 DB.Products.Insert(new Product() {ProductID = "X", Description = "X"});
 
@@ -837,9 +839,12 @@ namespace Iridium.DB.Test
         [Test]
         public void TransactionImplicitRollback()
         {
+            if (!DB.DataProvider.SupportsTransactions)
+                return;
+
             DB.Products.Count().Should().Be(0);
 
-            using (var transaction = new Vx.Transaction(DB))
+            using (var transaction = new Transaction(DB))
             {
                 DB.Products.Insert(new Product() { ProductID = "X", Description = "X" });
             }
@@ -852,9 +857,12 @@ namespace Iridium.DB.Test
         [Test]
         public void TransactionCommit()
         {
+            if (!DB.DataProvider.SupportsTransactions)
+                return;
+
             DB.Products.Count().Should().Be(0);
 
-            using (var transaction = new Vx.Transaction(DB))
+            using (var transaction = new Transaction(DB))
             {
                 DB.Products.Insert(new Product() { ProductID = "X", Description = "X" });
 

@@ -31,27 +31,29 @@ namespace Iridium.DB
 {
     public interface IDataProvider : IDisposable
     {
-        object GetScalar(Aggregate aggregate, INativeQuerySpec nativeQuerySpec, OrmSchema schema);
-        IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec filter, OrmSchema schema);
-        IEnumerable<SerializedEntity> GetObjectsWithPrefetch(INativeQuerySpec filter, OrmSchema schema, IEnumerable<OrmSchema.Relation> prefetchRelations, out IEnumerable<Dictionary<OrmSchema.Relation, SerializedEntity>> relatedEntities);
-        ObjectWriteResult WriteObject(SerializedEntity o, bool createNew, OrmSchema schema);
-        SerializedEntity ReadObject(Dictionary<string,object> keys, OrmSchema schema);
-        bool DeleteObject(SerializedEntity o, OrmSchema schema);
-        bool DeleteObjects(INativeQuerySpec filter, OrmSchema schema);
-        QuerySpec CreateQuerySpec(FilterSpec filter, ScalarSpec scalarEpression, SortOrderSpec sortOrder, int? skip, int? take, OrmSchema schema);
-        void Purge(OrmSchema schema);
+        object GetScalar(Aggregate aggregate, INativeQuerySpec nativeQuerySpec, TableSchema schema);
+        IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec filter, TableSchema schema);
+        IEnumerable<SerializedEntity> GetObjectsWithPrefetch(INativeQuerySpec filter, TableSchema schema, IEnumerable<TableSchema.Relation> prefetchRelations, out IEnumerable<Dictionary<TableSchema.Relation, SerializedEntity>> relatedEntities);
+        ObjectWriteResult WriteObject(SerializedEntity o, bool createNew, TableSchema schema);
+        SerializedEntity ReadObject(Dictionary<string,object> keys, TableSchema schema);
+        bool DeleteObject(SerializedEntity o, TableSchema schema);
+        bool DeleteObjects(INativeQuerySpec filter, TableSchema schema);
+        QuerySpec CreateQuerySpec(FilterSpec filter, ScalarSpec scalarEpression, SortOrderSpec sortOrder, int? skip, int? take, TableSchema schema);
+        void Purge(TableSchema schema);
 
         bool SupportsQueryTranslation(QueryExpression expression = null);
 
         bool SupportsRelationPrefetch { get; }
+        bool SupportsTransactions { get; }
+        bool SupportsSql { get; }
 
-        bool CreateOrUpdateTable(OrmSchema schema, bool recreateTable = false, bool recreateIndexes = false);
+        bool CreateOrUpdateTable(TableSchema schema, bool recreateTable = false, bool recreateIndexes = false);
 
         int ExecuteSql(string sql, QueryParameterCollection parameters);
         IEnumerable<SerializedEntity> Query(string sql, QueryParameterCollection parameters);
         IEnumerable<object> QueryScalar(string sql, QueryParameterCollection parameters);
 
-        void BeginTransaction(Vx.IsolationLevel isolationLevel = Vx.IsolationLevel.None);
+        void BeginTransaction(IsolationLevel isolationLevel = IsolationLevel.None);
         void CommitTransaction();
         void RollbackTransaction();
     }

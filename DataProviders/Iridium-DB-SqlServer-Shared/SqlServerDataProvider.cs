@@ -30,7 +30,6 @@ using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.Linq;
 using System.Reflection;
-using Iridium.DB.Core;
 
 namespace Iridium.DB.SqlServer
 {

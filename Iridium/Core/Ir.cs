@@ -24,31 +24,20 @@
 //=============================================================================
 #endregion
 
-using System;
 using System.Collections.Generic;
 
 namespace Iridium.DB
 {
-    public static partial class Vx
+    public static partial class Ir
     {
         public static IDataSet<T> DataSet<T>()
         {
-            return DB.DataSet<T>();
+            return DbContext.Instance.DataSet<T>();
         }
-
-        public static Context DB { get; set; }
 
         // TODO: move this somewhere else
 
-        public static List<T> CreateEmptyList<T>(T templateValue) { return new List<T>(); }
+        public static List<T> CreateEmptyList<T>(T templateValue) { return new List<T>(); } // TODO: move to Core
         public static Dictionary<TKey, TValue> CreateEmptyDictionary<TKey, TValue>(TKey keyTemplate, TValue valueTemplae) { return new Dictionary<TKey, TValue>(); }
-
-        public class SchemaException : Exception
-        {
-            public SchemaException(string msg) : base(msg)
-            {
-            }
-        }
-
     }
 }

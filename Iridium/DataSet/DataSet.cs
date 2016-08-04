@@ -40,7 +40,7 @@ namespace Iridium.DB
         private readonly List<Expression<Func<T, object>>> _relationsToLoad;
         private int? _skip;
         private int? _take;
-        private readonly OrmSchema.Relation _parentRelation;
+        private readonly TableSchema.Relation _parentRelation;
         private readonly object _parentObject;
 
         public DataSet(Repository repository)
@@ -56,7 +56,7 @@ namespace Iridium.DB
         }
 
         [Preserve]
-        public DataSet(Repository repository, FilterSpec filter, OrmSchema.Relation parentRelation, object parentObject)
+        public DataSet(Repository repository, FilterSpec filter, TableSchema.Relation parentRelation, object parentObject)
         {
             _repository = (Repository<T>)repository;
             _filter = filter;
@@ -308,6 +308,6 @@ namespace Iridium.DB
             return Skip(index).Take(1).FirstOrDefault();
         }
 
-        public Vx.IEvents<T> Events => _repository.Events;
+        public IObjectEvents<T> Events => _repository.Events;
     }
 }

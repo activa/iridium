@@ -33,22 +33,22 @@ namespace Iridium.DB
 {
     internal abstract class Repository
     {
-        internal Vx.Context Context { get; }
-        internal OrmSchema Schema { get; }
+        internal DbContext Context { get; }
+        internal TableSchema Schema { get; }
 
         internal IDataProvider DataProvider => Context.DataProvider;
 
-        protected Repository(Type type, Vx.Context context)
+        protected Repository(Type type, DbContext context)
         {
             Context = context;
 
-            Schema = new OrmSchema(type, this);
+            Schema = new TableSchema(type, this);
         }
 
-        protected internal IEnumerable<object> GetRelationObjects(QuerySpec filter, OrmSchema.Relation parentRelation, object parentObject)
+        protected internal IEnumerable<object> GetRelationObjects(QuerySpec filter, TableSchema.Relation parentRelation, object parentObject)
         {
             var objects = from o in DataProvider.GetObjects(filter.Native,Schema)
-                          select Vx.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance(Schema.ObjectType), o),Schema.DatasetRelations) ;
+                          select Ir.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance(Schema.ObjectType), o),Schema.DatasetRelations) ;
 
             if (parentRelation?.ReverseRelation != null)
                 objects = from o in objects select parentRelation.ReverseRelation.SetField(o, parentObject);
@@ -75,7 +75,7 @@ namespace Iridium.DB
                 return false;
 
             var toOneRelations = Schema.Relations.Values.Where(r => r.IsToOne && !r.ReadOnly);
-            var toManyRelations = Schema.Relations.Values.Where(r => r.RelationType == OrmSchema.RelationType.OneToMany && !r.ReadOnly);
+            var toManyRelations = Schema.Relations.Values.Where(r => r.RelationType == TableSchema.RelationType.OneToMany && !r.ReadOnly);
 
             // Update and save ManyToOne relations
             foreach (var relation in toOneRelations)

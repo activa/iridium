@@ -31,13 +31,13 @@ namespace Iridium.DB
 {
     internal class LambdaRelationFinder : ExpressionVisitor
     {
-        private LambdaRelationFinder(Vx.Context context)
+        private LambdaRelationFinder(DbContext context)
         {
             _context = context;
         }
 
-        private readonly HashSet<OrmSchema.Relation> _relations = new HashSet<OrmSchema.Relation>();
-        private readonly Vx.Context _context;
+        private readonly HashSet<TableSchema.Relation> _relations = new HashSet<TableSchema.Relation>();
+        private readonly DbContext _context;
 
         protected override Expression VisitMember(MemberExpression node)
         {
@@ -54,7 +54,7 @@ namespace Iridium.DB
             return node;
         }
 
-        public static HashSet<OrmSchema.Relation> FindRelations(LambdaExpression expression, OrmSchema schema)
+        public static HashSet<TableSchema.Relation> FindRelations(LambdaExpression expression, TableSchema schema)
         {
             var finder = new LambdaRelationFinder(schema.Repository.Context);
 
@@ -63,17 +63,17 @@ namespace Iridium.DB
             return finder._relations;
         }
 
-        public static HashSet<OrmSchema.Relation> FindRelations(IEnumerable<LambdaExpression> expressions, OrmSchema schema)
+        public static HashSet<TableSchema.Relation> FindRelations(IEnumerable<LambdaExpression> expressions, TableSchema schema)
         {
             if (expressions == null)
                 return null;
 
-            HashSet<OrmSchema.Relation> relations = null;
+            HashSet<TableSchema.Relation> relations = null;
 
             foreach (var lambdaExpression in expressions)
             {
                 if (relations == null)
-                    relations = new HashSet<OrmSchema.Relation>(FindRelations(lambdaExpression,schema));
+                    relations = new HashSet<TableSchema.Relation>(FindRelations(lambdaExpression,schema));
                 else
                     relations.UnionWith(FindRelations(lambdaExpression, schema));
             }

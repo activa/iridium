@@ -4,13 +4,8 @@ using System.Text;
 
 namespace Iridium.DB.SqlServer
 {
-    public class SqlServerContext : Vx.Context
+    public class SqlServerContext : DbContext
     {
-        public static void Use(string connectionString)
-        {
-            Vx.DB = new SqlServerContext(connectionString);
-        }
-
         public SqlServerContext() : base(new SqlServerDataProvider())
         {
         }

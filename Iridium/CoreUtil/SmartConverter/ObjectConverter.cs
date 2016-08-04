@@ -28,7 +28,7 @@ using System;
 using System.Globalization;
 
 #if IRIDIUM_CORE_EMBEDDED
-namespace Iridium.DB.Core
+namespace Iridium.DB.CoreUtil
 #else
 namespace Iridium.Core
 #endif

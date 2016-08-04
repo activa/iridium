@@ -31,6 +31,6 @@ namespace Iridium.DB
     public abstract class QueryExpression
     {
         public abstract object Evaluate(object target);
-        public abstract HashSet<OrmSchema.Relation> FindRelations(OrmSchema schema);
+        public abstract HashSet<TableSchema.Relation> FindRelations(TableSchema schema);
     }
 }

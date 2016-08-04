@@ -28,7 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Iridium.DB.Core;
+using Iridium.DB.CoreUtil;
 
 namespace Iridium.DB
 {
@@ -43,7 +43,7 @@ namespace Iridium.DB
                 _keyValues = keyValues;
             }
 
-            public CompositeKey(OrmSchema schema, SerializedEntity o)
+            public CompositeKey(TableSchema schema, SerializedEntity o)
             {
                 _keyValues = schema.PrimaryKeys.ToDictionary(pk => pk.MappedName, pk => o[pk.MappedName]);
             }
@@ -108,19 +108,19 @@ namespace Iridium.DB
 
         }
 
-        private readonly SafeDictionary<OrmSchema,StorageBucket> _buckets = new SafeDictionary<OrmSchema, StorageBucket>();
+        private readonly SafeDictionary<TableSchema,StorageBucket> _buckets = new SafeDictionary<TableSchema, StorageBucket>();
 
-        private StorageBucket.BucketAccessor GetBucket(OrmSchema schema)
+        private StorageBucket.BucketAccessor GetBucket(TableSchema schema)
         {
             return (_buckets[schema] ?? (_buckets[schema] = new StorageBucket())).Accessor();
         }
 
-        public object GetScalar(Aggregate aggregate, INativeQuerySpec nativeQuerySpec, OrmSchema schema)
+        public object GetScalar(Aggregate aggregate, INativeQuerySpec nativeQuerySpec, TableSchema schema)
         {
             throw new NotSupportedException();
         }
 
-        public IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec querySpec, OrmSchema schema)
+        public IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec querySpec, TableSchema schema)
         {
             if (querySpec != null)
                 throw new NotSupportedException();
@@ -131,12 +131,12 @@ namespace Iridium.DB
             }
         }
 
-        public IEnumerable<SerializedEntity> GetObjectsWithPrefetch(INativeQuerySpec filter, OrmSchema schema, IEnumerable<OrmSchema.Relation> prefetchRelations, out IEnumerable<Dictionary<OrmSchema.Relation, SerializedEntity>> relatedEntities)
+        public IEnumerable<SerializedEntity> GetObjectsWithPrefetch(INativeQuerySpec filter, TableSchema schema, IEnumerable<TableSchema.Relation> prefetchRelations, out IEnumerable<Dictionary<TableSchema.Relation, SerializedEntity>> relatedEntities)
         {
             throw new NotSupportedException();
         }
 
-        public ObjectWriteResult WriteObject(SerializedEntity o, bool createNew, OrmSchema schema)
+        public ObjectWriteResult WriteObject(SerializedEntity o, bool createNew, TableSchema schema)
         {
             var result = new ObjectWriteResult();
 
@@ -188,7 +188,7 @@ namespace Iridium.DB
             return result;
         }
 
-        public SerializedEntity ReadObject(Dictionary<string,object> keys, OrmSchema schema)
+        public SerializedEntity ReadObject(Dictionary<string,object> keys, TableSchema schema)
         {
             using (var bucket = GetBucket(schema))
             {
@@ -203,7 +203,7 @@ namespace Iridium.DB
             }
         }
 
-        public bool DeleteObject(SerializedEntity o, OrmSchema schema)
+        public bool DeleteObject(SerializedEntity o, TableSchema schema)
         {
             using (var bucket = GetBucket(schema))
             {
@@ -221,12 +221,12 @@ namespace Iridium.DB
             return false;
         }
 
-        public bool DeleteObjects(INativeQuerySpec filter, OrmSchema schema)
+        public bool DeleteObjects(INativeQuerySpec filter, TableSchema schema)
         {
             throw new NotSupportedException();
         }
 
-        public QuerySpec CreateQuerySpec(FilterSpec filter, ScalarSpec expression, SortOrderSpec sortOrder, int? skip, int? take, OrmSchema schema)
+        public QuerySpec CreateQuerySpec(FilterSpec filter, ScalarSpec expression, SortOrderSpec sortOrder, int? skip, int? take, TableSchema schema)
         {
             throw new NotSupportedException();
         }
@@ -237,8 +237,10 @@ namespace Iridium.DB
         }
 
         public bool SupportsRelationPrefetch => false;
+        public bool SupportsTransactions => false;
+        public bool SupportsSql => false;
 
-        public bool CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes)
+        public bool CreateOrUpdateTable(TableSchema schema, bool recreateTable, bool recreateIndexes)
         {
             return true; // NOP
         }
@@ -258,7 +260,7 @@ namespace Iridium.DB
             throw new NotSupportedException();
         }
 
-        public void BeginTransaction(Vx.IsolationLevel isolationLevel)
+        public void BeginTransaction(IsolationLevel isolationLevel)
         {
             
         }
@@ -273,7 +275,7 @@ namespace Iridium.DB
             
         }
 
-        public void Purge(OrmSchema schema)
+        public void Purge(TableSchema schema)
         {
             using (var bucket = GetBucket(schema))
             {

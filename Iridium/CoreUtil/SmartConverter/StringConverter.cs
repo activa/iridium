@@ -30,7 +30,7 @@ using System.Globalization;
 using System.Linq;
 
 #if IRIDIUM_CORE_EMBEDDED
-namespace Iridium.DB.Core
+namespace Iridium.DB.CoreUtil
 #else
 namespace Iridium.Core
 #endif
@@ -108,22 +108,9 @@ namespace Iridium.Core
             _dateFormats = dateFormats;
         }
 
-        public static void RegisterDateFormat(string dateFormat)
+        public static void RegisterDateFormat(string dateFormat, bool replace = false)
         {
-            RegisterDateFormat(dateFormat,false);
-            
-        }
-
-        public static void RegisterDateFormat(string dateFormat, bool replace)
-        {
-            if (replace)
-            {
-                _dateFormats = new[] {dateFormat};
-            }
-            else
-            {
-                _dateFormats = _dateFormats.Union(new[] {dateFormat}).ToArray();
-            }
+            _dateFormats = replace ? new[] {dateFormat} : _dateFormats.Union(new[] {dateFormat}).ToArray();
         }
 
         public static T To<T>(this string stringValue, params string[] dateFormats)

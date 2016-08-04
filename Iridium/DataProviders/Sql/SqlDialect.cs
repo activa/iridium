@@ -147,7 +147,7 @@ namespace Iridium.DB
 
         public abstract string GetLastAutoincrementIdSql(string columnName, string alias, string tableName);
 
-        public abstract void CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes, SqlDataProvider dataProvider);
+        public abstract void CreateOrUpdateTable(TableSchema schema, bool recreateTable, bool recreateIndexes, SqlDataProvider dataProvider);
 
         public virtual string SqlFunction(Function function, params string[] parameters)
         {

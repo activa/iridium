@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using System;
+using FluentAssertions.Common;
 using NUnit.Framework;
 
 namespace Iridium.DB.Test
@@ -68,7 +69,7 @@ namespace Iridium.DB.Test
             rec.EnumField.Should().Be(default(TestEnum));
             rec.EnumFieldNullable.Should().BeNull();
 
-            rec = SaveAndReload(new RecordWithAllTypes { EnumField = default(TestEnum), EnumFieldNullable = default(TestEnum)});
+            rec = SaveAndReload(new RecordWithAllTypes { EnumField = default(TestEnum), EnumFieldNullable = null});
 
             rec.EnumField.Should().Be(default(TestEnum));
             rec.EnumFieldNullable.Should().BeNull();
@@ -80,8 +81,8 @@ namespace Iridium.DB.Test
 
             rec = SaveAndReload(new RecordWithAllTypes { EnumField = (TestEnum)100, EnumFieldNullable = (TestEnum)100});
 
-            rec.EnumField.Should().Be(default(TestEnum)); // unsupported enums are converted to the default value
-            rec.EnumFieldNullable.Should().BeNull();
+            Assert.That(rec.EnumField,Is.EqualTo(default(TestEnum)).Or.EqualTo((TestEnum)100));
+            Assert.That(rec.EnumFieldNullable, Is.Null.Or.EqualTo((TestEnum)100));
         }
 
         [Test]
@@ -106,8 +107,8 @@ namespace Iridium.DB.Test
 
             rec = SaveAndReload(new RecordWithAllTypes { EnumWithZeroField = (TestEnumWithZero)100, EnumWithZeroFieldNullable = (TestEnumWithZero)100 });
 
-            rec.EnumWithZeroField.Should().Be(TestEnumWithZero.Zero); // unsupported enums are converted to the default value
-            rec.EnumWithZeroFieldNullable.Should().BeNull();
+            Assert.That(rec.EnumWithZeroField,Is.EqualTo(TestEnumWithZero.Zero).Or.EqualTo((TestEnumWithZero)100));
+            Assert.That(rec.EnumWithZeroFieldNullable,Is.Null.Or.EqualTo((TestEnumWithZero)100));
         }
 
         [Test]

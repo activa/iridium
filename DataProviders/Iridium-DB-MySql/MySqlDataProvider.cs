@@ -41,10 +41,7 @@ namespace Iridium.DB.MySql
         {
         }
 
-        public override bool RequiresAutoIncrementGetInSameStatement
-        {
-            get { return true; }
-        }
+        public override bool RequiresAutoIncrementGetInSameStatement => true;
 
         public override void ClearConnectionPool()
         {

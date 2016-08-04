@@ -89,6 +89,6 @@ namespace Iridium.DB
         bool Delete(Expression<Func<T, bool>> filter);
         bool Delete(QueryExpression filterExpression);
 
-        Vx.IEvents<T> Events { get; } 
+        IObjectEvents<T> Events { get; } 
     }
 }

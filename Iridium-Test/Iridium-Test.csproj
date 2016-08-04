@@ -50,10 +50,6 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Velox.Core, Version=1.0.0.27232, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\velox.core.1.0.0.5\lib\portable-net45+netcore45+wpa81+wp8\Velox.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssertHelper.cs" />
@@ -73,9 +69,9 @@
       <Project>{eba66bd1-991e-435e-bb96-bb1ae5573f09}</Project>
       <Name>Iridium-DB-Service</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DataProviders\Iridium-DB-Sqlite\Iridium-DB-Sqlite.csproj">
+    <ProjectReference Include="..\DataProviders\Iridium-DB-Sqlite\Iridium-DB-Sqlite-Win32.csproj">
       <Project>{fcf8cc49-a5eb-46e4-932d-d4d6d36924a5}</Project>
-      <Name>Iridium-DB-Sqlite</Name>
+      <Name>Iridium-DB-Sqlite-Win32</Name>
     </ProjectReference>
     <ProjectReference Include="..\Iridium\Iridium.csproj">
       <Project>{8db31db3-ae35-44c3-876e-940c19689c59}</Project>

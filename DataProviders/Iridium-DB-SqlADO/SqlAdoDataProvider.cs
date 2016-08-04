@@ -144,7 +144,7 @@ namespace Iridium.DB.Sql
         {
             try
             {
-                BeginTransaction(Vx.IsolationLevel.None);
+                BeginTransaction(IsolationLevel.None);
 
                 List<Dictionary<string, object>> records = new List<Dictionary<string, object>>();
 
@@ -183,7 +183,7 @@ namespace Iridium.DB.Sql
         {
             try
             {
-                BeginTransaction(Vx.IsolationLevel.None);
+                BeginTransaction(IsolationLevel.None);
 
                 using (var cmd = CreateCommand(sql, parameters?.AsDictionary()))
                 {
@@ -204,26 +204,26 @@ namespace Iridium.DB.Sql
             }
         }
 
-        public override void BeginTransaction(Vx.IsolationLevel isolationLevel)
+        public override void BeginTransaction(IsolationLevel isolationLevel)
         {
-            IsolationLevel adoIsolationLevel = IsolationLevel.Serializable;
+            System.Data.IsolationLevel adoIsolationLevel;
 
             switch (isolationLevel)
             {
-                case Vx.IsolationLevel.None: _transactionStack.Value.Push(null);
+                case IsolationLevel.None: _transactionStack.Value.Push(null);
                     return;
                     
-                case Vx.IsolationLevel.Chaos: adoIsolationLevel = IsolationLevel.Chaos;
+                case IsolationLevel.Chaos: adoIsolationLevel = System.Data.IsolationLevel.Chaos;
                     break;
-                case Vx.IsolationLevel.ReadUncommitted: adoIsolationLevel=IsolationLevel.ReadUncommitted;
+                case IsolationLevel.ReadUncommitted: adoIsolationLevel=System.Data.IsolationLevel.ReadUncommitted;
                     break;
-                case Vx.IsolationLevel.ReadCommitted: adoIsolationLevel = IsolationLevel.ReadCommitted;
+                case IsolationLevel.ReadCommitted: adoIsolationLevel = System.Data.IsolationLevel.ReadCommitted;
                     break;
-                case Vx.IsolationLevel.RepeatableRead: adoIsolationLevel = IsolationLevel.RepeatableRead;
+                case IsolationLevel.RepeatableRead: adoIsolationLevel = System.Data.IsolationLevel.RepeatableRead;
                     break;
-                case Vx.IsolationLevel.Serializable: adoIsolationLevel = IsolationLevel.Serializable;
+                case IsolationLevel.Serializable: adoIsolationLevel = System.Data.IsolationLevel.Serializable;
                     break;
-                case Vx.IsolationLevel.Snapshot: adoIsolationLevel = IsolationLevel.Snapshot;
+                case IsolationLevel.Snapshot: adoIsolationLevel = System.Data.IsolationLevel.Snapshot;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(isolationLevel), isolationLevel, null);
@@ -238,9 +238,7 @@ namespace Iridium.DB.Sql
 
         public override void CommitTransaction()
         {
-            var transaction = _transactionStack.Value.Pop();
-
-            transaction?.Commit();
+            _transactionStack.Value.Pop()?.Commit();
 
             if (_transactionStack.Value.Count == 0)
                 CloseConnection();

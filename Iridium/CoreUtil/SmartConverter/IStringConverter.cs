@@ -24,24 +24,21 @@
 //=============================================================================
 #endregion
 
-using System.Reflection;
+using System;
 
 #if IRIDIUM_CORE_EMBEDDED
-namespace Iridium.DB.Core
+namespace Iridium.DB.CoreUtil
 #else
 namespace Iridium.Core
 #endif
 {
-    public class PropertyInspector : MemberInspector
+    public interface IStringConverter
     {
-        private readonly PropertyInfo _propertyInfo;
+        bool TryConvert(string s, Type targetType, out object value);
+    }
 
-        public PropertyInspector(PropertyInfo propertyInfo) : base(propertyInfo)
-        {
-            _propertyInfo = propertyInfo;
-        }
-
-        public bool CanRead => _propertyInfo.CanRead;
-        public bool CanWrite => _propertyInfo.CanWrite;
+    public interface IStringConverter<T>
+    {
+        bool TryConvert(string s, out T value);
     }
 }

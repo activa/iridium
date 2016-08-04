@@ -30,11 +30,11 @@ namespace Iridium.DB
 {
     public class SqlJoinPart : IEquatable<SqlJoinPart>
     {
-        public OrmSchema Schema { get; }
-        public OrmSchema.Field Field { get; }
+        public TableSchema Schema { get; }
+        public TableSchema.Field Field { get; }
         public string Alias { get; }
 
-        public SqlJoinPart(OrmSchema schema, OrmSchema.Field field, string alias)
+        public SqlJoinPart(TableSchema schema, TableSchema.Field field, string alias)
         {
             Field = field;
             Schema = schema;

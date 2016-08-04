@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{BAA00DEC-D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataProviders", "DataProviders", "{869B052F-0EAD-4489-89B6-DBADBC8F4F58}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium-DB-Sqlite", "DataProviders\Iridium-DB-Sqlite\Iridium-DB-Sqlite.csproj", "{FCF8CC49-A5EB-46E4-932D-D4D6D36924A5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium-DB-Sqlite-Win32", "DataProviders\Iridium-DB-Sqlite\Iridium-DB-Sqlite-Win32.csproj", "{FCF8CC49-A5EB-46E4-932D-D4D6D36924A5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium-DB-MySql", "DataProviders\Iridium-DB-MySql\Iridium-DB-MySql.csproj", "{A74D8405-74EE-482D-A03E-92B45C17F9F5}"
 EndProject

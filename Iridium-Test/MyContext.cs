@@ -11,7 +11,7 @@ using Iridium.DB.SqlService;
 
 namespace Iridium.DB.Test
 {
-    public class MyContext : Vx.Context
+    public class MyContext : DbContext
     {
         public IDataSet<Order> Orders { get; set; }
         public IDataSet<Customer> Customers { get; set; }
@@ -26,7 +26,7 @@ namespace Iridium.DB.Test
         public MyContext(IDataProvider dataProvider) : base(dataProvider)
         {
             /*
-            Vx.Config.NamingConvention = new NamingConvention()
+            Ir.Config.NamingConvention = new NamingConvention()
             {
                 PrimaryKeyName = "ID",
                 OneToManyKeyName = NamingConvention.RELATION_CLASS_NAME + "ID",

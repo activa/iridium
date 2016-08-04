@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace Iridium.DB.Core
+namespace Iridium.DB.CoreUtil
 {
     public class SafeDictionary<TK, TV> : IDictionary<TK, TV>
     {

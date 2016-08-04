@@ -27,7 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Iridium.DB.Core;
+using Iridium.DB.CoreUtil;
 
 namespace Iridium.DB
 {

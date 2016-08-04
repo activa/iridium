@@ -51,8 +51,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Velox.Core, Version=1.0.2.34365, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\velox.core.1.0.2.9\lib\portable-net45+win8+wpa81\Velox.Core.dll</HintPath>
+    <Reference Include="Iridium-Core, Version=1.0.3.94, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\iridium.core.1.0.3.11\lib\portable-net45+win8+wpa81\Iridium-Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

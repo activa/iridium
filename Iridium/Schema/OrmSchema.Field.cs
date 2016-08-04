@@ -30,11 +30,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
-using Iridium.DB.Core;
+using Iridium.DB.CoreUtil;
 
 namespace Iridium.DB
 {
-    public partial class OrmSchema
+    public partial class TableSchema
     {
         [Flags]
         public enum FieldFlags
@@ -128,8 +128,8 @@ namespace Iridium.DB
         public class Relation : FieldOrRelation
         {
             public RelationType RelationType;
-            public OrmSchema ForeignSchema;
-            public OrmSchema LocalSchema;
+            public TableSchema ForeignSchema;
+            public TableSchema LocalSchema;
             public Field ForeignField;
             public Field LocalField;
             public Relation ReverseRelation;
@@ -183,7 +183,7 @@ namespace Iridium.DB
                 {
                     var serializedForeignObject = localFieldValue == null ? null : foreignRepository.DataProvider.ReadObject(new Dictionary<string, object> {{ForeignField.MappedName,localFieldValue}}, ForeignSchema);
 
-                    var relationObject = serializedForeignObject != null ? Vx.WithLoadedRelations(ForeignSchema.UpdateObject(Activator.CreateInstance(FieldType), serializedForeignObject),ForeignSchema.DatasetRelations) : null;
+                    var relationObject = serializedForeignObject != null ? Ir.WithLoadedRelations(ForeignSchema.UpdateObject(Activator.CreateInstance(FieldType), serializedForeignObject),ForeignSchema.DatasetRelations) : null;
 
                     if (ReverseRelation != null)
                         relationObject = ReverseRelation.SetField(relationObject, parentObject);

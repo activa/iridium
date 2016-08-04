@@ -29,41 +29,41 @@ using System.Linq.Expressions;
 
 namespace Iridium.DB
 {
-    public static class VxExtensions
+    public static class IridiumExtensions
     {
         public static bool InsertOrUpdate<T>(this T entity, bool saveRelations = false, bool? create = null) where T:IEntity
         {
-            return Vx.DataSet<T>().InsertOrUpdate(entity, saveRelations);
+            return Ir.DataSet<T>().InsertOrUpdate(entity, saveRelations);
         }
 
         public static bool Save<T>(this T entity, bool saveRelations = false, bool? create = null) where T : IEntity
         {
-            return Vx.DataSet<T>().InsertOrUpdate(entity, saveRelations);
+            return Ir.DataSet<T>().InsertOrUpdate(entity, saveRelations);
         }
 
         public static bool Insert<T>(this T entity, bool saveRelations = false) where T : IEntity
         {
-            return Vx.DataSet<T>().Insert(entity, saveRelations);
+            return Ir.DataSet<T>().Insert(entity, saveRelations);
         }
 
         public static bool Update<T>(this T entity, bool saveRelations = false) where T : IEntity
         {
-            return Vx.DataSet<T>().Update(entity, saveRelations);
+            return Ir.DataSet<T>().Update(entity, saveRelations);
         }
 
         public static T Load<T>(this T obj, object key, params Expression<Func<T, object>>[] relationsToLoad) where T : IEntity
         {
-            return Vx.DataSet<T>().Load(obj, key, relationsToLoad);
+            return Ir.DataSet<T>().Load(obj, key, relationsToLoad);
         }
 
         public static bool Delete<T>(this T entity) where T : IEntity
         {
-            return Vx.DataSet<T>().Delete(entity);
+            return Ir.DataSet<T>().Delete(entity);
         }
 
         public static T WithRelations<T>(this T entity, params Expression<Func<T, object>>[] relations) where T : IEntity
         {
-            Vx.LoadRelations(entity, relations);
+            DbContext.Instance.LoadRelations(entity, relations);
 
             return entity;
         }

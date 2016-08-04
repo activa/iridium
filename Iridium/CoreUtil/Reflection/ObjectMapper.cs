@@ -29,7 +29,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 #if IRIDIUM_CORE_EMBEDDED
-namespace Iridium.DB.Core
+namespace Iridium.DB.CoreUtil
 #else
 namespace Iridium.Core
 #endif

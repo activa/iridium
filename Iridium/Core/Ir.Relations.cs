@@ -32,53 +32,21 @@ using System.Linq.Expressions;
 
 namespace Iridium.DB
 {
-    public partial class Vx
+    public partial class Ir
     {
-        public static void LoadRelations<T>(T obj, params Expression<Func<T, object>>[] relationsToLoad)
-        {
-            _LoadRelations(obj, relationsToLoad, null);
-        }
-
-        public static void LoadRelations<T>(T obj, IEnumerable<Expression<Func<T, object>>> relationsToLoad)
-        {
-            _LoadRelations(obj, relationsToLoad, null);
-        }
-
-        public static void LoadRelations(params Expression<Func<object>>[] relationsToLoad)
-        {
-            foreach (var relation in relationsToLoad)
-            {
-                var memberExpression = relation.Body as MemberExpression;
-
-                if (memberExpression != null)
-                {
-                    _LoadRelations(Expression.Lambda(memberExpression.Expression).Compile().DynamicInvoke(), new[] { relation }, null);
-                }
-            }
-        }
 
         // Internal & private methods
 
-        internal static T WithLoadedRelations<T>(T obj, IEnumerable<OrmSchema.Relation> relations)
+        internal static T WithLoadedRelations<T>(T obj, IEnumerable<TableSchema.Relation> relations)
         {
             if (relations != null)
-                _LoadRelations(obj, relations);
+                LoadRelations(obj, relations);
 
             return obj;
         }
 
-        private static void _LoadRelations(object obj, IEnumerable<LambdaExpression> relationsToLoad, OrmSchema parentSchema)
-        {
-            if (parentSchema == null)
-                parentSchema = SchemaForObject(obj);
 
-            if (parentSchema == null)
-                throw new Exception("LoadRelations() not supported for multiple contexts");
-
-            _LoadRelations(obj, LambdaRelationFinder.FindRelations(relationsToLoad, parentSchema));
-        }
-
-        private static void _LoadRelations(object obj, IEnumerable<OrmSchema.Relation> relationsToLoad)
+        internal static void LoadRelations(object obj, IEnumerable<TableSchema.Relation> relationsToLoad)
         {
             var objectType = obj.GetType();
 
@@ -105,23 +73,18 @@ namespace Iridium.DB
                 if (deepRelations.Count == 0)
                     continue;
 
-                if (relation.RelationType == OrmSchema.RelationType.OneToMany)
+                if (relation.RelationType == TableSchema.RelationType.OneToMany)
                 {
                     foreach (var item in (IEnumerable)value)
                     {
-                        _LoadRelations(item, deepRelations);
+                        LoadRelations(item, deepRelations);
                     }
                 }
                 else
                 {
-                    _LoadRelations(value, deepRelations);
+                    LoadRelations(value, deepRelations);
                 }
             }
-        }
-
-        private static OrmSchema SchemaForObject(object obj)
-        {
-            return DB.GetSchema(obj.GetType());
         }
 
     }

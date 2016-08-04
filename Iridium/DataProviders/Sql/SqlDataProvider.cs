@@ -27,7 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Iridium.DB.Core;
+using Iridium.DB.CoreUtil;
 
 namespace Iridium.DB
 {
@@ -47,7 +47,7 @@ namespace Iridium.DB
             SqlDialect = sqlDialect;
         }
 
-        public object GetScalar(Aggregate aggregate, INativeQuerySpec nativeQuerySpec, OrmSchema schema)
+        public object GetScalar(Aggregate aggregate, INativeQuerySpec nativeQuerySpec, TableSchema schema)
         {
             var querySpec = (SqlQuerySpec) nativeQuerySpec;
 
@@ -77,7 +77,7 @@ namespace Iridium.DB
                     limit = 1;
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("aggregate");
+                    throw new ArgumentOutOfRangeException(nameof(aggregate));
             }
 
             var valueAlias = SqlNameGenerator.NextFieldAlias();
@@ -100,7 +100,7 @@ namespace Iridium.DB
             return record[valueAlias];
         }
 
-        public IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec filter, OrmSchema schema)
+        public IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec filter, TableSchema schema)
         {
             try
             {
@@ -131,10 +131,10 @@ namespace Iridium.DB
         {
             public string TableAlias;
             public string FieldAlias;
-            public OrmSchema.Field Field;
+            public TableSchema.Field Field;
         }
         
-        public IEnumerable<SerializedEntity> GetObjectsWithPrefetch(INativeQuerySpec filter, OrmSchema schema, IEnumerable<OrmSchema.Relation> prefetchRelations, out IEnumerable<Dictionary<OrmSchema.Relation, SerializedEntity>> relatedEntities)
+        public IEnumerable<SerializedEntity> GetObjectsWithPrefetch(INativeQuerySpec filter, TableSchema schema, IEnumerable<TableSchema.Relation> prefetchRelations, out IEnumerable<Dictionary<TableSchema.Relation, SerializedEntity>> relatedEntities)
         {
             try
             {
@@ -143,8 +143,8 @@ namespace Iridium.DB
                 var fieldList = (from f in schema.FieldsByFieldName.Values select new { Field = f, Alias = SqlNameGenerator.NextFieldAlias() }).ToList();
 
                 var joins = new HashSet<SqlJoinDefinition>(sqlQuerySpec.Joins);
-                var fieldsByRelation = new Dictionary<OrmSchema.Relation, PrefetchFieldDefinition[]>();
-                var foreignKeyAliases = new Dictionary<OrmSchema.Relation, string>();
+                var fieldsByRelation = new Dictionary<TableSchema.Relation, PrefetchFieldDefinition[]>();
+                var foreignKeyAliases = new Dictionary<TableSchema.Relation, string>();
 
                 foreach (var prefetchRelation in prefetchRelations)
                 {
@@ -202,7 +202,7 @@ namespace Iridium.DB
             }
         }
 
-        public ObjectWriteResult WriteObject(SerializedEntity o, bool create, OrmSchema schema)
+        public ObjectWriteResult WriteObject(SerializedEntity o, bool create, TableSchema schema)
         {
             var result = new ObjectWriteResult();
 
@@ -255,7 +255,7 @@ namespace Iridium.DB
             {
                 if (columnList.Length > 0 && schema.PrimaryKeys.Length > 0)
                 {
-                    var pkParameters = schema.PrimaryKeys.Select(pk => new KeyValuePair<string,OrmSchema.Field>(SqlNameGenerator.NextParameterName(), pk)).ToArray();
+                    var pkParameters = schema.PrimaryKeys.Select(pk => new KeyValuePair<string,TableSchema.Field>(SqlNameGenerator.NextParameterName(), pk)).ToArray();
 
                     foreach (var primaryKey in pkParameters)
                         parameters[primaryKey.Key] = o[primaryKey.Value.MappedName];
@@ -281,7 +281,7 @@ namespace Iridium.DB
             return result;
         }
 
-        public SerializedEntity ReadObject(Dictionary<string,object> keys, OrmSchema schema)
+        public SerializedEntity ReadObject(Dictionary<string,object> keys, TableSchema schema)
         {
             string tableName = schema.MappedName;
             var columnList = (from f in schema.FieldsByFieldName.Values select new { Field = f, Alias = SqlNameGenerator.NextFieldAlias() }).ToArray();
@@ -304,7 +304,7 @@ namespace Iridium.DB
             return new SerializedEntity(columnList.ToDictionary(c => c.Field.MappedName , c => record[c.Alias].Convert(c.Field.FieldType)));
         }
 
-        public bool DeleteObject(SerializedEntity o, OrmSchema schema)
+        public bool DeleteObject(SerializedEntity o, TableSchema schema)
         {
             string tableName = schema.MappedName;
             var keyList = (from f in schema.PrimaryKeys select new { Field = f, ParameterName = SqlNameGenerator.NextParameterName() }).ToArray();
@@ -322,7 +322,7 @@ namespace Iridium.DB
             return result > 0;
         }
 
-        public bool DeleteObjects(INativeQuerySpec filter, OrmSchema schema)
+        public bool DeleteObjects(INativeQuerySpec filter, TableSchema schema)
         {
             string tableName = schema.MappedName;
             var querySpec = (SqlQuerySpec) filter;
@@ -337,7 +337,7 @@ namespace Iridium.DB
         }
 
         
-        public QuerySpec CreateQuerySpec(FilterSpec filterSpec, ScalarSpec scalarSpec, SortOrderSpec sortSpec, int? skip, int? take, OrmSchema schema)
+        public QuerySpec CreateQuerySpec(FilterSpec filterSpec, ScalarSpec scalarSpec, SortOrderSpec sortSpec, int? skip, int? take, TableSchema schema)
         {
             var tableAlias = SqlNameGenerator.NextTableAlias();
 
@@ -400,10 +400,12 @@ namespace Iridium.DB
         }
 
         public bool SupportsRelationPrefetch => true;
+        public virtual bool SupportsTransactions => true;
+        public bool SupportsSql => true;
 
         public abstract bool RequiresAutoIncrementGetInSameStatement { get; }
 
-        public virtual bool CreateOrUpdateTable(OrmSchema schema, bool recreateTable, bool recreateIndexes)
+        public virtual bool CreateOrUpdateTable(TableSchema schema, bool recreateTable, bool recreateIndexes)
         {
             SqlDialect.CreateOrUpdateTable(schema, recreateTable, recreateIndexes, this);
 
@@ -425,18 +427,18 @@ namespace Iridium.DB
             return results?.Select(r => r.First().Value);
         }
 
-        public abstract void BeginTransaction(Vx.IsolationLevel isolationLevel);
+        public abstract void BeginTransaction(IsolationLevel isolationLevel);
         public abstract void CommitTransaction();
         public abstract void RollbackTransaction();
 
-        public virtual void Purge(OrmSchema schema)
+        public virtual void Purge(TableSchema schema)
         {
             ExecuteSql(SqlDialect.TruncateTableSql(schema.MappedName), null);
 
             SqlNameGenerator.Reset();
         }
 
-        public virtual long GetLastAutoIncrementValue(OrmSchema schema)
+        public virtual long GetLastAutoIncrementValue(TableSchema schema)
         {
             var autoIncrementField = schema.IncrementKeys.FirstOrDefault();
             var fieldAlias = SqlNameGenerator.NextFieldAlias();

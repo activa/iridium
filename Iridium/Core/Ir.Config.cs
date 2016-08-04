@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
@@ -24,41 +24,15 @@
 //=============================================================================
 #endregion
 
-using System.Collections.Generic;
-using Iridium.DB.Core;
-
 namespace Iridium.DB
 {
-    public class SerializedEntity
+    public static partial class Ir
     {
-        readonly Dictionary<string, object> _dictionary;
-
-        public SerializedEntity(Dictionary<string, object> dictionary)
+        public class Configuration
         {
-            _dictionary = new Dictionary<string, object>(dictionary);
+            public NamingConvention NamingConvention { get; set; } = new NamingConvention();
         }
 
-        public bool Contains(string field)
-        {
-            return _dictionary.ContainsKey(field);
-        }
-
-        public IEnumerable<string> FieldNames => _dictionary.Keys;
-
-        public object this[string fieldName]
-        {
-            get { return _dictionary[fieldName]; }
-            set { _dictionary[fieldName] = value; }
-        }
-
-        public Dictionary<string, object> AsDictionary()
-        {
-            return new Dictionary<string, object>(_dictionary);
-        }
-
-        public T CreateObject<T>() where T : new()
-        {
-            return ObjectMapper.Mapper(includeInherited: true).CreateObject<T>(_dictionary);
-        }
+        public static Configuration Config { get; } = new Configuration();
     }
 }

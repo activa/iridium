@@ -24,52 +24,24 @@
 //=============================================================================
 #endregion
 
-using System;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Threading;
 
 #if IRIDIUM_CORE_EMBEDDED
-namespace Iridium.DB.Core
+namespace Iridium.DB.CoreUtil
 #else
 namespace Iridium.Core
 #endif
 {
-	public static class ReflectionExtensions
-	{
-        private static readonly ThreadLocal<Dictionary<Type,TypeInspector>> _typeInspectorCache = new ThreadLocal<Dictionary<Type, TypeInspector>>(() => new Dictionary<Type, TypeInspector>());
-       
-        public static TypeInspector Inspector(this Type type)
+    public class PropertyInspector : MemberInspector
+    {
+        private readonly PropertyInfo _propertyInfo;
+
+        public PropertyInspector(PropertyInfo propertyInfo) : base(propertyInfo)
         {
-            TypeInspector inspector;
-
-            if (!_typeInspectorCache.Value.TryGetValue(type, out inspector))
-            {
-                inspector = new TypeInspector(type);
-
-                _typeInspectorCache.Value[type] = inspector;
-            }
-
-            return inspector;
+            _propertyInfo = propertyInfo;
         }
 
-	    public static MemberInspector Inspector(this MemberInfo memberInfo)
-	    {
-	        return new MemberInspector(memberInfo);
-	    }
-
-	    public static PropertyInspector Inspector(this PropertyInfo propertyInfo)
-	    {
-	        return new PropertyInspector(propertyInfo);
-	    }
-
-	    public static AssemblyInspector Inspector(this Assembly assembly)
-	    {
-	        return new AssemblyInspector(assembly);
-	    }
-
-
-
-
+        public bool CanRead => _propertyInfo.CanRead;
+        public bool CanWrite => _propertyInfo.CanWrite;
     }
 }

@@ -3,12 +3,12 @@ using Iridium.DB;
 
 namespace Iridium.DB.SqlService
 {
-    public class SqlServiceContext : Vx.Context
+    public class SqlServiceContext : DbContext
     {
         /*
         public static void Use(string dbFileName)
         {
-            Vx.DB = new SqlServiceContext(dbFileName);
+            Ir.DB = new SqlServiceContext(dbFileName);
         }*/
 
         public SqlServiceContext() : base(new SqlServiceDataProvider())
