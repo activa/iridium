@@ -114,7 +114,7 @@
     <Compile Include="Core\DbContext.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Uridium.nuspec" />
+    <None Include="Iridium.nuspec" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Target Name="BeforeBuild">

@@ -45,7 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="sqlite3-src\howtocompile.txt" />
-    <None Include="nuget\Uridium.DB.Sqlite.Win32.targets">
+    <None Include="nuget\Iridium.DB.Sqlite.Win32.targets">
       <SubType>Designer</SubType>
     </None>
     <None Include="sqlite3-src\sqlite3.c" />

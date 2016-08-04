@@ -8,12 +8,12 @@
     <projectUrl>http://github.com/activa/iridium</projectUrl>
     <licenseUrl>https://github.com/activa/iridium/blob/master/LICENSE</licenseUrl>
     <iconUrl>http://dstyler.com/vici/32x32/im-_IconPlain100-w32-h32.png</iconUrl>
-    <tags>iridium orm sql sqlite sqlserver</tags>
+    <tags>iridium orm sql sqlite xamarin ios android uwp</tags>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Lightweight multi-platform ORM for mobile, desktop and servers. Support for Sqlite is built in for mobile and UWP platforms. For other database platforms and for Sqlite on Win32, a data provider is required to use this library. Providers for Sqlite (Win32), SQL Server and MySql are available on Nuget.</description>
     <copyright>Copyright 2015-2016 Philippe Leybaert</copyright>
   </metadata>
   <files>
-    <file src="bin\Release\*.dll" target="lib\portable-net45+win8+wpa81" />
+    <file src="*.dll" target="lib\portable-net45+win8+wpa81" />
   </files>
 </package>
