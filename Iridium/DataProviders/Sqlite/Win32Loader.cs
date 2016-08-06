@@ -15,8 +15,7 @@ namespace Iridium.DB
         {
             if (Platform.Properties.RuntimeEnvironment == Platform.RuntimeEnv.UWP)
             {
-                //TODO: check for latest version of Win10
-                //LoadLibrary("sqlite3.dll");
+                //TODO: check for latest version of Win10 (which includes "winsqlite3")
                 return;
             }
 

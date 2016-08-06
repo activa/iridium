@@ -27,6 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iridium.DB.CoreUtil;
@@ -272,7 +273,9 @@ namespace Iridium.DB
             var tableName = SqlDialect.QuoteTable(schema.MappedName);
 
             ExecuteSql("DELETE FROM " + tableName, null);
-            ExecuteSql("delete from sqlite_sequence where name=@name", new QueryParameterCollection(new {name = schema.MappedName}));
+
+            if (QueryScalar("select name from sqlite_master where name='sqlite_sequence'",null).Any())
+                ExecuteSql("delete from sqlite_sequence where name=@name", new QueryParameterCollection(new {name = schema.MappedName}));
         }
 
         public override long GetLastAutoIncrementValue(TableSchema schema)

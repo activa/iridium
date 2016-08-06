@@ -130,9 +130,9 @@ namespace Iridium.DB
         public virtual string DeleteSql(SqlTableNameWithAlias tableName, string sqlWhere)
         {
             if (tableName.Alias != null)
-                return "delete from " + QuoteTable(tableName.TableName) + (tableName.Alias != null ? (" " + tableName.Alias + " ") : "") + " where " + sqlWhere;
+                return "delete from " + QuoteTable(tableName.TableName) + (tableName.Alias != null ? (" " + tableName.Alias + " ") : "") + (sqlWhere != null ? (" where " + sqlWhere) : "");
             else
-                return "delete from " + QuoteTable(tableName.TableName) + " where " + sqlWhere;
+                return "delete from " + QuoteTable(tableName.TableName) + (sqlWhere != null ? (" where " + sqlWhere) : "");
         }
 
         public virtual string UpdateSql(SqlTableNameWithAlias table, IEnumerable<Tuple<string, string>> setColumns, string sqlWhere)

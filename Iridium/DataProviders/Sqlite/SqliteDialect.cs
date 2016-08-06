@@ -60,10 +60,10 @@ namespace Iridium.DB
 
         public override string DeleteSql(SqlTableNameWithAlias tableName, string sqlWhere)
         {
-            if (tableName.Alias != null)
+            if (tableName.Alias != null && sqlWhere != null)
                 sqlWhere = sqlWhere.Replace(QuoteTable(tableName.Alias) + ".", "");
             
-            return "delete from " + QuoteTable(tableName.TableName) + " where " + sqlWhere;
+            return "delete from " + QuoteTable(tableName.TableName) + (sqlWhere != null ? (" where " + sqlWhere) : "");
         }
 
         public override void CreateOrUpdateTable(TableSchema schema, bool recreateTable, bool recreateIndexes, SqlDataProvider dataProvider)

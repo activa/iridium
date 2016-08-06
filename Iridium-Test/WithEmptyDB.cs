@@ -686,6 +686,27 @@ namespace Iridium.DB.Test
         }
 
         [Test]
+        public void DeleteAllObjects()
+        {
+            List<Customer> customers = new List<Customer>();
+
+            for (int i = 0; i < 10; i++)
+            {
+                Customer customer = new Customer() { Name = "Customer " + (i + 1) };
+
+                customer.Save();
+
+                customers.Add(customer);
+            }
+
+            Assert.That(DB.Customers.Count(), Is.EqualTo(10));
+
+            DB.Customers.DeleteAll();
+
+            Assert.That(DB.Customers.Count(),Is.Zero);
+        }
+
+        [Test]
         public void CreateOrderWithNewItems()
         {
             Order order = new Order
