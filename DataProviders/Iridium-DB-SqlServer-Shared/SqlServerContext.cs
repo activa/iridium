@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Iridium.DB.SqlServer
 {
-    public class SqlServerContext : DbContext
+    public class SqlServerContext : StorageContext
     {
         public SqlServerContext() : base(new SqlServerDataProvider())
         {

@@ -33,13 +33,13 @@ using Iridium.DB.CoreUtil;
 
 namespace Iridium.DB
 {
-    public class DbContext : IDisposable
+    public class StorageContext : IDisposable
     {
         private readonly SafeDictionary<Type, Repository> _repositories = new SafeDictionary<Type, Repository>();
 
         public IDataProvider DataProvider { get; private set; }
 
-        public DbContext(IDataProvider dataProvider)
+        public StorageContext(IDataProvider dataProvider)
         {
             DataProvider = dataProvider;
 
@@ -64,11 +64,11 @@ namespace Iridium.DB
             Instance = this;
         }
 
-        private static DbContext _globalInstance;
+        private static StorageContext _globalInstance;
         private static int _instanceCount;
         private static readonly object _staticLock = new object();
 
-        public static DbContext Instance
+        public static StorageContext Instance
         {
             get
             {

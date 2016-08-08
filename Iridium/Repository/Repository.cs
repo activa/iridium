@@ -10,7 +10,7 @@ namespace Iridium.DB
     internal partial class Repository<T> : Repository
     {
         [Preserve]
-        public Repository(DbContext context) : base(typeof(T), context)
+        public Repository(StorageContext context) : base(typeof(T), context)
         {
         }
 

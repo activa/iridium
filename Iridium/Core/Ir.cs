@@ -32,7 +32,7 @@ namespace Iridium.DB
     {
         public static IDataSet<T> DataSet<T>()
         {
-            return DbContext.Instance.DataSet<T>();
+            return StorageContext.Instance.DataSet<T>();
         }
 
         // TODO: move this somewhere else

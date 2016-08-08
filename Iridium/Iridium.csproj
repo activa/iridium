@@ -111,7 +111,7 @@
     <Compile Include="Core\ObjectWriteResult.cs" />
     <Compile Include="Core\SerializedEntity.cs" />
     <Compile Include="Repository\RepositoryBase.cs" />
-    <Compile Include="Core\DbContext.cs" />
+    <Compile Include="Core\StorageContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Iridium.nuspec" />

@@ -5,7 +5,7 @@ using Iridium.DB;
 
 namespace Iridium.DB.MySql
 {
-    public class MySqlContext : DbContext
+    public class MySqlContext : StorageContext
     {
         public MySqlContext() : base(new MySqlDataProvider())
         {

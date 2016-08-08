@@ -33,12 +33,12 @@ namespace Iridium.DB
 {
     internal abstract class Repository
     {
-        internal DbContext Context { get; }
+        internal StorageContext Context { get; }
         internal TableSchema Schema { get; }
 
         internal IDataProvider DataProvider => Context.DataProvider;
 
-        protected Repository(Type type, DbContext context)
+        protected Repository(Type type, StorageContext context)
         {
             Context = context;
 

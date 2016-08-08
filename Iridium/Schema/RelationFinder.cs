@@ -31,13 +31,13 @@ namespace Iridium.DB
 {
     internal class LambdaRelationFinder : ExpressionVisitor
     {
-        private LambdaRelationFinder(DbContext context)
+        private LambdaRelationFinder(StorageContext context)
         {
             _context = context;
         }
 
         private readonly HashSet<TableSchema.Relation> _relations = new HashSet<TableSchema.Relation>();
-        private readonly DbContext _context;
+        private readonly StorageContext _context;
 
         protected override Expression VisitMember(MemberExpression node)
         {

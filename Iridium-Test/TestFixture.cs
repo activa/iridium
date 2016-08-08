@@ -12,11 +12,11 @@ namespace Iridium.DB.Test
 
         protected TestFixture(string driver)
         {
-            DbContext.Instance = null;
+            StorageContext.Instance = null;
 
             DB = MyContext.Get(driver);
 
-            DbContext.Instance = DB;
+            StorageContext.Instance = DB;
         }
     }
 }

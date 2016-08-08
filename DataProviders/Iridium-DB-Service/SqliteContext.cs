@@ -3,7 +3,7 @@ using Iridium.DB;
 
 namespace Iridium.DB.SqlService
 {
-    public class SqlServiceContext : DbContext
+    public class SqlServiceContext : StorageContext
     {
         /*
         public static void Use(string dbFileName)

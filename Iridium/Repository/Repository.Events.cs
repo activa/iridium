@@ -20,7 +20,7 @@ namespace Iridium.DB
             public event EventHandler<ObjectWithCancelEventArgs<T>> ObjectDeleting;
             public event EventHandler<ObjectEventArgs<T>> ObjectDeleted;
 
-            public void Fire_ObjectCreating(DbContext context, T obj, ref bool cancel)
+            public void Fire_ObjectCreating(StorageContext context, T obj, ref bool cancel)
             {
                 if (ObjectCreating != null)
                 {
@@ -41,7 +41,7 @@ namespace Iridium.DB
                 }
             }
 
-            public void Fire_ObjectSaving(DbContext context, T obj, ref bool cancel)
+            public void Fire_ObjectSaving(StorageContext context, T obj, ref bool cancel)
             {
                 if (ObjectSaving != null)
                 {
@@ -62,17 +62,17 @@ namespace Iridium.DB
                 }
             }
 
-            public void Fire_ObjectCreated(DbContext context, T obj)
+            public void Fire_ObjectCreated(StorageContext context, T obj)
             {
                 ObjectCreated?.Invoke(context, new ObjectEventArgs<T>(obj));
             }
 
-            public void Fire_ObjectSaved(DbContext context, T obj)
+            public void Fire_ObjectSaved(StorageContext context, T obj)
             {
                 ObjectSaved?.Invoke(context, new ObjectEventArgs<T>(obj));
             }
 
-            public void Fire_ObjectDeleting(DbContext context, T obj, ref bool cancel)
+            public void Fire_ObjectDeleting(StorageContext context, T obj, ref bool cancel)
             {
                 if (ObjectDeleting != null)
                 {
@@ -84,7 +84,7 @@ namespace Iridium.DB
                 }
             }
 
-            public void Fire_ObjectDeleted(DbContext context, T obj)
+            public void Fire_ObjectDeleted(StorageContext context, T obj)
             {
                 ObjectDeleted?.Invoke(context, new ObjectEventArgs<T>(obj));
             }

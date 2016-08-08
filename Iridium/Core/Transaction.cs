@@ -4,9 +4,9 @@ namespace Iridium.DB
 {
     public class Transaction : IDisposable
     {
-        private DbContext _context;
+        private StorageContext _context;
 
-        public Transaction(DbContext context, IsolationLevel isolationLevel = IsolationLevel.Serializable)
+        public Transaction(StorageContext context, IsolationLevel isolationLevel = IsolationLevel.Serializable)
         {
             _context = context;
 

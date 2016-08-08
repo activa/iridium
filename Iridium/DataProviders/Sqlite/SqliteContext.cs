@@ -1,6 +1,6 @@
 namespace Iridium.DB
 {
-    public class SqliteContext : DbContext
+    public class SqliteContext : StorageContext
     {
         public SqliteContext() : base(new SqliteDataProvider())
         {

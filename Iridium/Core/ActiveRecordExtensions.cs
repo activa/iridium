@@ -63,7 +63,7 @@ namespace Iridium.DB
 
         public static T WithRelations<T>(this T entity, params Expression<Func<T, object>>[] relations) where T : IEntity
         {
-            DbContext.Instance.LoadRelations(entity, relations);
+            StorageContext.Instance.LoadRelations(entity, relations);
 
             return entity;
         }

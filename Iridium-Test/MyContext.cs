@@ -11,7 +11,7 @@ using Iridium.DB.SqlService;
 
 namespace Iridium.DB.Test
 {
-    public class MyContext : DbContext
+    public class MyContext : StorageContext
     {
         public IDataSet<Order> Orders { get; set; }
         public IDataSet<Customer> Customers { get; set; }
