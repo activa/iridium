@@ -149,7 +149,7 @@ namespace Iridium.DB
                 case ExpressionType.Constant:
                     {
                         if (expression.Type.Inspector().Is(TypeFlags.Numeric | TypeFlags.Boolean | TypeFlags.String | TypeFlags.DateTime | TypeFlags.Enum))
-                            return CreateParameter(((ConstantExpression) expression).Value);
+                            return CreateParameter(((ConstantExpression) expression).Value, expression.Type);
                     }
                     break;
 
@@ -233,11 +233,11 @@ namespace Iridium.DB
                 switch (methodName)
                 {
                     case "StartsWith":
-                        return $"({arg} like {CreateParameter(stringArguments[0] + "%")})";
+                        return $"({arg} like {CreateParameter(stringArguments[0] + "%", typeof(string))})";
                     case "EndsWith":
-                        return $"({arg} like {CreateParameter("%" + stringArguments[0])})";
+                        return $"({arg} like {CreateParameter("%" + stringArguments[0], typeof(string))})";
                     case "Contains":
-                        return $"({arg} like {CreateParameter("%" + stringArguments[0] + "%")})";
+                        return $"({arg} like {CreateParameter("%" + stringArguments[0] + "%", typeof(string))})";
                     case "Trim":
                         return string.Format(_sqlDialect.SqlFunction(SqlDialect.Function.Trim), stringArguments[0]);
                 }
@@ -454,11 +454,11 @@ namespace Iridium.DB
             return Expression.Lambda(expression, lambdaParameter);
         }
         
-        private string CreateParameter(object value)
+        private string CreateParameter(object value, Type type)
         {
             var parameterName = SqlNameGenerator.NextParameterName();
 
-            SqlParameters[parameterName] = value;
+            SqlParameters[parameterName] = new QueryParameter(parameterName, value, type);
 
             return _sqlDialect.CreateParameterExpression(parameterName);
         }

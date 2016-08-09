@@ -154,11 +154,11 @@ namespace Iridium.DB
             }
 
             if (parameters != null)
-                foreach (var varName in parameters.Keys)
+                foreach (var parameter in parameters)
                 {
-                    int paramNumber = _sqlite3.bind_parameter_index(stmt, SqlDialect.CreateParameterExpression(varName));
+                    int paramNumber = _sqlite3.bind_parameter_index(stmt, SqlDialect.CreateParameterExpression(parameter.Name));
 
-                    var value = parameters[varName];
+                    var value = parameter.Value;
 
                     if (value == null)
                     {
@@ -166,10 +166,12 @@ namespace Iridium.DB
                     }
                     else
                     {
-                        var parameterType = value.GetType().Inspector();
+                        var parameterType = parameter.Type.Inspector();
 
                         if (parameterType.Is(TypeFlags.Boolean))
                             _sqlite3.bind_int(stmt, paramNumber, value.Convert<bool>() ? 1 : 0);
+                        else if (parameterType.Is(TypeFlags.Array | TypeFlags.Byte))
+                            _sqlite3.bind_blob(stmt, paramNumber, (byte[])value);
                         else if (parameterType.Is(TypeFlags.Integer64))
                             _sqlite3.bind_int64(stmt, paramNumber, value.Convert<long>());
                         else if (parameterType.Is(TypeFlags.Integer))
@@ -178,8 +180,6 @@ namespace Iridium.DB
                             _sqlite3.bind_double(stmt, paramNumber, value.Convert<double>());
                         else if (parameterType.Is(TypeFlags.String))
                             _sqlite3.bind_text(stmt, paramNumber, value.Convert<string>());
-                        else if (parameterType.Is(TypeFlags.Array | TypeFlags.Byte))
-                            _sqlite3.bind_blob(stmt, paramNumber, (byte[])value);
                         else if (parameterType.Is(TypeFlags.DateTime))
                         {
                             switch (DateFormat)
@@ -275,7 +275,7 @@ namespace Iridium.DB
             ExecuteSql("DELETE FROM " + tableName, null);
 
             if (QueryScalar("select name from sqlite_master where name='sqlite_sequence'",null).Any())
-                ExecuteSql("delete from sqlite_sequence where name=@name", new QueryParameterCollection(new {name = schema.MappedName}));
+                ExecuteSql("delete from sqlite_sequence where name=@name", QueryParameterCollection.FromObject(new {name = schema.MappedName}));
         }
 
         public override long GetLastAutoIncrementValue(TableSchema schema)

@@ -57,15 +57,18 @@ namespace Iridium.Core
         DateTimeOffset = 1<<16,
         String = 1<<17,
         Guid = 1<<18,
+        Array = 1 << 21,
         Nullable = 1<<24,
-        ValueType = 1<<25,
-        CanBeNull = 1<<26,
-        Array = 1<<27,        
-        Integer8 = Byte|SByte|Char,
-        Integer16 = Int16|UInt16,
+        ElementNullable = 1 << 25,
+        ValueType = 1<<26,
+        ElementValueType = 1 << 27,
+        CanBeNull = 1<<28,
+        ElementCanBeNull = 1 << 29,
+        Integer8 = Byte|SByte,
+        Integer16 = Int16|UInt16|Char,
         Integer32 = Int32|UInt32,
         Integer64 = Int64|UInt64,
-        SignedInteger = SByte|Int16|Int32|Int64,
+        SignedInteger = Char|SByte|Int16|Int32|Int64,
         UnsignedInteger = Byte|UInt16|UInt32|UInt64,
         FloatingPoint = Single|Double|Decimal,
         Integer = Integer8|Integer16|Integer32|Integer64,
@@ -77,10 +80,14 @@ namespace Iridium.Core
     {
         private readonly TypeInfo _typeInfo;
         private readonly TypeInfo _realTypeInfo;
+        private readonly TypeInspector _elementTypeInspector;
 
         public Type Type { get; }
         public Type RealType { get; }
         public TypeFlags TypeFlags { get; }
+
+        private const TypeFlags TypeDesignator = (TypeFlags) ((1 << 19) - 1);
+        private const TypeFlags TypeModifier = TypeFlags.CanBeNull|TypeFlags.Nullable|TypeFlags.ValueType| TypeFlags.ElementCanBeNull|TypeFlags.ElementNullable|TypeFlags.ElementValueType;
 
         private static readonly Dictionary<Type, TypeFlags> _typeflagsMap = new Dictionary<Type, TypeFlags>()
         {
@@ -112,6 +119,9 @@ namespace Iridium.Core
 
             _typeInfo = type.GetTypeInfo();
             _realTypeInfo = RealType.GetTypeInfo();
+
+            if (type.IsArray)
+                _elementTypeInspector = type.GetElementType().Inspector();
 
             TypeFlags = BuildTypeFlags();
         }
@@ -147,6 +157,13 @@ namespace Iridium.Core
 
                 if (_typeflagsMap.TryGetValue(Type.GetElementType(), out arrayTypeFlags))
                     flags |= arrayTypeFlags;
+
+                if ((_elementTypeInspector.TypeFlags & TypeFlags.CanBeNull) != 0)
+                    flags |= TypeFlags.ElementCanBeNull;
+                if ((_elementTypeInspector.TypeFlags & TypeFlags.Nullable) != 0)
+                    flags |= TypeFlags.ElementNullable;
+                if ((_elementTypeInspector.TypeFlags & TypeFlags.ValueType) != 0)
+                    flags |= TypeFlags.ElementValueType;
             }
 
             return flags;
@@ -199,7 +216,18 @@ namespace Iridium.Core
         public bool IsValueType => Is(TypeFlags.ValueType);
         public Type BaseType => _typeInfo.BaseType;
         public bool IsEnum => Is(TypeFlags.Enum);
-        public bool Is(TypeFlags flags) => (TypeFlags & flags) != 0;
+
+        public bool Is(TypeFlags flags)
+        {
+            return (
+                   ((flags & TypeDesignator) == 0 || (TypeFlags & flags & TypeDesignator) != 0)  
+                && (((flags & (TypeDesignator|TypeFlags.Array)) == 0) || (flags & TypeFlags.Array) == (TypeFlags & TypeFlags.Array))
+                && (flags & TypeFlags & TypeModifier) == (flags & TypeModifier)
+                );
+        }
+
+        public TypeInspector ElementType => _elementTypeInspector;
+
         public bool IsSubclassOf(Type type) => WalkAndFindSingle(t => t.GetTypeInfo().BaseType == type);
 
         public object DefaultValue()

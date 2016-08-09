@@ -32,6 +32,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Iridium.DB.CoreUtil;
 
 #if IRIDIUM_SQLSERVER
 namespace Iridium.DB.SqlServer
@@ -100,7 +101,7 @@ namespace Iridium.DB.Sql
 
         public abstract void ClearConnectionPool();
 
-        protected DbCommand CreateCommand(string sqlQuery, Dictionary<string, object> parameters)
+        protected DbCommand CreateCommand(string sqlQuery, QueryParameterCollection parameters)
         {
             Debug.WriteLine(sqlQuery);
 
@@ -119,14 +120,60 @@ namespace Iridium.DB.Sql
                 {
                     IDbDataParameter dataParameter = dbCommand.CreateParameter();
 
-                    dataParameter.ParameterName = SqlDialect.CreateParameterExpression(parameter.Key);
+                    dataParameter.ParameterName = SqlDialect.CreateParameterExpression(parameter.Name);
                     dataParameter.Direction = ParameterDirection.Input;
+                    dataParameter.DbType = DbType(parameter.Type);
+                    
                     dataParameter.Value = ConvertParameter(parameter.Value);
 
                     dbCommand.Parameters.Add(dataParameter);
                 }
 
             return dbCommand;
+        }
+
+        public DbType DbType(Type type)
+        {
+            var insp = type.Inspector();
+
+            if (insp.Is(TypeFlags.String))
+                return System.Data.DbType.String;
+            if (insp.Is(TypeFlags.Integer16))
+                return System.Data.DbType.Int16;
+            if (insp.Is(TypeFlags.Integer32))
+                return System.Data.DbType.Int32;
+            if (insp.Is(TypeFlags.Integer64))
+                return System.Data.DbType.Int64;
+            if (insp.Is(TypeFlags.Byte))
+                return System.Data.DbType.Byte;
+            if (insp.Is(TypeFlags.SByte))
+                return System.Data.DbType.SByte;
+            if (insp.Is(TypeFlags.Boolean))
+                return System.Data.DbType.Boolean;
+            if (insp.Is(TypeFlags.Decimal))
+                return System.Data.DbType.Decimal;
+            if (insp.Is(TypeFlags.Single))
+                return System.Data.DbType.Single;
+            if (insp.Is(TypeFlags.Double))
+                return System.Data.DbType.Double;
+            if (insp.Is(TypeFlags.DateTime))
+                return System.Data.DbType.DateTime;
+            if (insp.Is(TypeFlags.DateTimeOffset))
+                return System.Data.DbType.DateTimeOffset;
+            if (insp.Is(TypeFlags.Guid))
+                return System.Data.DbType.Guid;
+            if (insp.Is(TypeFlags.UInt16))
+                return System.Data.DbType.UInt16;
+            if (insp.Is(TypeFlags.UInt32))
+                return System.Data.DbType.UInt32;
+            if (insp.Is(TypeFlags.UInt64))
+                return System.Data.DbType.UInt64;
+            if (insp.Is(TypeFlags.Array | TypeFlags.Byte))
+                return System.Data.DbType.Binary;
+            if (insp.Is(TypeFlags.Integer))
+                return System.Data.DbType.Int32;
+
+            return System.Data.DbType.Object;
         }
 
         protected virtual object ConvertParameter(object value)
@@ -148,7 +195,7 @@ namespace Iridium.DB.Sql
 
                 List<Dictionary<string, object>> records = new List<Dictionary<string, object>>();
 
-                using (var cmd = CreateCommand(sql, parameters?.AsDictionary()))
+                using (var cmd = CreateCommand(sql, parameters))
                 {
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -185,7 +232,7 @@ namespace Iridium.DB.Sql
             {
                 BeginTransaction(IsolationLevel.None);
 
-                using (var cmd = CreateCommand(sql, parameters?.AsDictionary()))
+                using (var cmd = CreateCommand(sql, parameters))
                 {
                     return cmd.ExecuteNonQuery();
                 }

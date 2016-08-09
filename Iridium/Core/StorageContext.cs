@@ -230,27 +230,27 @@ namespace Iridium.DB
 
         public int Execute(string sql, object parameters)
         {
-            return DataProvider.ExecuteSql(sql, new QueryParameterCollection(parameters));
+            return DataProvider.ExecuteSql(sql, QueryParameterCollection.FromObject(parameters));
         }
 
         public IEnumerable<T> Query<T>(string sql, object parameters = null) where T : new()
         {
-            return DataProvider.Query(sql, new QueryParameterCollection(parameters)).Select(entity => entity.CreateObject<T>());
+            return DataProvider.Query(sql, QueryParameterCollection.FromObject(parameters)).Select(entity => entity.CreateObject<T>());
         }
 
         public IEnumerable<Dictionary<string,object>> Query(string sql, object parameters = null)
         {
-            return DataProvider.Query(sql, new QueryParameterCollection(parameters)).Select(entity => entity.AsDictionary());
+            return DataProvider.Query(sql, QueryParameterCollection.FromObject(parameters)).Select(entity => entity.AsDictionary());
         }
 
         public T QueryScalar<T>(string sql, object parameters = null) where T : new()
         {
-            return DataProvider.QueryScalar(sql, new QueryParameterCollection(parameters)).FirstOrDefault().Convert<T>();
+            return DataProvider.QueryScalar(sql, QueryParameterCollection.FromObject(parameters)).FirstOrDefault().Convert<T>();
         }
 
         public IEnumerable<T> QueryScalars<T>(string sql, object parameters = null) where T : new()
         {
-            return DataProvider.QueryScalar(sql, new QueryParameterCollection(parameters)).Select(scalar => scalar.Convert<T>());
+            return DataProvider.QueryScalar(sql, QueryParameterCollection.FromObject(parameters)).Select(scalar => scalar.Convert<T>());
         }
 
         // Async methods

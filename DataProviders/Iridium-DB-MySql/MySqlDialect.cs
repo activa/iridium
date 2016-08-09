@@ -67,6 +67,7 @@ namespace Iridium.DB.MySql
 
             var columnMappings = new[]
             {
+                new {Flags = TypeFlags.Array | TypeFlags.Byte, ColumnType = "LONGBLOB"},
                 new {Flags = TypeFlags.Boolean, ColumnType = "BOOLEAN"},
                 new {Flags = TypeFlags.Byte, ColumnType = "TINYINT UNSIGNED"},
                 new {Flags = TypeFlags.SByte, ColumnType = "TINYINT"},
@@ -80,14 +81,18 @@ namespace Iridium.DB.MySql
                 new {Flags = TypeFlags.Double, ColumnType = "DOUBLE"},
                 new {Flags = TypeFlags.Single, ColumnType = "FLOAT"},
                 new {Flags = TypeFlags.String, ColumnType = "VARCHAR({0})"},
-                new {Flags = TypeFlags.Array | TypeFlags.Byte, ColumnType = "LONGBLOB"},
                 new {Flags = TypeFlags.DateTime, ColumnType = "DATETIME"}
             };
 
             if (recreateTable)
                 recreateIndexes = true;
 
-            var existingColumns = dataProvider.ExecuteSqlReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=DATABASE() and TABLE_NAME=@name", new QueryParameterCollection(new { name = schema.MappedName })).ToLookup(rec => rec["COLUMN_NAME"].ToString());
+            var existingColumns = dataProvider.ExecuteSqlReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=DATABASE() and TABLE_NAME=@name", QueryParameterCollection.FromObject(new { name = schema.MappedName })).ToLookup(rec => rec["COLUMN_NAME"].ToString());
+
+            if (existingColumns.Any() && recreateTable)
+            {
+                dataProvider.ExecuteSql("DROP TABLE " + QuoteTable(schema.MappedName), null);
+            }
 
             var parts = new List<string>();
 
@@ -100,7 +105,7 @@ namespace Iridium.DB.MySql
                 if (columnMapping == null)
                     continue;
 
-                if (existingColumns.Contains(field.MappedName)/* && !recreateTable*/)
+                if (existingColumns.Contains(field.MappedName) && !recreateTable)
                 {
                     createNew = false;
                     continue;

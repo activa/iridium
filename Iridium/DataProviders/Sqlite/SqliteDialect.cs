@@ -72,12 +72,12 @@ namespace Iridium.DB
 
             var columnMappings = new[]
             {
+                new {Flags = TypeFlags.Array | TypeFlags.Byte, ColumnType = "LONGBLOB"},
                 new {Flags = TypeFlags.Boolean, ColumnType = "TINYINT"},
                 new {Flags = TypeFlags.Integer, ColumnType = "INTEGER"},
                 new {Flags = TypeFlags.Decimal, ColumnType = "DECIMAL({0},{1})"},
                 new {Flags = TypeFlags.FloatingPoint, ColumnType = "REAL"},
                 new {Flags = TypeFlags.String, ColumnType = "VARCHAR({0})"},
-                new {Flags = TypeFlags.Array | TypeFlags.Byte, ColumnType = "LONGBLOB"},
                 new {Flags = TypeFlags.DateTime, ColumnType = "DATETIME"}
             };
 

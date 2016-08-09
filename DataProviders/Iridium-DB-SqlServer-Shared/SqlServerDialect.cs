@@ -124,6 +124,7 @@ namespace Iridium.DB.SqlServer
 
             var columnMappings = new[]
             {
+                new {Flags = TypeFlags.Array | TypeFlags.Byte, ColumnType = "IMAGE"},
                 new {Flags = TypeFlags.Boolean, ColumnType = "BIT"},
                 new {Flags = TypeFlags.Integer8, ColumnType = "TINYINT"},
                 new {Flags = TypeFlags.Integer16, ColumnType = "SMALLINT"},
@@ -133,7 +134,6 @@ namespace Iridium.DB.SqlServer
                 new {Flags = TypeFlags.Double, ColumnType = "FLOAT"},
                 new {Flags = TypeFlags.Single, ColumnType = "REAL"},
                 new {Flags = TypeFlags.String, ColumnType = "VARCHAR({0})"},
-                new {Flags = TypeFlags.Array | TypeFlags.Byte, ColumnType = "IMAGE"},
                 new {Flags = TypeFlags.DateTime, ColumnType = "DATETIME"}
             };
 
@@ -143,10 +143,10 @@ namespace Iridium.DB.SqlServer
             string tableName = tableNameParts.Length == 1 ? tableNameParts[0] : tableNameParts[1];
 
             var existingColumns = dataProvider.ExecuteSqlReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=@schema and TABLE_NAME=@name",
-                new QueryParameterCollection(new { schema = tableSchemaName, name = tableName })).ToLookup(rec => rec["COLUMN_NAME"].ToString());
+                QueryParameterCollection.FromObject(new { schema = tableSchemaName, name = tableName })).ToLookup(rec => rec["COLUMN_NAME"].ToString());
 
             var tableExists = dataProvider.ExecuteSqlReader("select count(*) from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=@schema and TABLE_NAME=@name",
-                new QueryParameterCollection(new {schema = tableSchemaName, name = tableName})).Select(rec => rec.First().Value.Convert<int>()).First() == 1;
+                QueryParameterCollection.FromObject(new {schema = tableSchemaName, name = tableName})).Select(rec => rec.First().Value.Convert<int>()).First() == 1;
 
             var parts = new List<string>();
 
@@ -204,7 +204,7 @@ namespace Iridium.DB.SqlServer
             }
 
             var existingIndexes = dataProvider.ExecuteSqlReader("SELECT ind.name as IndexName FROM sys.indexes ind INNER JOIN sys.tables t ON ind.object_id = t.object_id WHERE ind.name is not null and ind.is_primary_key = 0 AND t.is_ms_shipped = 0 AND t.name=@tableName",
-                 new QueryParameterCollection(new { tableName })).ToLookup(rec => rec["IndexName"].ToString());
+                 QueryParameterCollection.FromObject(new { tableName })).ToLookup(rec => rec["IndexName"].ToString());
 
             foreach (var index in schema.Indexes)
             {

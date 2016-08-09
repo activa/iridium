@@ -237,11 +237,29 @@ namespace Iridium.DB.Test
         }
 
         [Test]
+        public void FieldBlob()
+        {
+            RecordWithAllTypes rec;
+
+            rec = SaveAndReload(new RecordWithAllTypes { });
+
+            Assert.That(rec.BlobField, Is.Null);
+
+            rec = SaveAndReload(new RecordWithAllTypes() {BlobField = new byte[] {1, 2, 3, 4, 5}});
+
+            Assert.That(rec.BlobField, Is.EquivalentTo(new[] {1,2,3,4,5}));
+
+
+        }
+
+        [Test]
         public void CompareNullableWithNonNullable()
         {
             DB.Insert(new RecordWithAllTypes {IntField = 1, IntFieldNullable = 1});
 
             DB.RecordsWithAllTypes.Count(rec => rec.IntField == rec.IntFieldNullable).Should().Be(1);
+
+
 
         }
 

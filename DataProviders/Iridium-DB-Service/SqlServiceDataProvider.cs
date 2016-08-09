@@ -78,7 +78,7 @@ namespace Iridium.DB.SqlService
             var json = JsonSerializer.ToJson(new
             {
                 sql,
-                parameters = parameters?.ToDictionary(kvp => kvp.Key, kvp => kvp.Value is byte[] ? new[] {Convert.ToBase64String((byte[]) kvp.Value)} : kvp.Value is DateTime ? ((DateTime) kvp.Value).Ticks : kvp.Value)
+                parameters = parameters?.ToDictionary(kvp => kvp.Name, kvp => kvp.Value is byte[] ? new[] {Convert.ToBase64String((byte[]) kvp.Value)} : kvp.Value is DateTime ? ((DateTime) kvp.Value).Ticks : kvp.Value)
             });
 
             Debug.WriteLine("Sending payload: {0}",json);
@@ -120,7 +120,7 @@ namespace Iridium.DB.SqlService
             var tableName = SqlDialect.QuoteTable(schema.MappedName);
 
             ExecuteSql($"DELETE FROM {tableName}", null);
-            ExecuteSql("delete from sqlite_sequence where name=@name", new QueryParameterCollection(new { name = schema.MappedName }));
+            ExecuteSql("delete from sqlite_sequence where name=@name", QueryParameterCollection.FromObject(new { name = schema.MappedName }));
         }
 
         public override long GetLastAutoIncrementValue(TableSchema schema)

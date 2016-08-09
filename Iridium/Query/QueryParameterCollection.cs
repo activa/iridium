@@ -24,6 +24,7 @@
 //=============================================================================
 #endregion
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,15 +32,45 @@ using Iridium.DB.CoreUtil;
 
 namespace Iridium.DB
 {
-    public class QueryParameterCollection : IEnumerable<KeyValuePair<string,object>>
+    public class QueryParameter
     {
-        private readonly Dictionary<string, object> _dic;
-
-        public QueryParameterCollection(object o = null)
+        public QueryParameter(string name, object value, Type type = null)
         {
-            _dic = new Dictionary<string, object>();
+            Name = name;
+            Value = value;
+            Type = (type ?? value?.GetType()) ?? typeof(object);
+        }
+
+        public readonly string Name;
+        public readonly object Value;
+        public readonly Type Type;
+    }
+
+    public class QueryParameterCollection : IEnumerable<QueryParameter>
+    {
+        private readonly Dictionary<string, QueryParameter> _dic;
+
+        public QueryParameterCollection()
+        {
+            _dic = new Dictionary<string, QueryParameter>();
+            
+        }
+
+        public QueryParameterCollection(IEnumerable<QueryParameter> parameters)
+        {
+            _dic = parameters.ToDictionary(p => p.Name, p => p);
+        }
+
+        private QueryParameterCollection(object o = null)
+        {
+            _dic = new Dictionary<string, QueryParameter>();
 
             AddParametersFromObject(o, true);
+        }
+
+        public static QueryParameterCollection FromObject(object o = null)
+        {
+            return new QueryParameterCollection(o);
         }
 
         public void Merge(object parameters, bool important = false)
@@ -47,7 +78,7 @@ namespace Iridium.DB
             AddParametersFromObject(parameters, important);
         }
 
-        public object this[string key]
+        public QueryParameter this[string key]
         {
             get { return _dic[key]; }
             set { _dic[key] = value; }
@@ -55,22 +86,21 @@ namespace Iridium.DB
 
         public IEnumerable<string> Keys => _dic.Keys;
 
-        public Dictionary<string, object> AsDictionary()
-        {
-            return _dic;
-        }
-
-        private IEnumerable<KeyValuePair<string, object>> EnumerateObject(object obj)
+        private IEnumerable<QueryParameter> EnumerateObject(object obj)
         {
             if (obj is IDictionary)
-                return from object key in ((IDictionary) obj).Keys select new KeyValuePair<string, object>(key.ToString(), ((IDictionary) obj)[key]);
-            
+            {
+                var dictionary = ((IDictionary) obj);
+
+                return from object key in dictionary.Keys select new QueryParameter(key.ToString(), dictionary[key]);
+            }
+
             if (obj is QueryParameterCollection)
-                return ((QueryParameterCollection) obj).AsDictionary();
+                return ((QueryParameterCollection) obj);
 
             var members = obj.GetType().Inspector().GetFieldsAndProperties(BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.Instance);
 
-            return members.Select(member => new KeyValuePair<string, object>(member.Name,member.GetValue(obj)));
+            return members.Select(member => new QueryParameter(member.Name,member.GetValue(obj), member.Type));
         }
 
         private void AddParametersFromObject(object parameters, bool important)
@@ -78,14 +108,14 @@ namespace Iridium.DB
             if (parameters == null)
                 return;
 
-            foreach (var kv in EnumerateObject(parameters).Where(kv => important || !_dic.ContainsKey(kv.Key)))
-                _dic[kv.Key] = kv.Value;
+            foreach (var param in EnumerateObject(parameters).Where(p => important || !_dic.ContainsKey(p.Name)))
+                _dic[param.Name] = param;
         }
 
 
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+        public IEnumerator< QueryParameter> GetEnumerator()
         {
-            return _dic.GetEnumerator();
+            return _dic.Values.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

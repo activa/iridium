@@ -185,6 +185,8 @@ namespace Iridium.DB.Test
         [Column.LargeText]
         public string LongStringField;
 
+        public byte[] BlobField;
+
         public DateTime DateTimeField = new DateTime(1970,1,1);
         public DateTime? DateTimeFieldNullable;
 

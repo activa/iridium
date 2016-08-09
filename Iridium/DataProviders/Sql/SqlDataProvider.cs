@@ -209,7 +209,7 @@ namespace Iridium.DB
             string tableName = schema.MappedName;
             var autoIncrementField = schema.IncrementKeys.FirstOrDefault();
             var columnList = (from f in schema.WriteFields where !f.AutoIncrement && !f.ColumnReadOnly select new { Field = f, ParameterName = SqlNameGenerator.NextParameterName()  }).ToArray();
-            var parameters = new QueryParameterCollection(columnList.ToDictionary(c => c.ParameterName, c => o[c.Field.MappedName]));
+            var parameters = new QueryParameterCollection(columnList.Select(c => new QueryParameter(c.ParameterName, o[c.Field.MappedName],c.Field.FieldType)));
 
             string sql;
 
@@ -258,7 +258,7 @@ namespace Iridium.DB
                     var pkParameters = schema.PrimaryKeys.Select(pk => new KeyValuePair<string,TableSchema.Field>(SqlNameGenerator.NextParameterName(), pk)).ToArray();
 
                     foreach (var primaryKey in pkParameters)
-                        parameters[primaryKey.Key] = o[primaryKey.Value.MappedName];
+                        parameters[primaryKey.Key] = new QueryParameter(primaryKey.Key, o[primaryKey.Value.MappedName], primaryKey.Value.FieldType);
 
                     sql = SqlDialect.UpdateSql(
                                         new SqlTableNameWithAlias(tableName),
@@ -286,7 +286,7 @@ namespace Iridium.DB
             string tableName = schema.MappedName;
             var columnList = (from f in schema.FieldsByFieldName.Values select new { Field = f, Alias = SqlNameGenerator.NextFieldAlias() }).ToArray();
             var keyList = (from f in schema.PrimaryKeys select new {Field = f, ParameterName = SqlNameGenerator.NextParameterName()}).ToArray();
-            var parameters = keyList.ToDictionary(key => key.ParameterName, key => keys[key.Field.MappedName]);
+            //var parameters = keyList.ToDictionary(key => key.ParameterName, key => keys[key.Field.MappedName]);
 
             string sql = SqlDialect.SelectSql(
                                         new SqlTableNameWithAlias(tableName), 
@@ -294,7 +294,7 @@ namespace Iridium.DB
                                         string.Join(" AND ", keyList.Select(k => SqlDialect.QuoteField(k.Field.MappedName) + "=" + SqlDialect.CreateParameterExpression(k.ParameterName)))
                                         );
 
-            var record = ExecuteSqlReader(sql, new QueryParameterCollection(parameters)).FirstOrDefault();
+            var record = ExecuteSqlReader(sql, new QueryParameterCollection(keyList.Select(k => new QueryParameter(k.ParameterName,keys[k.Field.MappedName],k.Field.FieldType)))).FirstOrDefault();
 
             SqlNameGenerator.Reset();
 
@@ -308,7 +308,7 @@ namespace Iridium.DB
         {
             string tableName = schema.MappedName;
             var keyList = (from f in schema.PrimaryKeys select new { Field = f, ParameterName = SqlNameGenerator.NextParameterName() }).ToArray();
-            var parameters = keyList.ToDictionary(key => key.ParameterName, key => o[key.Field.MappedName]);
+            var parameters = keyList.Select(key => new QueryParameter(key.ParameterName, o[key.Field.MappedName], key.Field.FieldType));
 
             string sql = SqlDialect.DeleteSql(
                                         new SqlTableNameWithAlias(tableName),
