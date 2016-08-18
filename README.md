@@ -1,22 +1,23 @@
-# Velox.DB
+# Iridium
 Portable lightweight .NET ORM for mobile, desktop and servers
 
-Velox.DB is a .NET ORM that can be used on any platform supported by .NET, Mono and Xamarin.
+Iridium is a .NET ORM that can be used on any platform supported by .NET, Mono or Xamarin.
 
 Features:
-- Works on any .NET 4.5.1+ platform, including Xamarin (iOS and Android), Windows (Phone) 8.1, and Windows 10 UWP
-- Lightweight (assembly is < 150k), very fast and without any dependencies
-- Full LINQ expression support, including complex expressions involving relations
+- Works on any .NET 4.5+ platform, including Xamarin (iOS and Android), Windows (Phone) 8.1, Windows 8 and Windows 10 UWP
+- Lightweight (assembly is < 170k), very fast and with zero dependencies
+- **Full LINQ expression support**, including complex expressions involving relations
 - Seamless support for relations (many-to-one and one-to-many)
 - Uses POCO classes (no base class or interface required)
-- Works with any storage backend, including SQL databases and non-relational databases, in-memory storage and flat files (Json/Xml)
+- **Works with any storage backend**, including SQL databases and non-relational databases, in-memory storage and flat files (Json/Xml)
 - Built-in support for many databases. Adding other database providers is extremely easy.
-  - Sqlite (Windows, iOS, Android, Windows Runtime, UWP)
+  - Sqlite (all platforms, including Windows, iOS, Android, Windows Runtime, UWP)
   - SQL Server (Windows, iOS and Android)
   - MySql (Windows)
+  - Oracle (driver in development)
   - More to come...
 
-### Velox.DB in action
+### Iridium in action
 
 Defining your object classes:
 
@@ -51,7 +52,7 @@ public class Order
 Connect to a storage backend:
 
 ```csharp
-var dbContext = new Vx.Context(new SqliteDataProvider("mydb.sqlite"));
+var dbContext = new StorageContext(new SqliteDataProvider("mydb.sqlite"));
 
 // Create tables (if they don't exist) yet
 
@@ -152,7 +153,7 @@ var orders = from order in DB.Orders
 //          where c.Name like 'A%'
 ```
 
-So what if a query can't be translated to SQL? In that case, any part of the query that can't be translated will be evaluated in code. This will hurt performance but it will still give you the results you need.
+So what if a query can't be translated to SQL? In that case, any part of the query that can't be translated will be evaluated in code at runtime. This will hurt performance but it will still give you the results you need.
 
 For example, say you have a custom function to determine if a customer object should be included in a query, but you only want to select customers with a name starting with "A":
 
@@ -183,7 +184,8 @@ public class CustomerInfo
 }
 
 var records = dbContext.Query<CustomerInfo>(
-                  "select c.CustomerID,c.Name as CustomerName, count(*) from Customer c " +
+                  "select c.CustomerID,c.Name as CustomerName, count(*) as NumOrders "
+                  "from Customer c " +
                   "inner join Order o on o.CustomerID=c.CustomerID " +
                   "group by c.CustomerID,c.Name");
 ```
@@ -229,4 +231,4 @@ foreach (Customer c in aCustomers.Sync())
 
 Full documention is in the works. A good part is already done and can be found here:
 
-https://github.com/velox/DB/wiki
+https://github.com/activa/iridium/wiki
