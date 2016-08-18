@@ -72,6 +72,8 @@ namespace Iridium.DB
                     _sqlite3.open_v2(FileName, out db, (SqliteOpenFlags.ReadWrite | SqliteOpenFlags.Create | SqliteOpenFlags.FullMutex));
 
                     _db = db;
+
+                    ExecuteSql("pragma journal_mode = TRUNCATE",null);
                 }
 
                 return _db.Value;
@@ -83,7 +85,7 @@ namespace Iridium.DB
 
         public override bool RequiresAutoIncrementGetInSameStatement => false;
 
-        public override int ExecuteSql(string sql, QueryParameterCollection parameters)
+        public override int ExecuteSql(string sql, QueryParameterCollection parameters = null)
         {
             lock (this) // although sqlite3 is thread-safe, we need to make sure that the last_insert_rowid is correct
             {
@@ -92,6 +94,9 @@ namespace Iridium.DB
                 try
                 {
                     SqliteReturnCode returnCode = _sqlite3.step(stmt);
+
+                    if (returnCode == SqliteReturnCode.Row)
+                        return 0; // quietly eat any rows being returned
 
                     if (returnCode != SqliteReturnCode.Done)
                         throw new Exception(_sqlite3.errmsg(DbHandle));
@@ -119,7 +124,6 @@ namespace Iridium.DB
 
                 _transactionStack.Value.Push(true);
             }
-
         }
 
         public override void CommitTransaction()
@@ -128,7 +132,6 @@ namespace Iridium.DB
 
             if (realTransaction)
                 ExecuteSql("COMMIT", null);
-
         }
 
         public override void RollbackTransaction()
@@ -144,7 +147,7 @@ namespace Iridium.DB
         {
             IntPtr stmt;
 
-            Debug.WriteLine("{0}",sql);
+            Debug.WriteLine("{0}", sql);
 
             SqliteReturnCode returnCode = _sqlite3.prepare_v2(DbHandle, sql, out stmt);
 
@@ -171,7 +174,7 @@ namespace Iridium.DB
                         if (parameterType.Is(TypeFlags.Boolean))
                             _sqlite3.bind_int(stmt, paramNumber, value.Convert<bool>() ? 1 : 0);
                         else if (parameterType.Is(TypeFlags.Array | TypeFlags.Byte))
-                            _sqlite3.bind_blob(stmt, paramNumber, (byte[])value);
+                            _sqlite3.bind_blob(stmt, paramNumber, (byte[]) value);
                         else if (parameterType.Is(TypeFlags.Integer64))
                             _sqlite3.bind_int64(stmt, paramNumber, value.Convert<long>());
                         else if (parameterType.Is(TypeFlags.Integer))
@@ -185,16 +188,16 @@ namespace Iridium.DB
                             switch (DateFormat)
                             {
                                 case SqliteDateFormat.String:
-                                    _sqlite3.bind_text(stmt, paramNumber, ((DateTime)value).ToString("yyyy-MM-dd HH:mm:ss.fff"));
+                                    _sqlite3.bind_text(stmt, paramNumber, ((DateTime) value).ToString("yyyy-MM-dd HH:mm:ss.fff"));
                                     break;
 //                                case SqliteDateFormat.Julian:
 //                                    _sqlite3.bind_int64(stmt, paramNumber, ((DateTime)value).Ticks);
 //                                    break;
                                 case SqliteDateFormat.Unix:
-                                    _sqlite3.bind_int(stmt, paramNumber, (int) (((DateTime)value) -new DateTime(1970,1,1)).TotalSeconds);
+                                    _sqlite3.bind_int(stmt, paramNumber, (int) (((DateTime) value) - new DateTime(1970, 1, 1)).TotalSeconds);
                                     break;
                                 case SqliteDateFormat.Ticks:
-                                    _sqlite3.bind_int64(stmt, paramNumber, ((DateTime)value).Ticks);
+                                    _sqlite3.bind_int64(stmt, paramNumber, ((DateTime) value).Ticks);
                                     break;
                                 default:
                                     throw new ArgumentOutOfRangeException();
@@ -274,7 +277,7 @@ namespace Iridium.DB
 
             ExecuteSql("DELETE FROM " + tableName, null);
 
-            if (QueryScalar("select name from sqlite_master where name='sqlite_sequence'",null).Any())
+            if (QueryScalar("select name from sqlite_master where name='sqlite_sequence'", null).Any())
                 ExecuteSql("delete from sqlite_sequence where name=@name", QueryParameterCollection.FromObject(new {name = schema.MappedName}));
         }
 

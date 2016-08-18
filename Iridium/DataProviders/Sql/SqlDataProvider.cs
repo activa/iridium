@@ -412,7 +412,7 @@ namespace Iridium.DB
             return true;
         }
 
-        public abstract int ExecuteSql(string sql, QueryParameterCollection parameters);
+        public abstract int ExecuteSql(string sql, QueryParameterCollection parameters = null);
         public abstract IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, QueryParameterCollection parameters);
 
         public virtual IEnumerable<SerializedEntity> Query(string sql, QueryParameterCollection parameters)

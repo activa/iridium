@@ -228,7 +228,7 @@ namespace Iridium.DB
             return repository.Delete(repository.CreateQuerySpec(new FilterSpec(condition)));
         }
 
-        public int Execute(string sql, object parameters)
+        public int Execute(string sql, object parameters = null)
         {
             return DataProvider.ExecuteSql(sql, QueryParameterCollection.FromObject(parameters));
         }

@@ -91,7 +91,7 @@ namespace Iridium.DB.MySql
 
             if (existingColumns.Any() && recreateTable)
             {
-                dataProvider.ExecuteSql("DROP TABLE " + QuoteTable(schema.MappedName), null);
+                dataProvider.ExecuteSql("DROP TABLE " + QuoteTable(schema.MappedName));
             }
 
             var parts = new List<string>();
@@ -151,7 +151,7 @@ namespace Iridium.DB.MySql
             if (createNew)
                 sql += ")";
 
-            dataProvider.ExecuteSql(sql, null);
+            dataProvider.ExecuteSql(sql);
         }
 
         public override string SqlFunction(Function function, params string[] parameters)
