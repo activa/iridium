@@ -8,6 +8,7 @@ namespace Iridium.DB
         SqliteReturnCode close(IntPtr db);
         SqliteReturnCode step(IntPtr stmt);
         string errmsg(IntPtr dbHandle);
+        SqliteExtendedErrorCode extended_errcode(IntPtr dbHandle);
         int changes(IntPtr dbHandle);
         long last_insert_rowid(IntPtr dbHandle);
         void finalize(IntPtr stmt);

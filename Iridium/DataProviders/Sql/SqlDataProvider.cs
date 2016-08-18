@@ -415,12 +415,12 @@ namespace Iridium.DB
         public abstract int ExecuteSql(string sql, QueryParameterCollection parameters = null);
         public abstract IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, QueryParameterCollection parameters);
 
-        public virtual IEnumerable<SerializedEntity> Query(string sql, QueryParameterCollection parameters)
+        public virtual IEnumerable<SerializedEntity> Query(string sql, QueryParameterCollection parameters = null)
         {
             return ExecuteSqlReader(sql, parameters).Select(rec => new SerializedEntity(rec));
         }
 
-        public virtual IEnumerable<object> QueryScalar(string sql, QueryParameterCollection parameters)
+        public virtual IEnumerable<object> QueryScalar(string sql, QueryParameterCollection parameters = null)
         {
             var results = ExecuteSqlReader(sql, parameters);
 
@@ -433,7 +433,7 @@ namespace Iridium.DB
 
         public virtual void Purge(TableSchema schema)
         {
-            ExecuteSql(SqlDialect.TruncateTableSql(schema.MappedName), null);
+            ExecuteSql(SqlDialect.TruncateTableSql(schema.MappedName));
 
             SqlNameGenerator.Reset();
         }

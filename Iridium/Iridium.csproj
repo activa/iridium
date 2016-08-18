@@ -60,7 +60,9 @@
     <Compile Include="DataProviders\Sqlite\SqliteAPI.cs" />
     <Compile Include="DataProviders\Sqlite\SqliteContext.cs" />
     <Compile Include="DataProviders\Sqlite\SqliteDataProvider.cs" />
+    <Compile Include="DataProviders\Sqlite\SqliteDateFormat.cs" />
     <Compile Include="DataProviders\Sqlite\SqliteDialect.cs" />
+    <Compile Include="DataProviders\Sqlite\SqliteException.cs" />
     <Compile Include="DataProviders\Sqlite\Win32Loader.cs" />
     <Compile Include="DataProviders\Sql\ExpressionTranslator\SqlExpressionTranslator.cs">
       <SubType>Code</SubType>

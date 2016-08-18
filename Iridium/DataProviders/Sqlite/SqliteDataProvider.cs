@@ -99,7 +99,7 @@ namespace Iridium.DB
                         return 0; // quietly eat any rows being returned
 
                     if (returnCode != SqliteReturnCode.Done)
-                        throw new Exception(_sqlite3.errmsg(DbHandle));
+                        throw new SqliteException(returnCode, _sqlite3.extended_errcode(DbHandle), _sqlite3.errmsg(DbHandle));
 
                     _lastRowId.Value = _sqlite3.last_insert_rowid(DbHandle);
 
@@ -153,7 +153,7 @@ namespace Iridium.DB
 
             if (returnCode != SqliteReturnCode.Ok)
             {
-                throw new Exception(_sqlite3.errmsg(DbHandle));
+                throw new SqliteException(returnCode, _sqlite3.extended_errcode(DbHandle), _sqlite3.errmsg(DbHandle));
             }
 
             if (parameters != null)
@@ -232,7 +232,7 @@ namespace Iridium.DB
                         break;
 
                     if (returnCode != SqliteReturnCode.Row)
-                        throw new Exception(_sqlite3.errmsg(DbHandle));
+                        throw new SqliteException(returnCode, _sqlite3.extended_errcode(DbHandle), _sqlite3.errmsg(DbHandle));
 
                     Dictionary<string, object> record = new Dictionary<string, object>();
 
@@ -296,14 +296,5 @@ namespace Iridium.DB
                 _db = null;
             }
         }
-    }
-
-
-    public enum SqliteDateFormat
-    {
-        String,
-        //Julian,
-        Unix,
-        Ticks
     }
 }

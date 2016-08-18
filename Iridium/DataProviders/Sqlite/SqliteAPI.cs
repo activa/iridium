@@ -39,6 +39,11 @@ namespace Iridium.DB
             sqlite3.finalize(stmt);
         }
 
+        public SqliteExtendedErrorCode extended_errcode(IntPtr dbHandle)
+        {
+            return (SqliteExtendedErrorCode) sqlite3.extended_errcode(dbHandle);
+        }
+
         public SqliteReturnCode prepare_v2(IntPtr dbHandle, string sql, out IntPtr stmt)
         {
             return (SqliteReturnCode) sqlite3.prepare_v2(dbHandle, sql, -1, out stmt, IntPtr.Zero);
@@ -164,6 +169,66 @@ namespace Iridium.DB
         Warning = 28,
         Row = 100,
         Done = 101
+    }
+
+    public enum SqliteExtendedErrorCode
+    {
+        IOERR_READ = (SqliteReturnCode.IOError | (1 << 8)),
+        IOERR_SHORT_READ = (SqliteReturnCode.IOError | (2 << 8)),
+        IOERR_WRITE = (SqliteReturnCode.IOError | (3 << 8)),
+        IOERR_FSYNC = (SqliteReturnCode.IOError | (4 << 8)),
+        IOERR_DIR_FSYNC = (SqliteReturnCode.IOError | (5 << 8)),
+        IOERR_TRUNCATE = (SqliteReturnCode.IOError | (6 << 8)),
+        IOERR_FSTAT = (SqliteReturnCode.IOError | (7 << 8)),
+        IOERR_UNLOCK = (SqliteReturnCode.IOError | (8 << 8)),
+        IOERR_RDLOCK = (SqliteReturnCode.IOError | (9 << 8)),
+        IOERR_DELETE = (SqliteReturnCode.IOError | (10 << 8)),
+        IOERR_BLOCKED = (SqliteReturnCode.IOError | (11 << 8)),
+        IOERR_NOMEM = (SqliteReturnCode.IOError | (12 << 8)),
+        IOERR_ACCESS = (SqliteReturnCode.IOError | (13 << 8)),
+        IOERR_CHECKRESERVEDLOCK = (SqliteReturnCode.IOError | (14 << 8)),
+        IOERR_LOCK = (SqliteReturnCode.IOError | (15 << 8)),
+        IOERR_CLOSE = (SqliteReturnCode.IOError | (16 << 8)),
+        IOERR_DIR_CLOSE = (SqliteReturnCode.IOError | (17 << 8)),
+        IOERR_SHMOPEN = (SqliteReturnCode.IOError | (18 << 8)),
+        IOERR_SHMSIZE = (SqliteReturnCode.IOError | (19 << 8)),
+        IOERR_SHMLOCK = (SqliteReturnCode.IOError | (20 << 8)),
+        IOERR_SHMMAP = (SqliteReturnCode.IOError | (21 << 8)),
+        IOERR_SEEK = (SqliteReturnCode.IOError | (22 << 8)),
+        IOERR_DELETE_NOENT = (SqliteReturnCode.IOError | (23 << 8)),
+        IOERR_MMAP = (SqliteReturnCode.IOError | (24 << 8)),
+        IOERR_GETTEMPPATH = (SqliteReturnCode.IOError | (25 << 8)),
+        IOERR_CONVPATH = (SqliteReturnCode.IOError | (26 << 8)),
+        IOERR_VNODE = (SqliteReturnCode.IOError | (27 << 8)),
+        IOERR_AUTH = (SqliteReturnCode.IOError | (28 << 8)),
+        LOCKED_SHAREDCACHE = (SqliteReturnCode.Locked | (1 << 8)),
+        BUSY_RECOVERY = (SqliteReturnCode.Busy | (1 << 8)),
+        BUSY_SNAPSHOT = (SqliteReturnCode.Busy | (2 << 8)),
+        CANTOPEN_NOTEMPDIR = (SqliteReturnCode.CantOpen | (1 << 8)),
+        CANTOPEN_ISDIR = (SqliteReturnCode.CantOpen | (2 << 8)),
+        CANTOPEN_FULLPATH = (SqliteReturnCode.CantOpen | (3 << 8)),
+        CANTOPEN_CONVPATH = (SqliteReturnCode.CantOpen | (4 << 8)),
+        CORRUPT_VTAB = (SqliteReturnCode.Corrupt | (1 << 8)),
+        READONLY_RECOVERY = (SqliteReturnCode.ReadOnly | (1 << 8)),
+        READONLY_CANTLOCK = (SqliteReturnCode.ReadOnly | (2 << 8)),
+        READONLY_ROLLBACK = (SqliteReturnCode.ReadOnly | (3 << 8)),
+        READONLY_DBMOVED = (SqliteReturnCode.ReadOnly | (4 << 8)),
+        ABORT_ROLLBACK = (SqliteReturnCode.Abort | (2 << 8)),
+        CONSTRAINT_CHECK = (SqliteReturnCode.Constraint | (1 << 8)),
+        CONSTRAINT_COMMITHOOK = (SqliteReturnCode.Constraint | (2 << 8)),
+        CONSTRAINT_FOREIGNKEY = (SqliteReturnCode.Constraint | (3 << 8)),
+        CONSTRAINT_FUNCTION = (SqliteReturnCode.Constraint | (4 << 8)),
+        CONSTRAINT_NOTNULL = (SqliteReturnCode.Constraint | (5 << 8)),
+        CONSTRAINT_PRIMARYKEY = (SqliteReturnCode.Constraint | (6 << 8)),
+        CONSTRAINT_TRIGGER = (SqliteReturnCode.Constraint | (7 << 8)),
+        CONSTRAINT_UNIQUE = (SqliteReturnCode.Constraint | (8 << 8)),
+        CONSTRAINT_VTAB = (SqliteReturnCode.Constraint | (9 << 8)),
+        CONSTRAINT_ROWID = (SqliteReturnCode.Constraint | (10 << 8)),
+        NOTICE_RECOVER_WAL = (SqliteReturnCode.Notice | (1 << 8)),
+        NOTICE_RECOVER_ROLLBACK = (SqliteReturnCode.Notice | (2 << 8)),
+        WARNING_AUTOINDEX = (SqliteReturnCode.Warning | (1 << 8)),
+        AUTH_USER = (SqliteReturnCode.Authorization | (1 << 8)),
+        OK_LOAD_PERMANENTLY = (SqliteReturnCode.Ok | (1 << 8)),
     }
 
 
