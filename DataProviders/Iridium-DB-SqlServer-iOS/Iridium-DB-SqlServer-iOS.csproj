@@ -10,14 +10,14 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Velox.DB.SqlServer.iOS</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
-    <AssemblyName>Velox.DB.SqlServer.iOS</AssemblyName>
+    <AssemblyName>Iridium.DB.SqlServer.iOS</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\iPhone\Debug</OutputPath>
-    <DefineConstants>DEBUG;VELOX_SQLSERVER</DefineConstants>
+    <DefineConstants>DEBUG;__UNIFIED__;__MOBILE__;__IOS__;IRIDIUM_SQLSERVER</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -32,16 +32,10 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
     <CodesignKey>iPhone Developer</CodesignKey>
-    <DefineConstants>VELOX_SQLSERVER</DefineConstants>
+    <DefineConstants>__UNIFIED__;__MOBILE__;__IOS__;IRIDIUM_SQLSERVER</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Velox.DB\Velox.DB.csproj">
-      <Project>{8db31db3-ae35-44c3-876e-940c19689c59}</Project>
-      <Name>Velox.DB</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -50,7 +44,15 @@
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.iOS" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Iridium\Iridium.csproj">
+      <Project>{8db31db3-ae35-44c3-876e-940c19689c59}</Project>
+      <Name>Iridium</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="..\Velox.DB.SqlServer.Shared\Velox.DB.SqlServer.Shared.projitems" Label="Shared" Condition="Exists('..\Velox.DB.SqlServer.Shared\Velox.DB.SqlServer.Shared.projitems')" />
   <Import Project="..\Velox.DB.SqlADO\Velox.DB.SqlADO.projitems" Label="Shared" Condition="Exists('..\Velox.DB.SqlADO\Velox.DB.SqlADO.projitems')" />
+  <Import Project="..\Iridium-DB-SqlServer-Shared\Velox.DB.SqlServer.Shared.projitems" Label="Shared" />
+  <Import Project="..\Iridium-DB-SqlADO\Velox.DB.SqlADO.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
 </Project>
