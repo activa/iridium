@@ -47,11 +47,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedNativeLibrary Include="Native\arm64-v8a\sqlite_emb.so" />
-    <EmbeddedNativeLibrary Include="Native\armeabi-v7a\sqlite_emb.so" />
-    <EmbeddedNativeLibrary Include="Native\armeabi\sqlite_emb.so" />
-    <EmbeddedNativeLibrary Include="Native\x86\sqlite_emb.so" />
-    <EmbeddedNativeLibrary Include="Native\x86_64\sqlite_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\arm64-v8a\libsqlite_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\armeabi-v7a\libsqlite_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\armeabi\libsqlite_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\x86\libsqlite_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\x86_64\libsqlite_emb.so" />
     <None Include="Resources\AboutResources.txt" />
   </ItemGroup>
   <ItemGroup>
