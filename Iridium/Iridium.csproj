@@ -107,6 +107,9 @@
     <Compile Include="Core\StorageContext.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="DataProviders\Sqlite\Iridium.DB.Sqlite.Win32.targets">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Iridium.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
