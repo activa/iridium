@@ -14,6 +14,8 @@
     <copyright>Copyright 2015-2016 Philippe Leybaert</copyright>
   </metadata>
   <files>
+    <file src="Iridium\bin\$Configuration$\Iridium.dll" target="lib\portable-net45-win8-wpa81"/>
+
     <file src="Iridium\bin\$Configuration$\Iridium.dll" target="lib\net45"/>
     <file src="Iridium\DataProviders\Sqlite\Iridium.DB.Sqlite.Win32.dll" target="lib\net45" />
 
