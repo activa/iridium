@@ -55,15 +55,6 @@
     <Compile Include="CoreUtil\SmartConverter\IStringConverter.cs" />
     <Compile Include="CoreUtil\SmartConverter\ObjectConverter.cs" />
     <Compile Include="CoreUtil\SmartConverter\StringConverter.cs" />
-    <Compile Include="DataProviders\Sqlite\ISqliteAPI.cs" />
-    <Compile Include="DataProviders\Sqlite\sqlite3.cs" />
-    <Compile Include="DataProviders\Sqlite\SqliteAPI.cs" />
-    <Compile Include="DataProviders\Sqlite\SqliteContext.cs" />
-    <Compile Include="DataProviders\Sqlite\SqliteDataProvider.cs" />
-    <Compile Include="DataProviders\Sqlite\SqliteDateFormat.cs" />
-    <Compile Include="DataProviders\Sqlite\SqliteDialect.cs" />
-    <Compile Include="DataProviders\Sqlite\SqliteException.cs" />
-    <Compile Include="DataProviders\Sqlite\Win32Loader.cs" />
     <Compile Include="DataProviders\Sql\ExpressionTranslator\SqlExpressionTranslator.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -118,6 +109,14 @@
   <ItemGroup>
     <None Include="Iridium.nuspec" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="DataProviders\Sqlite\Iridium.DB.Sqlite.Android.dll" />
+    <None Include="DataProviders\Sqlite\Iridium.DB.Sqlite.Native.dll" />
+    <None Include="DataProviders\Sqlite\Iridium.DB.Sqlite.Win32.dll" />
+    <None Include="DataProviders\Sqlite\win32-x64\sqlite3.dll" />
+    <None Include="DataProviders\Sqlite\win32-x86\sqlite3.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Target Name="BeforeBuild">

@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>3624abdc-245d-4562-a41b-7cebaca8f213</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Iridium_DB_Sqlite_Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ISqliteAPI.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)sqlite3.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SqliteAPI.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SqliteContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SqliteDataProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SqliteDateFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SqliteDialect.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SqliteException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Win32Loader.cs" />
+  </ItemGroup>
+</Project>

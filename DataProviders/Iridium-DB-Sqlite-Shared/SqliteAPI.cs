@@ -233,7 +233,7 @@ namespace Iridium.DB
 
 
     [Flags]
-    internal enum SqliteOpenFlags
+    public enum SqliteOpenFlags
     {
         ReadOnly     = 0x00000001, 
         ReadWrite    = 0x00000002, 

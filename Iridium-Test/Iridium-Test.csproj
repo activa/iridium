@@ -69,7 +69,7 @@
       <Project>{eba66bd1-991e-435e-bb96-bb1ae5573f09}</Project>
       <Name>Iridium-DB-Service</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DataProviders\Iridium-DB-Sqlite\Iridium-DB-Sqlite-Win32.csproj">
+    <ProjectReference Include="..\DataProviders\Iridium-DB-Sqlite-Win32\Iridium-DB-Sqlite-Win32.csproj">
       <Project>{fcf8cc49-a5eb-46e4-932d-d4d6d36924a5}</Project>
       <Name>Iridium-DB-Sqlite-Win32</Name>
     </ProjectReference>
