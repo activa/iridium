@@ -142,6 +142,24 @@ namespace Iridium.DB
             _LoadRelations(obj, relationsToLoad);
         }
 
+        public void LoadRelations<T>(IEnumerable<T> list, params Expression<Func<T, object>>[] relationsToLoad)
+        {
+            foreach (var obj in list)
+            {
+                _LoadRelations(obj, relationsToLoad);
+            }
+        }
+
+        public void LoadRelations<T>(IEnumerable<T> list, IEnumerable<Expression<Func<T, object>>> relationsToLoad)
+        {
+            relationsToLoad = relationsToLoad.ToList();
+
+            foreach (var obj in list)
+            {
+                _LoadRelations(obj, relationsToLoad);
+            }
+        }
+
         public TProp LoadRelation<TProp>(Expression<Func<TProp>> propExpression)
         {
             var memberExpression = propExpression.Body as MemberExpression;

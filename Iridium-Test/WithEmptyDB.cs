@@ -218,8 +218,6 @@ namespace Iridium.DB.Test
             customer = DB.Customers.Read(customer.CustomerID);
 
             customer.Orders.Should().HaveCount(5).And.OnlyContain(order => order.Customer == customer);
-
-
         }
 
         [Test]
@@ -254,10 +252,10 @@ namespace Iridium.DB.Test
 
             DB.SalesPeople.Save(salesPerson);
 
-            Order[] orders = new[]
+            Order[] orders =
             {
-                new Order() { CustomerID = customer.CustomerID, OrderDate = DateTime.Today, SalesPersonID = null},
-                new Order() { CustomerID = customer.CustomerID, OrderDate = DateTime.Today, SalesPersonID = salesPerson.ID}
+                new Order { CustomerID = customer.CustomerID, OrderDate = DateTime.Today, SalesPersonID = null},
+                new Order { CustomerID = customer.CustomerID, OrderDate = DateTime.Today, SalesPersonID = salesPerson.ID}
             };
 
             foreach (var order in orders)
@@ -269,10 +267,6 @@ namespace Iridium.DB.Test
 
             salesPerson.Orders.Count().Should().Be(1);
             salesPerson.Orders.First().OrderID.Should().Be(orders[1].OrderID);
-            
-
-
-
         }
 
         [Test]
