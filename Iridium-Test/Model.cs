@@ -198,15 +198,30 @@ namespace Iridium.DB.Test
 
         public TestFlagsEnum FlagsEnumField;
         public TestFlagsEnum? FlagsEnumFieldNullable;
-
     }
 
     public class RecordWithCompositeKey
     {
-        [Column.PrimaryKeyAttribute]
+        [Column.PrimaryKey]
         public int Key1;
-        [Column.PrimaryKeyAttribute]
+        [Column.PrimaryKey]
         public int Key2;
         public string Name;
+    }
+
+    public class RecordWithIgnoredFields
+    {
+        [Column.PrimaryKey(AutoIncrement = true)]
+        public int RecordID;
+
+        public string FirstName;
+        public string LastName;
+
+        [Column.Ignore]
+        public string FullName
+        {
+            get { return FirstName + " " + LastName; }
+            set { FirstName = value; }
+        }
     }
 }

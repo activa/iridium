@@ -47,11 +47,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedNativeLibrary Include="Native\arm64-v8a\libsqlite_emb.so" />
-    <EmbeddedNativeLibrary Include="Native\armeabi-v7a\libsqlite_emb.so" />
-    <EmbeddedNativeLibrary Include="Native\armeabi\libsqlite_emb.so" />
-    <EmbeddedNativeLibrary Include="Native\x86\libsqlite_emb.so" />
-    <EmbeddedNativeLibrary Include="Native\x86_64\libsqlite_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\libs\arm64-v8a\sqlite3_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\libs\armeabi-v7a\sqlite3_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\libs\armeabi\sqlite3_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\libs\mips64\sqlite3_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\libs\mips\sqlite3_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\libs\x86\sqlite3_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\libs\x86_64\sqlite3_emb.so" />
     <None Include="Resources\AboutResources.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -62,6 +64,12 @@
       <Project>{8db31db3-ae35-44c3-876e-940c19689c59}</Project>
       <Name>Iridium</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Native\jni\Android.mk" />
+    <None Include="Native\jni\Application.mk" />
+    <None Include="Native\jni\sqlite3.c" />
+    <None Include="Native\jni\sqlite3.h" />
   </ItemGroup>
   <Import Project="..\Iridium-DB-Sqlite-Shared\Iridium-DB-Sqlite-Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

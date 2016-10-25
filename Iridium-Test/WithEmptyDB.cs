@@ -197,7 +197,9 @@ namespace Iridium.DB.Test
 
             order.OrderItems.Should().HaveCount(5).And.OnlyContain(item => item.Order == order);
 
+            order = DB.Orders.Read(originalOrder.OrderID);
 
+            DB.LoadRelation(order, o => o.OrderItems).Should().HaveCount(5).And.OnlyContain(item => item.Order == order);
         }
 
         [Test]
@@ -891,9 +893,26 @@ namespace Iridium.DB.Test
             }
 
             DB.Products.Count().Should().Be(1);
-
-
         }
+
+        [Test]
+        public void IgnoredFields()
+        {
+            RecordWithIgnoredFields rec = new RecordWithIgnoredFields()
+            {
+                FirstName = "John",
+                LastName = "Doe"
+            };
+
+            DB.Insert(rec);
+
+            rec = DB.RecordsWithIgnoredFields.First(r => r.FirstName == "John" && r.LastName == "Doe");
+
+            Assert.That(rec.FirstName, Is.EqualTo("John"));
+            Assert.That(rec.LastName, Is.EqualTo("Doe"));
+            Assert.That(rec.FullName, Is.EqualTo("John Doe"));
+        }
+
 
     }
 }

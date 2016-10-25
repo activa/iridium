@@ -22,6 +22,7 @@ namespace Iridium.DB.Test
         public IDataSet<CustomerPaymentMethodLink> CustomerPaymentMethodLinks { get; set; }
         public IDataSet<RecordWithAllTypes> RecordsWithAllTypes;
         public IDataSet<RecordWithCompositeKey> RecordsWithCompositeKey;
+        public IDataSet<RecordWithIgnoredFields> RecordsWithIgnoredFields;
 
         public MyContext(IDataProvider dataProvider) : base(dataProvider)
         {
@@ -47,7 +48,9 @@ namespace Iridium.DB.Test
             CustomerPaymentMethodLinks.Purge();
             RecordsWithAllTypes.Purge();
             RecordsWithCompositeKey.Purge();
+            RecordsWithIgnoredFields.Purge();
             
+
         }
 
         public void CreateAllTables()
@@ -63,6 +66,7 @@ namespace Iridium.DB.Test
             CreateTable<RecordWithCompositeKey>(recreateTable: true);
             CreateTable<OneToOneRec1>(recreateTable:true);
             CreateTable<OneToOneRec2>(recreateTable:true);
+            CreateTable<RecordWithIgnoredFields>(recreateTable: true);
         }
 
         private static Dictionary<string, Func<MyContext>> _contextFactories;
