@@ -142,11 +142,20 @@ namespace Iridium.DB
             _LoadRelations(obj, relationsToLoad);
         }
 
-        public TProp LoadRelation<T, TProp>(T obj, Expression<Func<T, TProp>> propExpression)
+        public TProp LoadRelation<TProp>(Expression<Func<TProp>> propExpression)
         {
-            _LoadRelations(obj, new [] {(LambdaExpression)propExpression});
+            var memberExpression = propExpression.Body as MemberExpression;
 
-            return propExpression.Compile().Invoke(obj);
+            if (memberExpression != null)
+            {
+                var obj = Expression.Lambda(memberExpression.Expression).Compile().DynamicInvoke();
+
+                _LoadRelations(obj, new[] { propExpression });
+
+                return propExpression.Compile().Invoke();
+            }
+
+            throw new ArgumentException("lambda is not a property access expression",nameof(propExpression));
         }
 
         public void LoadRelations(params Expression<Func<object>>[] relationsToLoad)

@@ -192,14 +192,14 @@ namespace Iridium.DB.Test
             DB.Orders.Insert(order, true);
 
             order = DB.Orders.Read(originalOrder.OrderID);
-
             DB.LoadRelations(order, o => o.OrderItems);
+            order.OrderItems.Should().HaveCount(5).And.OnlyContain(item => item.Order == order);
 
+            order = DB.Orders.Read(originalOrder.OrderID, o => o.OrderItems);
             order.OrderItems.Should().HaveCount(5).And.OnlyContain(item => item.Order == order);
 
             order = DB.Orders.Read(originalOrder.OrderID);
-
-            DB.LoadRelation(order, o => o.OrderItems).Should().HaveCount(5).And.OnlyContain(item => item.Order == order);
+            DB.LoadRelation(() => order.OrderItems).Should().HaveCount(5).And.OnlyContain(item => item.Order == order);
         }
 
         [Test]
