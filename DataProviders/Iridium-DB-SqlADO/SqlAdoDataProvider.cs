@@ -58,7 +58,7 @@ namespace Iridium.DB.Sql
             ConnectionString = connectionString;
         }
 
-        private DbConnection Connection
+        protected DbConnection Connection
         {
             get
             {
@@ -89,7 +89,7 @@ namespace Iridium.DB.Sql
             return connection;
         }
 
-        private void CloseConnection()
+        protected void CloseConnection()
         {
             var connection = _localConnection.Value;
 
@@ -251,36 +251,48 @@ namespace Iridium.DB.Sql
             }
         }
 
-        public override void BeginTransaction(IsolationLevel isolationLevel)
+        protected System.Data.IsolationLevel AdoIsolationLevel(IsolationLevel isolationLevel)
         {
             System.Data.IsolationLevel adoIsolationLevel;
 
             switch (isolationLevel)
             {
-                case IsolationLevel.None: _transactionStack.Value.Push(null);
-                    return;
-                    
-                case IsolationLevel.Chaos: adoIsolationLevel = System.Data.IsolationLevel.Chaos;
+                case IsolationLevel.Chaos:
+                    adoIsolationLevel = System.Data.IsolationLevel.Chaos;
                     break;
-                case IsolationLevel.ReadUncommitted: adoIsolationLevel=System.Data.IsolationLevel.ReadUncommitted;
+                case IsolationLevel.ReadUncommitted:
+                    adoIsolationLevel = System.Data.IsolationLevel.ReadUncommitted;
                     break;
-                case IsolationLevel.ReadCommitted: adoIsolationLevel = System.Data.IsolationLevel.ReadCommitted;
+                case IsolationLevel.ReadCommitted:
+                    adoIsolationLevel = System.Data.IsolationLevel.ReadCommitted;
                     break;
-                case IsolationLevel.RepeatableRead: adoIsolationLevel = System.Data.IsolationLevel.RepeatableRead;
+                case IsolationLevel.RepeatableRead:
+                    adoIsolationLevel = System.Data.IsolationLevel.RepeatableRead;
                     break;
-                case IsolationLevel.Serializable: adoIsolationLevel = System.Data.IsolationLevel.Serializable;
+                case IsolationLevel.Serializable:
+                    adoIsolationLevel = System.Data.IsolationLevel.Serializable;
                     break;
-                case IsolationLevel.Snapshot: adoIsolationLevel = System.Data.IsolationLevel.Snapshot;
+                case IsolationLevel.Snapshot:
+                    adoIsolationLevel = System.Data.IsolationLevel.Snapshot;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(isolationLevel), isolationLevel, null);
             }
 
-            var transaction = Connection.BeginTransaction(adoIsolationLevel);
+            return adoIsolationLevel;
 
-            _transactionStack.Value.Push(transaction);
+        }
 
-            //_currentTransaction = transaction;
+        public override void BeginTransaction(IsolationLevel isolationLevel)
+        {
+            if (isolationLevel == IsolationLevel.None)
+                _transactionStack.Value.Push(null);
+            else
+            {
+                var transaction = Connection.BeginTransaction(AdoIsolationLevel(isolationLevel));
+
+                _transactionStack.Value.Push(transaction);
+            }
         }
 
         public override void CommitTransaction()
@@ -299,9 +311,9 @@ namespace Iridium.DB.Sql
                 CloseConnection();
         }
 
-        private DbTransaction CurrentTransaction
+        protected virtual DbTransaction CurrentTransaction
         {
-            get { return _transactionStack.Value.Reverse().FirstOrDefault(t => t != null); }
+            get { return _transactionStack.Value.FirstOrDefault(t => t != null); }
         }
 
         //private DbTransaction _currentTransaction;
@@ -311,30 +323,5 @@ namespace Iridium.DB.Sql
 
     public interface ITransaction
     {
-    }
-
-    public class SqlAdoTransaction : ITransaction
-    {
-        private readonly DbTransaction _transaction;
-
-        public SqlAdoTransaction()
-        {
-            _transaction = null;
-        }
-
-        public SqlAdoTransaction(DbTransaction transaction)
-        {
-            _transaction = transaction;
-        }
-
-        public void Commit()
-        {
-            _transaction?.Commit();
-        }
-
-        public void Rollback()
-        {
-            _transaction?.Rollback();
-        }
     }
 }

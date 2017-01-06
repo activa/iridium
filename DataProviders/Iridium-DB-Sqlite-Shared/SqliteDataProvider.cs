@@ -73,6 +73,8 @@ namespace Iridium.DB
 
                     _db = db;
 
+                    _transactionStack.Clear();
+
                     ExecuteSql("pragma journal_mode = TRUNCATE",null);
                 }
 
@@ -112,34 +114,62 @@ namespace Iridium.DB
             }
         }
 
-        private readonly ThreadLocal<Stack<bool>> _transactionStack = new ThreadLocal<Stack<bool>>(() => new Stack<bool>());
+        private readonly Stack<string> _transactionStack = new Stack<string>();
 
         public override void BeginTransaction(IsolationLevel isolationLevel)
         {
-            if (isolationLevel == IsolationLevel.None)
-                _transactionStack.Value.Push(false);
-            else
+            lock (this)
             {
-                ExecuteSql("BEGIN TRANSACTION", null);
+                if (isolationLevel == IsolationLevel.None)
+                    _transactionStack.Push(null);
+                else
+                {
+                    if (_transactionStack.Any(s => s != null))
+                    {
+                        string savePoint = "SP" + _transactionStack.Count;
 
-                _transactionStack.Value.Push(true);
+                        ExecuteSql("SAVEPOINT " + savePoint);
+
+                        _transactionStack.Push(savePoint);
+                    }
+                    else
+                    {
+                        ExecuteSql("BEGIN TRANSACTION", null);
+
+                        _transactionStack.Push(string.Empty);
+                    }
+                }
             }
         }
 
         public override void CommitTransaction()
         {
-            bool realTransaction = _transactionStack.Value.Pop();
+            lock (this)
+            {
+                string name = _transactionStack.Pop();
 
-            if (realTransaction)
-                ExecuteSql("COMMIT", null);
+                if (name == null)
+                    return;
+                else if (name == "")
+                    ExecuteSql("COMMIT");
+                else
+                    ExecuteSql("RELEASE " + name);
+            }
         }
 
         public override void RollbackTransaction()
         {
-            bool realTransaction = _transactionStack.Value.Pop();
+            lock (this)
+            {
+                string name = _transactionStack.Pop();
 
-            if (realTransaction)
-                ExecuteSql("ROLLBACK", null);
+                if (name == null)
+                    return;
+                else if (name == "")
+                    ExecuteSql("ROLLBACK");
+                else
+                    ExecuteSql("ROLLBACK TO " + name);
+            }
         }
 
 
@@ -294,6 +324,8 @@ namespace Iridium.DB
                     _sqlite3.close(_db.Value);
 
                 _db = null;
+
+                _transactionStack.Clear();
             }
         }
     }

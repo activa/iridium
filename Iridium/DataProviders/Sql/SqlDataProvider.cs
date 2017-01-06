@@ -312,7 +312,8 @@ namespace Iridium.DB
 
             string sql = SqlDialect.DeleteSql(
                                         new SqlTableNameWithAlias(tableName),
-                                        string.Join(" AND ", keyList.Select(k => SqlDialect.QuoteField(k.Field.MappedName) + "=" + SqlDialect.CreateParameterExpression(k.ParameterName)))
+                                        string.Join(" AND ", keyList.Select(k => SqlDialect.QuoteField(k.Field.MappedName) + "=" + SqlDialect.CreateParameterExpression(k.ParameterName))),
+                                        null
                                         );
 
             var result = ExecuteSql(sql, new QueryParameterCollection(parameters));
@@ -327,7 +328,7 @@ namespace Iridium.DB
             string tableName = schema.MappedName;
             var querySpec = (SqlQuerySpec) filter;
 
-            string sql = SqlDialect.DeleteSql(new SqlTableNameWithAlias(tableName, querySpec.TableAlias),querySpec.FilterSql);
+            string sql = SqlDialect.DeleteSql(new SqlTableNameWithAlias(tableName, querySpec.TableAlias),querySpec.FilterSql,querySpec.Joins);
 
             var result = ExecuteSql(sql, querySpec.SqlParameters);
 

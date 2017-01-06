@@ -72,6 +72,7 @@
     <Compile Include="Core\IsolationLevel.cs" />
     <Compile Include="Core\SchemaException.cs" />
     <Compile Include="Core\Transaction.cs" />
+    <Compile Include="DataSet\UnboundDataSet.cs" />
     <Compile Include="Query\FilterSpec.cs" />
     <Compile Include="DataSet\IDataSet.cs" />
     <Compile Include="LambdaExpressions\PartialEvaluator.cs" />

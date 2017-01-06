@@ -14,8 +14,9 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyCulture("")]
 [assembly: NeutralResourcesLanguage("en")]
 
-[assembly: AssemblyVersion("1.1.1.*")]
-[assembly: AssemblyInformationalVersion("1.1.1")]
+[assembly: AssemblyVersion("1.1.2.*")]
+[assembly: AssemblyFileVersion("1.1.2")]
+[assembly: AssemblyInformationalVersion("1.1.2")]
 
 /*
 class LinkerSafeAttribute : System.Attribute

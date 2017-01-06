@@ -11,4 +11,6 @@ using System.Reflection;
 [assembly: AssemblyCulture("")]
 [assembly: NeutralResourcesLanguage("en")]
 
-[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.1.2.*")]
+[assembly: AssemblyFileVersion("1.1.2")]
+[assembly: AssemblyInformationalVersion("1.1.2")]

@@ -91,13 +91,14 @@ namespace Iridium.DB.SqlServer
             return "@" + parameterName;
         }
 
+        /*
         public override string DeleteSql(SqlTableNameWithAlias tableName, string sqlWhere)
         {
             if (tableName.Alias != null)
                 return "delete " + tableName.Alias + " from " + QuoteTable(tableName.TableName) + (tableName.Alias != null ? (" " + tableName.Alias + " ") : "") +  (sqlWhere != null ? (" where " + sqlWhere) : "");
             else
                 return "delete from " + QuoteTable(tableName.TableName) + (sqlWhere != null ? (" where " + sqlWhere) : "");
-        }
+        }*/
 
         public override string GetLastAutoincrementIdSql(string columnName, string alias, string tableName)
         {

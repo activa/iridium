@@ -682,6 +682,42 @@ namespace Iridium.DB.Test
         }
 
         [Test]
+        public void DeleteWithRelationFilter()
+        {
+            if (Driver == "sqlite")
+                return;
+
+            List<Order> orders = new List<Order>();
+
+            for (int i = 0; i < 10; i++)
+            {
+                Order order = new Order
+                {
+                    Customer = new Customer
+                    {
+                        Name = "Customer " + (i+1)
+                    },
+                    Remark = "Remark" + (i+1)
+                };
+
+                DB.Orders.Insert(order, true);
+
+                orders.Add(order);
+            }
+
+            Assert.AreEqual(10, DB.Orders.Count());
+
+            DB.Orders.Delete(o => o.Customer.Name == "Customer 2" || o.Customer.Name == "Customer 4");
+
+            Assert.IsNotNull(DB.Orders.Read(orders[0].OrderID));
+            Assert.IsNull(DB.Orders.Read(orders[1].OrderID));
+            Assert.IsNotNull(DB.Orders.Read(orders[2].OrderID));
+            Assert.IsNull(DB.Orders.Read(orders[3].OrderID));
+
+            Assert.AreEqual(8, DB.Orders.Count());
+        }
+
+        [Test]
         public void DeleteAllObjects()
         {
             List<Customer> customers = new List<Customer>();
@@ -887,6 +923,132 @@ namespace Iridium.DB.Test
             }
 
             DB.Products.Count().Should().Be(1);
+        }
+
+
+        [Test]
+        public void NestedTransactions()
+        {
+            if (!DB.DataProvider.SupportsTransactions)
+                return;
+
+            DB.Products.Count().Should().Be(0);
+
+            using (var transaction1 = new Transaction(DB))
+            {
+                DB.Products.Insert(new Product() { ProductID = "X", Description = "X" });
+
+                using (var transaction2 = new Transaction(DB))
+                {
+                    DB.Products.Insert(new Product() { ProductID = "Y", Description = "Y" });
+
+                    transaction2.Rollback();
+                }
+
+                transaction1.Commit();
+            }
+
+            DB.Products.Count().Should().Be(1);
+            DB.Products.First().ProductID.Should().Be("X");
+        }
+
+        [Test]
+        public void NestedTransactions2()
+        {
+            if (!DB.DataProvider.SupportsTransactions)
+                return;
+
+            DB.Products.Count().Should().Be(0);
+
+            using (var transaction1 = new Transaction(DB))
+            {
+                DB.Products.Insert(new Product() { ProductID = "X", Description = "X" });
+
+                using (var transaction2 = new Transaction(DB))
+                {
+                    DB.Products.Insert(new Product() { ProductID = "Y", Description = "Y" });
+
+                    using (var transaction3 = new Transaction(DB))
+                    {
+                        DB.Products.Insert(new Product() { ProductID = "Z", Description = "Z" });
+
+                        transaction3.Commit();
+                    }
+
+                    transaction2.Rollback();
+                }
+
+                transaction1.Commit();
+            }
+
+            DB.Products.Count().Should().Be(1);
+            DB.Products.First().ProductID.Should().Be("X");
+        }
+
+        [Test]
+        public void NestedTransactions3()
+        {
+            if (!DB.DataProvider.SupportsTransactions)
+                return;
+
+            DB.Products.Count().Should().Be(0);
+
+            using (var transaction1 = new Transaction(DB))
+            {
+                DB.Products.Insert(new Product() { ProductID = "X", Description = "X" });
+
+                using (var transaction2 = new Transaction(DB))
+                {
+                    DB.Products.Insert(new Product() { ProductID = "Y", Description = "Y" });
+
+                    using (var transaction3 = new Transaction(DB))
+                    {
+                        DB.Products.Insert(new Product() { ProductID = "Z", Description = "Z" });
+
+                        transaction3.Rollback();
+                    }
+
+                    transaction2.Commit();
+                }
+
+                transaction1.Commit();
+            }
+
+            DB.Products.Count().Should().Be(2);
+            DB.Products.OrderBy(p => p.ProductID).First().ProductID.Should().Be("X");
+            DB.Products.OrderBy(p => p.ProductID).Skip(1).First().ProductID.Should().Be("Y");
+        }
+
+        [Test]
+        public void NestedTransactions4()
+        {
+            if (!DB.DataProvider.SupportsTransactions)
+                return;
+
+            DB.Products.Count().Should().Be(0);
+
+            using (var transaction1 = new Transaction(DB))
+            {
+                DB.Products.Insert(new Product() { ProductID = "X", Description = "X" });
+
+                using (var transaction2 = new Transaction(DB))
+                {
+                    DB.Products.Insert(new Product() { ProductID = "Y", Description = "Y" });
+
+                    using (var transaction3 = new Transaction(DB))
+                    {
+                        DB.Products.Insert(new Product() { ProductID = "Z", Description = "Z" });
+
+                        transaction3.Commit();
+                    }
+
+                    transaction2.Commit();
+                }
+
+                transaction1.Rollback();
+            }
+
+            DB.Products.Count().Should().Be(0);
         }
 
         [Test]

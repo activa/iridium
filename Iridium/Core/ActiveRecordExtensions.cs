@@ -25,6 +25,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace Iridium.DB
@@ -68,6 +69,9 @@ namespace Iridium.DB
             return entity;
         }
 
-
+        public static IDataSet<T> ToDataSet<T>(this IEnumerable<T> list)
+        {
+            return new UnboundDataSet<T>(list);
+        }
     }
 }

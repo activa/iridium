@@ -59,6 +59,7 @@ namespace Iridium.DB.SqlService
             throw new NotSupportedException(); // Is handled in DataProvider class
         }
 
+        /*
         public override string DeleteSql(SqlTableNameWithAlias tableName, string sqlWhere)
         {
             if (tableName.Alias != null)
@@ -66,6 +67,7 @@ namespace Iridium.DB.SqlService
             
             return $"delete from {QuoteTable(tableName.TableName)} where {sqlWhere}";
         }
+        */
 
         public override void CreateOrUpdateTable(TableSchema schema, bool recreateTable, bool recreateIndexes, SqlDataProvider dataProvider)
         {

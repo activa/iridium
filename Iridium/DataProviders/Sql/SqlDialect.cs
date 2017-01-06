@@ -127,12 +127,35 @@ namespace Iridium.DB
         public abstract string QuoteTable(string tableName);
         public abstract string CreateParameterExpression(string parameterName);
 
-        public virtual string DeleteSql(SqlTableNameWithAlias tableName, string sqlWhere)
+        public virtual string DeleteSql(SqlTableNameWithAlias tableName, string sqlWhere, IEnumerable<SqlJoinDefinition> joins)
         {
+            List<string> parts = new List<string>
+            {
+                "delete ",
+                tableName.Alias ?? QuoteTable(tableName.TableName),
+                "from",
+                QuoteTable(tableName.TableName)
+            };
+
+            if (tableName.Alias != null)
+                parts.Add(tableName.Alias);
+
+            if (joins != null)
+                parts.Add(string.Join(" ", joins.Select(j => j.ToSql(this))));
+
+            if (!string.IsNullOrWhiteSpace(sqlWhere))
+            {
+                parts.Add("where");
+                parts.Add(sqlWhere);
+            }
+
+            return string.Join(" ", parts);
+/*
             if (tableName.Alias != null)
                 return "delete from " + QuoteTable(tableName.TableName) + (tableName.Alias != null ? (" " + tableName.Alias + " ") : "") + (sqlWhere != null ? (" where " + sqlWhere) : "");
             else
                 return "delete from " + QuoteTable(tableName.TableName) + (sqlWhere != null ? (" where " + sqlWhere) : "");
+*/
         }
 
         public virtual string UpdateSql(SqlTableNameWithAlias table, IEnumerable<Tuple<string, string>> setColumns, string sqlWhere)

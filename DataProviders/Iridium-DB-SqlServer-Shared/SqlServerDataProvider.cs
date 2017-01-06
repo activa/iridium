@@ -26,10 +26,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 
 namespace Iridium.DB.SqlServer
 {
@@ -44,5 +46,74 @@ namespace Iridium.DB.SqlServer
         public override void ClearConnectionPool() => SqlConnection.ClearAllPools();
 
         public override bool RequiresAutoIncrementGetInSameStatement => true;
+
+        private readonly ThreadLocal<Stack<string>> _transactionStack = new ThreadLocal<Stack<string>>(() => new Stack<string>());
+        private readonly ThreadLocal<SqlTransaction> _transaction = new ThreadLocal<SqlTransaction>(true);
+
+        public override void BeginTransaction(IsolationLevel isolationLevel)
+        {
+            if (isolationLevel == IsolationLevel.None)
+                _transactionStack.Value.Push(null);
+            else
+            {
+                if (_transaction.Value == null)
+                {
+                    _transaction.Value = ((SqlConnection) Connection).BeginTransaction(AdoIsolationLevel(isolationLevel));
+
+                    _transactionStack.Value.Push("");
+                }
+                else
+                {
+                    string savePoint = "SP" + _transactionStack.Value.Count;
+
+                    _transaction.Value.Save(savePoint);
+                    _transactionStack.Value.Push(savePoint);
+                }
+            }
+
+        }
+    
+
+        public override void CommitTransaction()
+        {
+            string name = _transactionStack.Value.Pop();
+
+            if (name == null)
+                return;
+            else if (name == "")
+            {
+                _transaction.Value.Commit();
+                _transaction.Value = null;
+            }
+            else
+            {
+                // no need to commit named savepoint
+            }
+
+            if (_transactionStack.Value.Count == 0)
+                CloseConnection();
+        }
+
+        public override void RollbackTransaction()
+        {
+            string name = _transactionStack.Value.Pop();
+
+            if (name == null)
+                return;
+            else if (name == "")
+            {
+                _transaction.Value.Rollback();
+                _transaction.Value = null;
+            }
+            else
+            {
+                _transaction.Value.Rollback(name);
+            }
+
+            if (_transactionStack.Value.Count == 0)
+                CloseConnection();
+        }
+
+        protected override DbTransaction CurrentTransaction => _transaction.Value;
     }
 }

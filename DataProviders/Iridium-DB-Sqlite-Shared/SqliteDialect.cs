@@ -58,10 +58,13 @@ namespace Iridium.DB
             throw new NotSupportedException(); // Is handled in DataProvider class
         }
 
-        public override string DeleteSql(SqlTableNameWithAlias tableName, string sqlWhere)
+        public override string DeleteSql(SqlTableNameWithAlias tableName, string sqlWhere, IEnumerable<SqlJoinDefinition> joins = null)
         {
-            if (tableName.Alias != null && sqlWhere != null)
-                sqlWhere = sqlWhere.Replace(QuoteTable(tableName.Alias) + ".", "");
+            if (joins != null && joins.Any())
+                throw new NotSupportedException("Sqlite does not support delete with joins");
+
+            if (tableName.Alias != null)
+                sqlWhere = sqlWhere?.Replace(QuoteTable(tableName.Alias) + ".", "");
             
             return "delete from " + QuoteTable(tableName.TableName) + (sqlWhere != null ? (" where " + sqlWhere) : "");
         }

@@ -5,6 +5,8 @@ namespace Iridium.DB.Test
     [TestFixture]
     public abstract class TestFixture
     {
+        public string Driver;
+
         public MyContext DB
         {
             get;
@@ -12,6 +14,8 @@ namespace Iridium.DB.Test
 
         protected TestFixture(string driver)
         {
+            Driver = driver;
+
             StorageContext.Instance = null;
 
             DB = MyContext.Get(driver);
