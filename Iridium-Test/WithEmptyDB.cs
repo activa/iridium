@@ -15,7 +15,7 @@ namespace Iridium.DB.Test
     [TestFixture("sqlite")]
     [TestFixture("sqlserver")]
     [TestFixture("memory")]
-    [TestFixture("mysql")]
+    //[TestFixture("mysql")]
     public class WithEmptyDB : TestFixture
     {
         public WithEmptyDB(string driver) : base(driver)

@@ -8,7 +8,7 @@ namespace Iridium.DB.Test
     [TestFixture("sqlite")]
     [TestFixture("sqlserver")]
     [TestFixture("memory")]
-    [TestFixture("mysql")]
+    //[TestFixture("mysql")]
     public class WithStandardTestData : TestFixture
     {
         private const int NUM_CUSTOMERS = 20;
