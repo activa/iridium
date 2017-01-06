@@ -226,6 +226,31 @@ namespace Iridium.DB
             throw new NotSupportedException();
         }
 
+        public bool Save(IEnumerable<T> objects, bool saveRelations = false, bool? create = null)
+        {
+            throw new NotSupportedException();
+        }
+
+        public bool InsertOrUpdate(IEnumerable<T> objects, bool saveRelations = false)
+        {
+            throw new NotSupportedException();
+        }
+
+        public bool Insert(IEnumerable<T> objects, bool saveRelations = false)
+        {
+            throw new NotSupportedException();
+        }
+
+        public bool Update(IEnumerable<T> objects, bool saveRelations = false)
+        {
+            throw new NotSupportedException();
+        }
+
+        public bool Delete(IEnumerable<T> objects)
+        {
+            throw new NotSupportedException();
+        }
+
         public bool DeleteAll()
         {
             throw new NotSupportedException();
