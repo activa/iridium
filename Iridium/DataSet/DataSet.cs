@@ -161,9 +161,19 @@ namespace Iridium.DB
             return _repository.Save(obj, saveRelations, create);
         }
 
+        public bool Save(IEnumerable<T> objects, bool saveRelations = false, bool? create = null)
+        {
+            return _repository.Context.RunTransaction(() => objects.All(o => Save(o, saveRelations, create)));
+        }
+
         public bool InsertOrUpdate(T obj, bool saveRelations = false)
         {
             return _repository.Save(obj, saveRelations, create:null);
+        }
+
+        public bool InsertOrUpdate(IEnumerable<T> objects, bool saveRelations = false)
+        {
+            return _repository.Context.RunTransaction(() => objects.All(o => InsertOrUpdate(o, saveRelations)));
         }
 
         public bool Insert(T obj, bool saveRelations = false)
@@ -171,14 +181,29 @@ namespace Iridium.DB
             return _repository.Save(obj, saveRelations, create: true);
         }
 
+        public bool Insert(IEnumerable<T> objects, bool saveRelations = false)
+        {
+            return _repository.Context.RunTransaction(() => objects.All(o => Insert(o, saveRelations)));
+        }
+
         public bool Update(T obj, bool saveRelations = false)
         {
             return _repository.Save(obj, saveRelations, create: false);
         }
 
+        public bool Update(IEnumerable<T> objects, bool saveRelations = false)
+        {
+            return _repository.Context.RunTransaction(() => objects.All(o => Update(o, saveRelations)));
+        }
+
         public bool Delete(T obj)
         {
             return _repository.Delete(obj);
+        }
+
+        public bool Delete(IEnumerable<T> objects)
+        {
+            return _repository.Context.RunTransaction(() => objects.All(Delete));
         }
 
         public bool DeleteAll()

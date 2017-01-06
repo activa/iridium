@@ -210,6 +210,26 @@ namespace Iridium.DB
             return new DataSet<T>(GetRepository<T>());
         }
 
+        public Transaction CreateTransaction(IsolationLevel isolationLevel = IsolationLevel.Serializable)
+        {
+            return new Transaction(this, isolationLevel);
+        }
+
+        public bool RunTransaction(Func<bool> block, IsolationLevel isolationLevel = IsolationLevel.Serializable)
+        {
+            using (var transaction = CreateTransaction(isolationLevel))
+            {
+                var success = block();
+
+                if (success)
+                    transaction.Commit();
+                else
+                    transaction.Rollback();
+
+                return success;
+            }
+        }
+
         public void CreateTable<T>(bool recreateTable = false, bool recreateIndexes = false)
         {
             DataProvider.CreateOrUpdateTable(GetRepository<T>().Schema, recreateTable, recreateIndexes);
