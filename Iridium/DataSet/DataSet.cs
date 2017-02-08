@@ -125,9 +125,14 @@ namespace Iridium.DB
             return new DataSet<T>(this, newSortSpec: new SortOrderSpec(expression, sortOrder, _sortOrder));
         }
 
+        private IEnumerable<T> Enumerate()
+        {
+            return _repository.List(_repository.CreateQuerySpec(_filter, sortSpec: _sortOrder, skip: _skip, take: _take), _relationsToLoad, _parentRelation, _parentObject);
+        }
+
         public IEnumerator<T> GetEnumerator()
         {
-            return _repository.List(_repository.CreateQuerySpec(_filter, sortSpec: _sortOrder, skip:_skip, take:_take), _relationsToLoad, _parentRelation, _parentObject).GetEnumerator();
+            return Enumerate().GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -265,27 +270,27 @@ namespace Iridium.DB
 
         public long Count()
         {
-            return _repository.GetAggregate<long>(Aggregate.Count, _repository.CreateQuerySpec(_filter));
+            return _repository.GetAggregate<long>(Aggregate.Count, _repository.CreateQuerySpec(_filter, skip: _skip, take: _take));
         }
 
         public long Count(Expression<Func<T, bool>> filter)
         {
-            return _repository.GetAggregate<long>(Aggregate.Count, _repository.CreateQuerySpec(new FilterSpec(filter, _filter)));
+            return _repository.GetAggregate<long>(Aggregate.Count, _repository.CreateQuerySpec(new FilterSpec(filter, _filter), skip: _skip, take: _take));
         }
 
         public TScalar Max<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter)
         {
-            return _repository.GetAggregate<TScalar>(Aggregate.Max, _repository.CreateQuerySpec(new FilterSpec(filter, _filter),new ScalarSpec(expression)));
+            return _repository.GetAggregate<TScalar>(Aggregate.Max, _repository.CreateQuerySpec(new FilterSpec(filter, _filter),new ScalarSpec(expression), skip: _skip, take: _take));
         }
 
         public TScalar Min<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter)
         {
-            return _repository.GetAggregate<TScalar>(Aggregate.Min, _repository.CreateQuerySpec(new FilterSpec(filter, _filter), new ScalarSpec(expression)));
+            return _repository.GetAggregate<TScalar>(Aggregate.Min, _repository.CreateQuerySpec(new FilterSpec(filter, _filter), new ScalarSpec(expression), skip: _skip, take: _take));
         }
 
         public TScalar Sum<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter)
         {
-            return _repository.GetAggregate<TScalar>(Aggregate.Sum, _repository.CreateQuerySpec(new FilterSpec(filter, _filter), new ScalarSpec(expression)));
+            return _repository.GetAggregate<TScalar>(Aggregate.Sum, _repository.CreateQuerySpec(new FilterSpec(filter, _filter), new ScalarSpec(expression), skip: _skip, take: _take));
         }
 
         public bool All(Expression<Func<T, bool>> filter)
@@ -295,37 +300,37 @@ namespace Iridium.DB
 
         public TScalar Max<TScalar>(Expression<Func<T, TScalar>> expression)
         {
-            return _repository.GetAggregate<TScalar>(Aggregate.Max, _repository.CreateQuerySpec(_filter, new ScalarSpec(expression)));
+            return _repository.GetAggregate<TScalar>(Aggregate.Max, _repository.CreateQuerySpec(_filter, new ScalarSpec(expression), skip: _skip, take: _take));
         }
 
         public TScalar Min<TScalar>(Expression<Func<T, TScalar>> expression)
         {
-            return _repository.GetAggregate<TScalar>(Aggregate.Min, _repository.CreateQuerySpec(_filter, new ScalarSpec(expression)));
+            return _repository.GetAggregate<TScalar>(Aggregate.Min, _repository.CreateQuerySpec(_filter, new ScalarSpec(expression), skip: _skip, take: _take));
         }
 
         public TScalar Sum<TScalar>(Expression<Func<T, TScalar>> expression)
         {
-            return _repository.GetAggregate<TScalar>(Aggregate.Sum, _repository.CreateQuerySpec(_filter, new ScalarSpec(expression)));
+            return _repository.GetAggregate<TScalar>(Aggregate.Sum, _repository.CreateQuerySpec(_filter, new ScalarSpec(expression), skip: _skip, take: _take));
         }
 
         public TScalar Average<TScalar>(Expression<Func<T, TScalar>> expression)
         {
-            return _repository.GetAggregate<TScalar>(Aggregate.Average, _repository.CreateQuerySpec(_filter, new ScalarSpec(expression)));
+            return _repository.GetAggregate<TScalar>(Aggregate.Average, _repository.CreateQuerySpec(_filter, new ScalarSpec(expression), skip: _skip, take: _take));
         }
 
         public bool Any()
         {
-            return _repository.GetAggregate<bool>(Aggregate.Any, _repository.CreateQuerySpec(_filter));
+            return _repository.GetAggregate<bool>(Aggregate.Any, _repository.CreateQuerySpec(_filter, skip: _skip, take: _take));
         }
 
         public TScalar Average<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter)
         {
-            return _repository.GetAggregate<TScalar>(Aggregate.Average, _repository.CreateQuerySpec(new FilterSpec(filter, _filter), new ScalarSpec(expression)));
+            return _repository.GetAggregate<TScalar>(Aggregate.Average, _repository.CreateQuerySpec(new FilterSpec(filter, _filter), new ScalarSpec(expression), skip: _skip, take: _take));
         }
 
         public bool Any(Expression<Func<T, bool>> filter)
         {
-            return _repository.GetAggregate<bool>(Aggregate.Any, _repository.CreateQuerySpec(new FilterSpec(filter, _filter)));
+            return _repository.GetAggregate<bool>(Aggregate.Any, _repository.CreateQuerySpec(new FilterSpec(filter, _filter), skip: _skip, take: _take));
         }
 
         public T ElementAt(int index)
@@ -334,5 +339,6 @@ namespace Iridium.DB
         }
 
         public IObjectEvents<T> Events => _repository.Events;
+        
     }
 }

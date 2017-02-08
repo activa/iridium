@@ -87,7 +87,9 @@ namespace Iridium.DB
                 new[] { new SqlExpressionWithAlias(expressionSql,valueAlias) },
                 querySpec.FilterSql, 
                 querySpec.Joins,
-                numRecords: limit
+                querySpec.SortExpressionSql,
+                querySpec.Skip + 1,
+                limit ?? querySpec.Take
                 );
 
             var record = ExecuteSqlReader(sql, querySpec.SqlParameters).FirstOrDefault();

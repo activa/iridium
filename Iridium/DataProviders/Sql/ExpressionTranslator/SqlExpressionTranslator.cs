@@ -79,6 +79,9 @@ namespace Iridium.DB
 
         private string ProcessRelation(Expression fullExpression, Expression leftExpression, string memberName)
         {
+            if (leftExpression.NodeType == ExpressionType.Convert)
+                leftExpression = ((UnaryExpression) leftExpression).Operand;
+                
             var parentMetaData = _metaData[leftExpression];
 
             if (parentMetaData != null)

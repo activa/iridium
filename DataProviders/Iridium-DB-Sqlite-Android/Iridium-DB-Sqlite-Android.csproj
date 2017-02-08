@@ -15,7 +15,7 @@
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
-    <TargetFrameworkVersion>v6.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v7.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -47,13 +47,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedNativeLibrary Include="Native\libs\arm64-v8a\libsqlite3_emb.so" />
-    <EmbeddedNativeLibrary Include="Native\libs\armeabi-v7a\libsqlite3_emb.so" />
-    <EmbeddedNativeLibrary Include="Native\libs\armeabi\libsqlite3_emb.so" />
-    <EmbeddedNativeLibrary Include="Native\libs\mips64\libsqlite3_emb.so" />
-    <EmbeddedNativeLibrary Include="Native\libs\mips\libsqlite3_emb.so" />
-    <EmbeddedNativeLibrary Include="Native\libs\x86\libsqlite3_emb.so" />
-    <EmbeddedNativeLibrary Include="Native\libs\x86_64\libsqlite3_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\libs\arm64-v8a\libsqlite_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\libs\armeabi-v7a\libsqlite_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\libs\armeabi\libsqlite_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\libs\mips64\libsqlite_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\libs\mips\libsqlite_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\libs\x86\libsqlite_emb.so" />
+    <EmbeddedNativeLibrary Include="Native\libs\x86_64\libsqlite_emb.so" />
     <None Include="Resources\AboutResources.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -70,6 +70,9 @@
     <None Include="Native\jni\Application.mk" />
     <None Include="Native\jni\sqlite3.c" />
     <None Include="Native\jni\sqlite3.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="bin\Release\" />
   </ItemGroup>
   <Import Project="..\Iridium-DB-Sqlite-Shared\Iridium-DB-Sqlite-Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

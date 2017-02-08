@@ -73,7 +73,7 @@ namespace Iridium.DB.Test
 
 	public class SalesPerson
 	{
-        [Column.PrimaryKeyAttribute(AutoIncrement = true), Column.Name("SalesPersonID")]
+        [Column.PrimaryKey(AutoIncrement = true), Column.Name("SalesPersonID")]
         public int ID;
 
 	    public string Name;
@@ -223,5 +223,19 @@ namespace Iridium.DB.Test
             get { return FirstName + " " + LastName; }
             set { FirstName = value; }
         }
+    }
+
+
+    public interface IRecordWithInterface
+    {
+        string Name { get; set; }
+    }
+
+    public class RecordWithInterface : IRecordWithInterface
+    {
+        [Column.PrimaryKey(AutoIncrement = true)]
+        public int RecordID;
+
+        public string Name { get; set; }
     }
 }

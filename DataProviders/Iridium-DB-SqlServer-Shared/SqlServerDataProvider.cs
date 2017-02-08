@@ -76,42 +76,54 @@ namespace Iridium.DB.SqlServer
 
         public override void CommitTransaction()
         {
-            string name = _transactionStack.Value.Pop();
-
-            if (name == null)
-                return;
-            else if (name == "")
+            try
             {
-                _transaction.Value.Commit();
-                _transaction.Value = null;
-            }
-            else
-            {
-                // no need to commit named savepoint
-            }
+                string name = _transactionStack.Value.Pop();
 
-            if (_transactionStack.Value.Count == 0)
-                CloseConnection();
+                if (name != null)
+                {
+                    if (name == "")
+                    {
+                        _transaction.Value.Commit();
+                        _transaction.Value = null;
+                    }
+                    else
+                    {
+                        // no need to commit named savepoint
+                    }
+                }
+            }
+            finally
+            {
+                if (_transactionStack.Value.Count == 0)
+                    CloseConnection();
+            }
         }
 
         public override void RollbackTransaction()
         {
-            string name = _transactionStack.Value.Pop();
-
-            if (name == null)
-                return;
-            else if (name == "")
+            try
             {
-                _transaction.Value.Rollback();
-                _transaction.Value = null;
-            }
-            else
-            {
-                _transaction.Value.Rollback(name);
-            }
+                string name = _transactionStack.Value.Pop();
 
-            if (_transactionStack.Value.Count == 0)
-                CloseConnection();
+                if (name != null)
+                {
+                    if (name == "")
+                    {
+                        _transaction.Value.Rollback();
+                        _transaction.Value = null;
+                    }
+                    else
+                    {
+                        _transaction.Value.Rollback(name);
+                    }
+                }
+            }
+            finally
+            {
+                if (_transactionStack.Value.Count == 0)
+                    CloseConnection();
+            }
         }
 
         protected override DbTransaction CurrentTransaction => _transaction.Value;

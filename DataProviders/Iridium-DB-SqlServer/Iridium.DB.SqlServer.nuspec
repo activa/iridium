@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>iridium.db.sqlserver</id>
-    <version>1.0.0.8</version>
+    <version>1.1.2.21</version>
     <title>Iridium SQL Server Driver</title>
     <authors>Philippe Leybaert</authors>
     <projectUrl>http://github.com/activa/iridium</projectUrl>
@@ -11,9 +11,9 @@
     <tags>iridium orm sql sqlserver</tags>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>SQL Server driver for Iridium, the lightweight multi-platform ORM for mobile, desktop and servers. This driver is compatible with .NET 4.5 (desktop/server), Xamarin.iOS and Xamarin.Android</description>
-    <copyright>Copyright 2015-2016 Philippe Leybaert</copyright>
+    <copyright>Copyright 2015-2017 Philippe Leybaert</copyright>
     <dependencies>
-      <dependency id="iridium" version="1.0.0.8" />
+      <dependency id="iridium" version="1.1.2" />
     </dependencies>
   </metadata>
   <files>

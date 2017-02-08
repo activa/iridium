@@ -177,7 +177,7 @@ namespace Iridium.DB.Test
             Order order = new Order()
             {
                 Customer = new Customer() {Name = "A"},
-                OrderItems = new List<OrderItem>()
+                OrderItems = new[]
                 {
                     new OrderItem() {Description = "X"},
                     new OrderItem() {Description = "X"},
@@ -191,15 +191,15 @@ namespace Iridium.DB.Test
 
             DB.Orders.Insert(order, true);
 
-            order = DB.Orders.Read(originalOrder.OrderID);
-            DB.LoadRelations(order, o => o.OrderItems);
+            order = DB.Orders.Read(originalOrder.OrderID, o => o.OrderItems);
+
             order.OrderItems.Should().HaveCount(5).And.OnlyContain(item => item.Order == order);
 
             order = DB.Orders.Read(originalOrder.OrderID, o => o.OrderItems);
             order.OrderItems.Should().HaveCount(5).And.OnlyContain(item => item.Order == order);
 
-            order = DB.Orders.Read(originalOrder.OrderID);
-            DB.LoadRelation(() => order.OrderItems).Should().HaveCount(5).And.OnlyContain(item => item.Order == order);
+            order = DB.Orders.Read(originalOrder.OrderID, o => o.OrderItems);
+            order.OrderItems.Should().HaveCount(5).And.OnlyContain(item => item.Order == order);
         }
 
         [Test]
@@ -454,6 +454,31 @@ namespace Iridium.DB.Test
 
             sortedProducts.Should().BeInDescendingOrder(product => product.Price);
         }
+
+        [Test]
+        public void ThousandsOfTransactions()
+        {
+            for (int i = 0; i < 10000; i++)
+            {
+                Customer customer = new Customer {Name = "A"};
+
+                customer.Save();
+
+                Assert.IsTrue(customer.CustomerID > 0);
+
+                int customerId = customer.CustomerID;
+
+                customer = DB.Customers.Read(customerId);
+
+                Assert.NotNull(customer, $"Customer ID {customerId}");
+                Assert.AreEqual("A", customer.Name);
+
+                customer.Delete();
+
+                Assert.That(DB.Customers.Count(), Is.Zero);
+            }
+        }
+
 
         [Test]
         public void CreateAndReadSingleObject()
@@ -758,10 +783,7 @@ namespace Iridium.DB.Test
 
             order = DB.Orders.Read(order.OrderID, o => o.OrderItems);
 
-            //double totalPrice = Convert.ToDouble(order.OrderItems.GetScalar("Qty * Price", CSAggregate.Sum));
-
             Assert.AreEqual(2, order.OrderItems.Count, "Order items not added");
-            //Assert.AreEqual(1135.0, totalPrice, "Incorrect total amount");
 
             order.OrderItems.Add(new OrderItem { Description = "test", Qty = 2, Price = 1000.0 });
 
@@ -769,21 +791,7 @@ namespace Iridium.DB.Test
 
             order = DB.Orders.Read(order.OrderID, o => o.OrderItems);
 
-            //totalPrice = Convert.ToDouble(order.OrderItems.GetScalar("Qty * Price", CSAggregate.Sum));
-
             Assert.AreEqual(3, order.OrderItems.Count, "Order item not added");
-            //Assert.AreEqual(3135.0, totalPrice, "Total price incorrect");
-
-            /*
-            order.OrderItems.DeleteAll();
-
-            order = Order.Read(order.OrderID);
-
-            Assert.AreEqual(0, order.OrderItems.Count, "Order items not deleted");
-
-            Assert.IsTrue(order.Delete());
-                */
-
         }
 
         [Test]
@@ -1068,6 +1076,30 @@ namespace Iridium.DB.Test
             Assert.That(rec.LastName, Is.EqualTo("Doe"));
             Assert.That(rec.FullName, Is.EqualTo("John Doe"));
         }
+
+        [Test]
+        public void FilterOnInterfaceFields()
+        {
+            DB.RecordsWithInterface.Insert(new RecordWithInterface() {Name = "A"});
+            DB.RecordsWithInterface.Insert(new RecordWithInterface() {Name = "B"});
+            DB.RecordsWithInterface.Insert(new RecordWithInterface() {Name = "C"});
+
+            GenericFilterOnInterfaceFields<RecordWithInterface>();
+        }
+
+        private void GenericFilterOnInterfaceFields<T>() where T:IRecordWithInterface
+        {
+            var dataSet = DB.DataSet<T>();
+
+            long n = dataSet.Where(rec => rec.Name == "B").Count();
+
+            Assert.That(n, Is.EqualTo(1));
+
+            n = dataSet.Where(rec => rec.Name == "D").Count();
+
+            Assert.That(n, Is.EqualTo(0));
+        }
+
 
 
     }

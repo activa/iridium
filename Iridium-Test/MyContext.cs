@@ -23,6 +23,7 @@ namespace Iridium.DB.Test
         public IDataSet<RecordWithAllTypes> RecordsWithAllTypes;
         public IDataSet<RecordWithCompositeKey> RecordsWithCompositeKey;
         public IDataSet<RecordWithIgnoredFields> RecordsWithIgnoredFields;
+        public IDataSet<RecordWithInterface> RecordsWithInterface;
 
         public MyContext(IDataProvider dataProvider) : base(dataProvider)
         {
@@ -67,6 +68,7 @@ namespace Iridium.DB.Test
             CreateTable<OneToOneRec1>(recreateTable:true);
             CreateTable<OneToOneRec2>(recreateTable:true);
             CreateTable<RecordWithIgnoredFields>(recreateTable: true);
+            CreateTable<RecordWithInterface>(recreateTable: true);
         }
 
         private static Dictionary<string, Func<MyContext>> _contextFactories;
