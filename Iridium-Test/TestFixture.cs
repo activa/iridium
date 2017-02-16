@@ -7,7 +7,7 @@ namespace Iridium.DB.Test
     {
         public string Driver;
 
-        public MyContext DB
+        public DBContext DB
         {
             get;
         }
@@ -18,7 +18,7 @@ namespace Iridium.DB.Test
 
             StorageContext.Instance = null;
 
-            DB = MyContext.Get(driver);
+            DB = DBContext.Get(driver);
 
             StorageContext.Instance = DB;
         }

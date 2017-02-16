@@ -32,24 +32,24 @@ namespace Iridium.DB
 {
     public static class IridiumExtensions
     {
-        public static bool InsertOrUpdate<T>(this T entity, bool saveRelations = false, bool? create = null) where T:IEntity
+        public static bool InsertOrUpdate<T>(this T entity, params Expression<Func<T, object>>[] relationsToSave) where T:IEntity
         {
-            return Ir.DataSet<T>().InsertOrUpdate(entity, saveRelations);
+            return Ir.DataSet<T>().InsertOrUpdate(entity, relationsToSave);
         }
 
-        public static bool Save<T>(this T entity, bool saveRelations = false, bool? create = null) where T : IEntity
+        public static bool Save<T>(this T entity, params Expression<Func<T, object>>[] relationsToSave) where T : IEntity
         {
-            return Ir.DataSet<T>().InsertOrUpdate(entity, saveRelations);
+            return Ir.DataSet<T>().Save(entity, relationsToSave);
         }
 
-        public static bool Insert<T>(this T entity, bool saveRelations = false) where T : IEntity
+        public static bool Insert<T>(this T entity, params Expression<Func<T, object>>[] relationsToSave) where T : IEntity
         {
-            return Ir.DataSet<T>().Insert(entity, saveRelations);
+            return Ir.DataSet<T>().Insert(entity, deferSave:null, relationsToSave: relationsToSave);
         }
 
-        public static bool Update<T>(this T entity, bool saveRelations = false) where T : IEntity
+        public static bool Update<T>(this T entity, params Expression<Func<T, object>>[] relationsToSave) where T : IEntity
         {
-            return Ir.DataSet<T>().Update(entity, saveRelations);
+            return Ir.DataSet<T>().Update(entity, relationsToSave);
         }
 
         public static T Load<T>(this T obj, object key, params Expression<Func<T, object>>[] relationsToLoad) where T : IEntity

@@ -11,7 +11,7 @@ using Iridium.DB.SqlService;
 
 namespace Iridium.DB.Test
 {
-    public class MyContext : StorageContext
+    public class DBContext : StorageContext
     {
         public IDataSet<Order> Orders { get; set; }
         public IDataSet<Customer> Customers { get; set; }
@@ -25,7 +25,7 @@ namespace Iridium.DB.Test
         public IDataSet<RecordWithIgnoredFields> RecordsWithIgnoredFields;
         public IDataSet<RecordWithInterface> RecordsWithInterface;
 
-        public MyContext(IDataProvider dataProvider) : base(dataProvider)
+        public DBContext(IDataProvider dataProvider) : base(dataProvider)
         {
             /*
             Ir.Config.NamingConvention = new NamingConvention()
@@ -71,12 +71,12 @@ namespace Iridium.DB.Test
             CreateTable<RecordWithInterface>(recreateTable: true);
         }
 
-        private static Dictionary<string, Func<MyContext>> _contextFactories;
-        private static Dictionary<string,MyContext> _contexts = new Dictionary<string, MyContext>();
+        private static Dictionary<string, Func<DBContext>> _contextFactories;
+        private static Dictionary<string,DBContext> _contexts = new Dictionary<string, DBContext>();
 
-        static MyContext()
+        static DBContext()
         {
-            _contextFactories = new Dictionary<string,Func<MyContext>>()
+            _contextFactories = new Dictionary<string,Func<DBContext>>()
             {
                { "sqlite", () => new SqliteStorage() },
                 { "sqlserver", () => new SqlServerStorage() },
@@ -86,7 +86,7 @@ namespace Iridium.DB.Test
 
         }
 
-        public static MyContext Get(string driver)
+        public static DBContext Get(string driver)
         {
             if (_contexts.ContainsKey(driver))
                 return _contexts[driver];
@@ -95,42 +95,29 @@ namespace Iridium.DB.Test
 
             return _contexts[driver];
         }
-
-        /*
-        private static MyContext _instance;
-
-        public static MyContext Instance
-        {
-//            get { return _instance ?? (_instance = new MemoryStorage()); }
-//            get { return _instance ?? (_instance = new SqlServerStorage()); }
-//            get { return _instance ?? (_instance = new MySqlStorage()); }
-            get { return _instance ?? (_instance = new SqliteStorage()); }
-//            get { return _instance ?? (_instance = new ServiceStorage()); }
-        }
-        */
     }
 
-    public class MySqlStorage : MyContext
+    public class MySqlStorage : DBContext
     {
         public MySqlStorage() : base(new MySqlDataProvider("Server=192.168.1.32;Database=velox;UID=velox;PWD=velox")) { }
     }
 
-    public class SqlServerStorage : MyContext
+    public class SqlServerStorage : DBContext
     {
         public SqlServerStorage() : base(new SqlServerDataProvider("Server=NOOKIE;Database=velox;UID=velox;PWD=velox")) { }
     }
 
-    public class SqliteStorage : MyContext
+    public class SqliteStorage : DBContext
     {
         public SqliteStorage() : base(new SqliteDataProvider("velox.sqlite")) { }
     }
 
-    public class MemoryStorage : MyContext
+    public class MemoryStorage : DBContext
     {
         public MemoryStorage() : base(new MemoryDataProvider()) { }
     }
 
-    public class ServiceStorage : MyContext
+    public class ServiceStorage : DBContext
     {
         public ServiceStorage() : base(new SqlServiceDataProvider("http://localhost:55768",null,null))
         {

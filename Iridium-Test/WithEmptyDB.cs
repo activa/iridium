@@ -189,7 +189,7 @@ namespace Iridium.DB.Test
 
             var originalOrder = order;
 
-            DB.Orders.Insert(order, true);
+            DB.Orders.Insert(order, o => o.Customer, o => o.OrderItems);
 
             order = DB.Orders.Read(originalOrder.OrderID, o => o.OrderItems);
 
@@ -583,7 +583,7 @@ namespace Iridium.DB.Test
                 Customer = customer
             };
 
-            Assert.IsTrue(DB.Orders.Save(order,saveRelations: true));
+            Assert.IsTrue(DB.Orders.Save(order, relationsToSave: o => o.Customer));
 
             Order order2 = DB.Orders.Read(order.OrderID, o => o.Customer);
 
@@ -725,7 +725,7 @@ namespace Iridium.DB.Test
                     Remark = "Remark" + (i+1)
                 };
 
-                DB.Orders.Insert(order, true);
+                DB.Orders.Insert(order, deferSave:false, relationsToSave: o => o.Customer);
 
                 orders.Add(order);
             }
@@ -779,15 +779,15 @@ namespace Iridium.DB.Test
                 }
             };
 
-            Assert.IsTrue(DB.Orders.Save(order,saveRelations:true));
+            Assert.IsTrue(DB.Orders.Save(order, o => o.Customer, o => o.OrderItems));
 
-            order = DB.Orders.Read(order.OrderID/*, o => o.OrderItems*/);
+            order = DB.Orders.Read(order.OrderID);
 
             Assert.AreEqual(2, order.OrderItems.Count(), "Order items not added");
 
             order.OrderItems.Insert(new OrderItem { Description = "test", Qty = 2, Price = 1000.0 });
 
-            Assert.IsTrue(DB.Orders.Save(order,saveRelations:true));
+            Assert.IsTrue(DB.Orders.Save(order, o => o.OrderItems));
 
             order = DB.Orders.Read(order.OrderID);
 
@@ -795,7 +795,7 @@ namespace Iridium.DB.Test
 
             order.OrderItems.Insert(new OrderItem { Description = "test", Qty = 3, Price = 2000.0 }, deferSave:true);
 
-            Assert.IsTrue(DB.Orders.Save(order, saveRelations: true));
+            Assert.IsTrue(DB.Orders.Save(order, o => o.OrderItems));
 
             order = DB.Orders.Read(order.OrderID);
 

@@ -24,7 +24,12 @@ namespace Iridium.DB.Test
         public int MinQty;
     }
 
-	public class Order
+    public interface IOrder
+    {
+        Customer Customer { get; set; }
+    }
+
+	public class Order : IOrder
 	{
 	    public Order()
 	    {

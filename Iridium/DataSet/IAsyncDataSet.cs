@@ -48,10 +48,10 @@ namespace Iridium.DB
         Task<T> Read(object key, params Expression<Func<T, object>>[] relationsToLoad);
         Task<T> Read(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] relationsToLoad);
         Task<T> Load(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad);
-        Task<bool> Save(T obj, bool saveRelations = false, bool? create = null);
-        Task<bool> Update(T obj, bool saveRelations = false);
-        Task<bool> InsertOrUpdate(T obj, bool saveRelations = false);
-        Task<bool> Insert(T obj, bool saveRelations = false);
+        Task<bool> Save(T obj, params Expression<Func<T, object>>[] relationsToSave);
+        Task<bool> Update(T obj, params Expression<Func<T, object>>[] relationsToSave);
+        Task<bool> InsertOrUpdate(T obj, params Expression<Func<T, object>>[] relationsToSave);
+        Task<bool> Insert(T obj, params Expression<Func<T, object>>[] relationsToSave);
         Task<bool> Delete(T obj);
         Task<bool> DeleteAll();
         Task<bool> Delete(Expression<Func<T, bool>> filter);

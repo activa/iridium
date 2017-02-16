@@ -247,27 +247,27 @@ namespace Iridium.DB
 
         public T Load<T>(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad)
         {
-            return GetRepository<T>().Load(obj, key, relationsToLoad);
+            return DataSet<T>().Load(obj, key, relationsToLoad);
         }
 
-        public bool Save<T>(T obj, bool saveRelations = false, bool? create = null)
+        public bool Save<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return GetRepository<T>().Save(obj, saveRelations, create: create);
+            return DataSet<T>().Save(obj, relationsToSave);
         }
 
-        public bool InsertOrUpdate<T>(T obj, bool saveRelations = false)
+        public bool InsertOrUpdate<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return GetRepository<T>().Save(obj, saveRelations, create: null);
+            return DataSet<T>().Save(obj, relationsToSave);
         }
 
-        public bool Update<T>(T obj, bool saveRelations = false)
+        public bool Update<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return GetRepository<T>().Save(obj, saveRelations, create: false);
+            return DataSet<T>().Update(obj, relationsToSave);
         }
 
-        public bool Insert<T>(T obj, bool saveRelations = false)
+        public bool Insert<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return GetRepository<T>().Save(obj, saveRelations, create: true);
+            return DataSet<T>().Insert(obj, relationsToSave);
         }
 
         public bool Delete<T>(T obj)
@@ -277,9 +277,7 @@ namespace Iridium.DB
 
         public bool Delete<T>(Expression<Func<T, bool>> condition)
         {
-            var repository = GetRepository<T>();
-
-            return repository.Delete(repository.CreateQuerySpec(new FilterSpec(condition)));
+            return GetRepository<T>().Delete(GetRepository<T>().CreateQuerySpec(new FilterSpec(condition)));
         }
 
         public int Execute(string sql, object parameters = null)
@@ -354,19 +352,19 @@ namespace Iridium.DB
             return Task.Factory.StartNew(() => GetRepository<T>().Load(obj, key, relationsToLoad));
         }
 
-        public Task<bool> SaveAsync<T>(T obj, bool saveRelations = false, bool? create = null)
+        public Task<bool> SaveAsync<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return Task.Factory.StartNew(() => GetRepository<T>().Save(obj, saveRelations, create));
+            return Task.Factory.StartNew(() => DataSet<T>().Save(obj, relationsToSave));
         }
 
-        public Task<bool> InsertAsync<T>(T obj, bool saveRelations = false)
+        public Task<bool> InsertAsync<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return Task.Factory.StartNew(() => GetRepository<T>().Save(obj, saveRelations, true));
+            return Task.Factory.StartNew(() => DataSet<T>().Insert(obj, relationsToSave));
         }
 
-        public Task<bool> UpdateAsync<T>(T obj, bool saveRelations = false)
+        public Task<bool> UpdateAsync<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return Task.Factory.StartNew(() => GetRepository<T>().Save(obj, saveRelations, false));
+            return Task.Factory.StartNew(() => DataSet<T>().Update(obj, relationsToSave));
         }
 
         public Task<bool> DeleteAsync<T>(T obj)

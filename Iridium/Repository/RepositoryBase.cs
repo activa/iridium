@@ -59,10 +59,15 @@ namespace Iridium.DB
             return objects;
         }
 
-        protected bool Save(object obj, bool saveRelations = false, bool? create = null)
+        protected bool Save(object obj, bool? create, HashSet<TableSchema.Relation> relationsToSave)
         {
             if (create == null)
+            {
+                if (Schema.IncrementKeys.Length == 0)
+                    throw new Exception("Save()/InsertOrUpdate() is only supported for objects with autoincremnt primary keys. Use explicit Insert() or Update()");
+                
                 create = Schema.IncrementKeys.Length > 0 && Equals(Schema.IncrementKeys[0].GetField(obj), Schema.IncrementKeys[0].FieldInfo.TypeInspector.DefaultValue());
+            }
 
             bool cancelSave = false;
 
@@ -85,8 +90,8 @@ namespace Iridium.DB
                 if (foreignObject == null)
                     continue;
 
-                if (saveRelations)
-                    relation.ForeignSchema.Repository.Save(foreignObject);
+                if (relationsToSave != null && relationsToSave.Contains(relation))
+                    relation.ForeignSchema.Repository.Save(foreignObject, null, relationsToSave);
 
                 var foreignKeyValue = relation.ForeignField.GetField(foreignObject);
 
@@ -101,31 +106,30 @@ namespace Iridium.DB
             if (result.OriginalUpdated)
                 Schema.UpdateObject(obj, serializedEntity);
 
-
             // Update and save OneToMany relations
-            foreach (var relation in toManyRelations)
-            {
-                var foreignCollection = (IEnumerable) relation.GetField(obj);
-                var deferredList = foreignCollection as IDeferredList;
-
-                if (deferredList != null)
-                    foreignCollection = deferredList.DeferredList;
-
-                if (foreignCollection == null)
-                    continue;
-
-                foreach (var foreignObject in foreignCollection)
+            if (relationsToSave != null)
+                foreach (var relation in toManyRelations.Where(relationsToSave.Contains))
                 {
-                    var foreignKeyValue = relation.ForeignField.GetField(foreignObject);
-                    var localKeyValue = relation.LocalField.GetField(obj);
+                    var foreignCollection = (IEnumerable) relation.GetField(obj);
+                    var dataSet = foreignCollection as DataSet;
 
-                    if (!Equals(localKeyValue, foreignKeyValue))
-                        relation.ForeignField.SetField(foreignObject, localKeyValue);
+                    if (dataSet != null)
+                        foreignCollection = dataSet.NewObjects;
 
-                    if (saveRelations)
-                        relation.ForeignSchema.Repository.Save(foreignObject);
+                    if (foreignCollection == null)
+                        continue;
+
+                    foreach (var foreignObject in foreignCollection)
+                    {
+                        var foreignKeyValue = relation.ForeignField.GetField(foreignObject);
+                        var localKeyValue = relation.LocalField.GetField(obj);
+
+                        if (!Equals(localKeyValue, foreignKeyValue))
+                            relation.ForeignField.SetField(foreignObject, localKeyValue);
+
+                        relation.ForeignSchema.Repository.Save(foreignObject, null, relationsToSave);
+                    }
                 }
-            }
 
             if (result.Success)
             {
@@ -175,5 +179,14 @@ namespace Iridium.DB
         public abstract void Fire_ObjectSaved(object obj);
         public abstract void Fire_ObjectDeleting(object obj, ref bool cancel);
         public abstract void Fire_ObjectDeleted(object obj);
+    }
+
+    [Flags]
+    public enum SaveOptions
+    {
+        FieldsOnly = 0,
+        InsertNewToOneRelations = 4,
+        InsertNewToManyRelations = 8,
+        InsertNewRelations = InsertNewToManyRelations|InsertNewToOneRelations,
     }
 }

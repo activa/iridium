@@ -50,8 +50,6 @@
     <EmbeddedNativeLibrary Include="Native\libs\arm64-v8a\libsqlite_emb.so" />
     <EmbeddedNativeLibrary Include="Native\libs\armeabi-v7a\libsqlite_emb.so" />
     <EmbeddedNativeLibrary Include="Native\libs\armeabi\libsqlite_emb.so" />
-    <EmbeddedNativeLibrary Include="Native\libs\mips64\libsqlite_emb.so" />
-    <EmbeddedNativeLibrary Include="Native\libs\mips\libsqlite_emb.so" />
     <EmbeddedNativeLibrary Include="Native\libs\x86\libsqlite_emb.so" />
     <EmbeddedNativeLibrary Include="Native\libs\x86_64\libsqlite_emb.so" />
     <None Include="Resources\AboutResources.txt" />

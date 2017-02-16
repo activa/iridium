@@ -111,24 +111,24 @@ namespace Iridium.DB
             return Task.Factory.StartNew( () => _dataSet.Load(obj, key, relationsToLoad));
         }
 
-        public Task<bool> Save(T obj, bool saveRelations = false, bool? create = null)
+        public Task<bool> Save(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return Task.Factory.StartNew(() => _dataSet.Save(obj, saveRelations, create));
+            return Task.Factory.StartNew(() => _dataSet.Save(obj, relationsToSave));
         }
 
-        public Task<bool> InsertOrUpdate(T obj, bool saveRelations = false)
+        public Task<bool> InsertOrUpdate(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return Task.Factory.StartNew( () => _dataSet.InsertOrUpdate(obj, saveRelations));
+            return Task.Factory.StartNew( () => _dataSet.InsertOrUpdate(obj, relationsToSave));
         }
 
-        public Task<bool> Insert(T obj, bool saveRelations = false)
+        public Task<bool> Insert(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return Task.Factory.StartNew( () => _dataSet.Insert(obj, saveRelations));
+            return Task.Factory.StartNew( () => _dataSet.Insert(obj, relationsToSave: relationsToSave));
         }
 
-        public Task<bool> Update(T obj, bool saveRelations = false)
+        public Task<bool> Update(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return Task.Factory.StartNew(() => _dataSet.Update(obj, saveRelations));
+            return Task.Factory.StartNew(() => _dataSet.Update(obj, relationsToSave));
         }
 
         public Task<bool> Delete(T obj)

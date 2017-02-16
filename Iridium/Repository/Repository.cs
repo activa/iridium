@@ -76,9 +76,9 @@ namespace Iridium.DB
             return Ir.WithLoadedRelations(obj, relations);
         }
 
-        internal bool Save(T obj, bool saveRelations = false, bool? create = null)
+        internal bool Save(T obj, bool? create = null, HashSet<TableSchema.Relation> relationsToSave = null)
         {
-            return base.Save(obj, saveRelations, create);
+            return base.Save(obj, create, relationsToSave);
         }
 
         internal bool Delete(T obj)

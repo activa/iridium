@@ -148,7 +148,6 @@ namespace Iridium.DB.Test
 
 
             AssertHelper.AssertSorting(sortedOrders, (prev, now) => prev.OrderItems.Sum(item => item.Price) <= now.OrderItems.Sum(item => item.Price));
-            
         }
 
         [Test]
@@ -191,11 +190,6 @@ namespace Iridium.DB.Test
             order.Customer.CustomerID.Should().Be(customer.CustomerID);
             order.Customer.Orders.Should().NotBeNull();
             order.Customer.Orders.Count().Should().Be(1);
-
-
-
-
-
         }
 
         [Test]
@@ -297,8 +291,8 @@ namespace Iridium.DB.Test
         [Test]
         public void ScalarAny()
         {
-            DB.Customers.Any(c => c.CustomerID == 0).Should().BeFalse();
-            DB.Customers.Any(c => c.CustomerID > 0).Should().BeTrue();
+            Assert.That(DB.Customers.Any(c => c.CustomerID == 0), Is.False);
+            Assert.That(DB.Customers.Any(c => c.CustomerID > 0), Is.True);
         }
 
         [Test]

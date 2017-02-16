@@ -44,6 +44,7 @@ namespace Iridium.DB
         IDataSet<T> OrderBy(QueryExpression expression, SortOrder sortOrder = SortOrder.Ascending);
         IDataSet<T> Skip(int n);
         IDataSet<T> Take(int n);
+
         T First();
         T First(Expression<Func<T, bool>> filter);
         T FirstOrDefault();
@@ -79,16 +80,17 @@ namespace Iridium.DB
         T Read(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] relationsToLoad);
         T Load(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad);
 
-        bool Save(T obj, bool saveRelations = false, bool? create = null);
-        bool Update(T obj, bool saveRelations = false);
-        bool Insert(T obj, bool saveRelations = false, bool? deferSave = null);
-        bool InsertOrUpdate(T obj, bool saveRelations);
+        bool Save(T obj, params Expression<Func<T, object>>[] relationsToSave);
+        bool Update(T obj, params Expression<Func<T, object>>[] relationsToSave);
+        bool Insert(T obj, params Expression<Func<T, object>>[] relationsToSave);
+        bool Insert(T obj, bool? deferSave, params Expression<Func<T,object>>[] relationsToSave);
+        bool InsertOrUpdate(T obj, params Expression<Func<T, object>>[] relationsToSave);
         bool Delete(T obj);
 
-        bool Save(IEnumerable<T> objects, bool saveRelations = false, bool? create = null);
-        bool InsertOrUpdate(IEnumerable<T> objects, bool saveRelations = false);
-        bool Insert(IEnumerable<T> objects, bool saveRelations = false, bool? deferSave = null);
-        bool Update(IEnumerable<T> objects, bool saveRelations = false);
+        bool Save(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave);
+        bool InsertOrUpdate(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave);
+        bool Insert(IEnumerable<T> objects, bool? deferSave, params Expression<Func<T, object>>[] relationsToSave);
+        bool Update(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave);
         bool Delete(IEnumerable<T> objects);
 
         bool DeleteAll();
@@ -96,7 +98,5 @@ namespace Iridium.DB
         bool Delete(QueryExpression filterExpression);
 
         IObjectEvents<T> Events { get; }
-
-        bool IsBound { get; }
     }
 }

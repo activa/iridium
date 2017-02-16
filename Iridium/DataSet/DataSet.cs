@@ -33,12 +33,12 @@ using Iridium.DB.CoreUtil;
 
 namespace Iridium.DB
 {
-    internal interface IDeferredList
+    internal abstract class DataSet
     {
-        IList DeferredList { get; }
+        internal virtual IList NewObjects { get; set; }
     }
 
-    internal sealed class DataSet<T> : IDataSet<T>, IDeferredList
+    internal sealed class DataSet<T> : DataSet, IDataSet<T>
     {
         private readonly Repository<T> _repository;
         private readonly FilterSpec _filter;
@@ -48,14 +48,14 @@ namespace Iridium.DB
         private int? _take;
         private readonly TableSchema.Relation _parentRelation;
         private readonly object _parentObject;
-        private List<T> _deferredList;
+        private List<T> _newObjects;
 
         public DataSet(Repository repository)
         {
             _repository = (Repository<T>) repository;
         }
 
-        public bool IsBound => true;
+        internal override IList NewObjects => _newObjects;
 
         [Preserve]
         public DataSet(Repository repository, FilterSpec filter)
@@ -98,8 +98,6 @@ namespace Iridium.DB
             _parentRelation = baseDataSet._parentRelation;
             _parentObject = baseDataSet._parentObject;
         }
-
-        public IList DeferredList => _deferredList;
 
         public IAsyncDataSet<T> Async()
         {
@@ -172,27 +170,32 @@ namespace Iridium.DB
             return _repository.Load(obj, key, relationsToLoad);
         }
 
-        public bool Save(T obj, bool saveRelations = false, bool? create = null)
+        public bool Save(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return _repository.Save(obj, saveRelations, create);
+            return _repository.Save(obj, null, LambdaRelationFinder.FindRelations(relationsToSave, _repository.Schema));
         }
 
-        public bool Save(IEnumerable<T> objects, bool saveRelations = false, bool? create = null)
+        public bool Save(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return _repository.Context.RunTransaction(() => objects.All(o => Save(o, saveRelations, create)));
+            return _repository.Context.RunTransaction(() => objects.All(o => Save(o, relationsToSave)));
         }
 
-        public bool InsertOrUpdate(T obj, bool saveRelations = false)
+        public bool InsertOrUpdate(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return _repository.Save(obj, saveRelations, create:null);
+            return _repository.Save(obj, null, LambdaRelationFinder.FindRelations(relationsToSave, _repository.Schema));
         }
 
-        public bool InsertOrUpdate(IEnumerable<T> objects, bool saveRelations = false)
+        public bool InsertOrUpdate(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return _repository.Context.RunTransaction(() => objects.All(o => InsertOrUpdate(o, saveRelations)));
+            return _repository.Context.RunTransaction(() => objects.All(o => InsertOrUpdate(o, relationsToSave)));
         }
 
-        public bool Insert(T obj, bool saveRelations = false, bool? deferSave = null)
+        public bool Insert(T obj, params Expression<Func<T, object>>[] relationsToSave)
+        {
+            return Insert(obj, deferSave: null, relationsToSave: relationsToSave);
+        }
+
+        public bool Insert(T obj, bool? deferSave, params Expression<Func<T,object>>[] relationsToSave)
         {
             var isOneToMany = _parentRelation?.RelationType == TableSchema.RelationType.OneToMany;
 
@@ -219,10 +222,12 @@ namespace Iridium.DB
                 }
                 else
                 {
-                    if (_deferredList == null)
-                        _deferredList = new List<T>();
+                    if (_newObjects == null)
+                        _newObjects = new List<T>();
 
-                    DeferredList.Add(obj);
+                    _newObjects.Add(obj);
+
+                    return true;
                 }
             }
             else
@@ -231,22 +236,22 @@ namespace Iridium.DB
                     throw new ArgumentException($"{nameof(deferSave)} is only applicable for one-to-many relations");
             }
 
-            return _repository.Save(obj, saveRelations, create: true);
+            return _repository.Save(obj, create: true, relationsToSave: LambdaRelationFinder.FindRelations(relationsToSave, _repository.Schema));
         }
 
-        public bool Insert(IEnumerable<T> objects, bool saveRelations = false, bool? deferSave = null)
+        public bool Insert(IEnumerable<T> objects, bool? deferSave = null, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return _repository.Context.RunTransaction(() => objects.All(o => Insert(o, saveRelations, deferSave)));
+            return _repository.Context.RunTransaction(() => objects.All(o => Insert(o, deferSave, relationsToSave)));
         }
 
-        public bool Update(T obj, bool saveRelations = false)
+        public bool Update(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return _repository.Save(obj, saveRelations, create: false);
+            return _repository.Save(obj, create: false, relationsToSave: LambdaRelationFinder.FindRelations(relationsToSave, _repository.Schema));
         }
 
-        public bool Update(IEnumerable<T> objects, bool saveRelations = false)
+        public bool Update(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return _repository.Context.RunTransaction(() => objects.All(o => Update(o, saveRelations)));
+            return _repository.Context.RunTransaction(() => objects.All(o => Update(o, relationsToSave)));
         }
 
         public bool Delete(T obj)

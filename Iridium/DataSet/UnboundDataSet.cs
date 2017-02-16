@@ -198,19 +198,24 @@ namespace Iridium.DB
             throw new NotSupportedException();
         }
 
-        public bool Save(T obj, bool saveRelations = false, bool? create = null)
+        public bool Save(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
             throw new NotSupportedException();
         }
 
-        public bool Update(T obj, bool saveRelations = false)
+        public bool Update(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
             throw new NotSupportedException();
         }
 
-        public bool Insert(T obj, bool saveRelations = false, bool? deferSave = null)
+        public bool Insert(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            if (saveRelations)
+            return Insert(obj, deferSave: null, relationsToSave: relationsToSave);
+        }
+
+        public bool Insert(T obj, bool? deferSave = null, params Expression<Func<T, object>>[] relationsToSave)
+        {
+            if (relationsToSave.Length > 0)
                 throw new NotSupportedException();
 
             _list.Add(obj);
@@ -218,7 +223,7 @@ namespace Iridium.DB
             return true;
         }
 
-        public bool InsertOrUpdate(T obj, bool saveRelations)
+        public bool InsertOrUpdate(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
             throw new NotSupportedException();
         }
@@ -228,19 +233,19 @@ namespace Iridium.DB
             return _list.Remove(obj);
         }
 
-        public bool Save(IEnumerable<T> objects, bool saveRelations = false, bool? create = null)
+        public bool Save(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave)
         {
             throw new NotSupportedException();
         }
 
-        public bool InsertOrUpdate(IEnumerable<T> objects, bool saveRelations = false)
+        public bool InsertOrUpdate(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave)
         {
             throw new NotSupportedException();
         }
 
-        public bool Insert(IEnumerable<T> objects, bool saveRelations = false, bool? deferSave = null)
+        public bool Insert(IEnumerable<T> objects, bool? deferSave = null, params Expression<Func<T, object>>[] relationsToSave)
         {
-            if (saveRelations)
+            if (relationsToSave.Length > 0)
                 throw new NotSupportedException();
 
             _list.AddRange(objects);
@@ -248,7 +253,7 @@ namespace Iridium.DB
             return true;
         }
 
-        public bool Update(IEnumerable<T> objects, bool saveRelations = false)
+        public bool Update(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave)
         {
             throw new NotSupportedException();
         }
