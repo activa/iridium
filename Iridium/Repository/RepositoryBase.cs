@@ -106,6 +106,10 @@ namespace Iridium.DB
             foreach (var relation in toManyRelations)
             {
                 var foreignCollection = (IEnumerable) relation.GetField(obj);
+                var deferredList = foreignCollection as IDeferredList;
+
+                if (deferredList != null)
+                    foreignCollection = deferredList.DeferredList;
 
                 if (foreignCollection == null)
                     continue;

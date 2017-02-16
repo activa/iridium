@@ -48,7 +48,7 @@ namespace Iridium.DB.Test
 		public Customer Customer { get; set; }
 
 		[Relation]
-        public ICollection<OrderItem> OrderItems { get; set; }
+        public IDataSet<OrderItem> OrderItems { get; set; }
 	}
 
 	public class OrderItem

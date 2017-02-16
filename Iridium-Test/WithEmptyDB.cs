@@ -177,7 +177,7 @@ namespace Iridium.DB.Test
             Order order = new Order()
             {
                 Customer = new Customer() {Name = "A"},
-                OrderItems = new[]
+                OrderItems = new UnboundDataSet<OrderItem>
                 {
                     new OrderItem() {Description = "X"},
                     new OrderItem() {Description = "X"},
@@ -458,7 +458,7 @@ namespace Iridium.DB.Test
         [Test]
         public void ThousandsOfTransactions()
         {
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 Customer customer = new Customer {Name = "A"};
 
@@ -772,7 +772,7 @@ namespace Iridium.DB.Test
                 {
                     Name = "test"
                 },
-                OrderItems = new List<OrderItem>
+                OrderItems = new UnboundDataSet<OrderItem>
                 {
                     new OrderItem {Description = "test", Qty = 5, Price = 200.0},
                     new OrderItem {Description = "test", Qty = 3, Price = 45.0}
@@ -781,17 +781,26 @@ namespace Iridium.DB.Test
 
             Assert.IsTrue(DB.Orders.Save(order,saveRelations:true));
 
-            order = DB.Orders.Read(order.OrderID, o => o.OrderItems);
+            order = DB.Orders.Read(order.OrderID/*, o => o.OrderItems*/);
 
-            Assert.AreEqual(2, order.OrderItems.Count, "Order items not added");
+            Assert.AreEqual(2, order.OrderItems.Count(), "Order items not added");
 
-            order.OrderItems.Add(new OrderItem { Description = "test", Qty = 2, Price = 1000.0 });
+            order.OrderItems.Insert(new OrderItem { Description = "test", Qty = 2, Price = 1000.0 });
 
             Assert.IsTrue(DB.Orders.Save(order,saveRelations:true));
 
-            order = DB.Orders.Read(order.OrderID, o => o.OrderItems);
+            order = DB.Orders.Read(order.OrderID);
 
-            Assert.AreEqual(3, order.OrderItems.Count, "Order item not added");
+            Assert.AreEqual(3, order.OrderItems.Count(), "Order item not added");
+
+            order.OrderItems.Insert(new OrderItem { Description = "test", Qty = 3, Price = 2000.0 }, deferSave:true);
+
+            Assert.IsTrue(DB.Orders.Save(order, saveRelations: true));
+
+            order = DB.Orders.Read(order.OrderID);
+
+            Assert.AreEqual(4, order.OrderItems.Count(), "Order item not added");
+
         }
 
         [Test]
@@ -842,10 +851,10 @@ namespace Iridium.DB.Test
 
             foreach (Order order in orders)
             {
-                DB.LoadRelations(order, o => o.Customer, o => o.OrderItems);
+                DB.LoadRelations(order, o => o.Customer/*, o => o.OrderItems*/);
 
                 Assert.AreEqual(cust.CustomerID, order.Customer.CustomerID);
-                Assert.AreEqual(20, order.OrderItems.Count);
+                Assert.AreEqual(20, order.OrderItems.Count());
                 Assert.AreEqual(cust.Name, order.Customer.Name);
 
                 DB.OrderItems.Delete(order.OrderItems.First());

@@ -198,6 +198,36 @@ namespace Iridium.DB.Test
 
         }
 
+        [Test]
+        public void Relations_ManyToOne_Explicit()
+        {
+            var orders = DB.Orders.ToArray();
+
+            orders.Length.Should().Be(90);
+
+            DB.LoadRelation(() => orders[0].Customer);
+
+            orders[0].Customer.Should().NotBeNull();
+
+            orders[0].Customer.CustomerID.Should().Be(orders[0].CustomerID);
+        }
+
+        [Test]
+        public void Relations_ManyToOne_Explicit_ByInterface()
+        {
+            var orders = DB.Orders.ToArray();
+
+            orders.Length.Should().Be(90);
+
+            IOrder order = orders[0];
+
+            DB.LoadRelation(() => order.Customer);
+
+            order.Customer.Should().NotBeNull();
+
+            order.Customer.CustomerID.Should().Be(orders[0].CustomerID);
+        }
+
 
         [Test]
         public void PrefetchRelations_ManyToOne()

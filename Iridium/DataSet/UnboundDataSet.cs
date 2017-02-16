@@ -7,14 +7,21 @@ using System.Threading.Tasks;
 
 namespace Iridium.DB
 {
-    public class UnboundDataSet<T> : IDataSet<T>
+    public class UnboundDataSet<T> : IDataSet<T>, ICollection<T>
     {
-        private readonly IEnumerable<T> _list;
+        private readonly List<T> _list;
+
+        public UnboundDataSet()
+        {
+            _list = new List<T>();
+        }
 
         public UnboundDataSet(IEnumerable<T> list)
         {
-            _list = list;
+            _list = new List<T>(list);
         }
+
+        public bool IsBound => false;
 
         public IEnumerator<T> GetEnumerator()
         {
@@ -48,22 +55,12 @@ namespace Iridium.DB
 
         public IDataSet<T> ThenBy<TKey>(Expression<Func<T, TKey>> keySelector)
         {
-            var orderedList = _list as IOrderedEnumerable<T>;
-
-            if (orderedList == null)
-                throw new ArgumentException("ThenBy() out of sequence");
-
-            return new UnboundDataSet<T>(orderedList.ThenBy(keySelector.Compile()));
+            throw new NotSupportedException();
         }
 
         public IDataSet<T> ThenByDescending<TKey>(Expression<Func<T, TKey>> keySelector)
         {
-            var orderedList = _list as IOrderedEnumerable<T>;
-
-            if (orderedList == null)
-                throw new ArgumentException("ThenByDescending() out of sequence");
-
-            return new UnboundDataSet<T>(orderedList.ThenByDescending(keySelector.Compile()));
+            throw new NotSupportedException();
         }
 
         public IDataSet<T> OrderBy(QueryExpression expression, SortOrder sortOrder = SortOrder.Ascending)
@@ -116,7 +113,7 @@ namespace Iridium.DB
             return _list.Any();
         }
 
-        public long Count()
+        long IDataSet<T>.Count()
         {
             return _list.Count();
         }
@@ -128,12 +125,12 @@ namespace Iridium.DB
 
         public TScalar Max<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter)
         {
-            throw new NotSupportedException();
+            return _list.Where(filter.Compile()).Max(expression.Compile());
         }
 
         public TScalar Min<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter)
         {
-            throw new NotSupportedException();
+            return _list.Where(filter.Compile()).Min(expression.Compile());
         }
 
         public TScalar Sum<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter)
@@ -148,12 +145,12 @@ namespace Iridium.DB
 
         public TScalar Max<TScalar>(Expression<Func<T, TScalar>> expression)
         {
-            throw new NotSupportedException();
+            return _list.Max(expression.Compile());
         }
 
         public TScalar Min<TScalar>(Expression<Func<T, TScalar>> expression)
         {
-            throw new NotSupportedException();
+            return _list.Min(expression.Compile());
         }
 
         public TScalar Sum<TScalar>(Expression<Func<T, TScalar>> expression)
@@ -168,7 +165,7 @@ namespace Iridium.DB
 
         public T ElementAt(int index)
         {
-            return _list.ElementAt(index);
+            return _list[index];
         }
 
         public IDataSet<T> Where(QueryExpression filterExpression)
@@ -211,9 +208,14 @@ namespace Iridium.DB
             throw new NotSupportedException();
         }
 
-        public bool Insert(T obj, bool saveRelations = false)
+        public bool Insert(T obj, bool saveRelations = false, bool? deferSave = null)
         {
-            throw new NotSupportedException();
+            if (saveRelations)
+                throw new NotSupportedException();
+
+            _list.Add(obj);
+
+            return true;
         }
 
         public bool InsertOrUpdate(T obj, bool saveRelations)
@@ -223,7 +225,7 @@ namespace Iridium.DB
 
         public bool Delete(T obj)
         {
-            throw new NotSupportedException();
+            return _list.Remove(obj);
         }
 
         public bool Save(IEnumerable<T> objects, bool saveRelations = false, bool? create = null)
@@ -236,9 +238,14 @@ namespace Iridium.DB
             throw new NotSupportedException();
         }
 
-        public bool Insert(IEnumerable<T> objects, bool saveRelations = false)
+        public bool Insert(IEnumerable<T> objects, bool saveRelations = false, bool? deferSave = null)
         {
-            throw new NotSupportedException();
+            if (saveRelations)
+                throw new NotSupportedException();
+
+            _list.AddRange(objects);
+
+            return true;
         }
 
         public bool Update(IEnumerable<T> objects, bool saveRelations = false)
@@ -248,17 +255,23 @@ namespace Iridium.DB
 
         public bool Delete(IEnumerable<T> objects)
         {
-            throw new NotSupportedException();
+            _list.RemoveAll(objects.Contains);
+
+            return true;
         }
 
         public bool DeleteAll()
         {
-            throw new NotSupportedException();
+            _list.Clear();
+
+            return true;
         }
 
         public bool Delete(Expression<Func<T, bool>> filter)
         {
-            throw new NotSupportedException();
+            _list.RemoveAll(obj => filter.Compile().Invoke(obj));
+
+            return true;
         }
 
         public bool Delete(QueryExpression filterExpression)
@@ -273,5 +286,22 @@ namespace Iridium.DB
                 throw new NotSupportedException();
             }
         }
+
+        public void Add(T item) => _list.Add(item);
+
+        public void Clear() => _list.Clear();
+
+        public bool Contains(T item) => _list.Contains(item);
+
+        public void CopyTo(T[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
+
+        public bool Remove(T item) => _list.Remove(item);
+
+        int ICollection<T>.Count => _list.Count;
+
+        public bool IsReadOnly => false;
+
+        public static implicit operator UnboundDataSet<T>(T[] items) => new UnboundDataSet<T>(items);
+        public static implicit operator UnboundDataSet<T>(List<T> items) => new UnboundDataSet<T>(items);
     }
 }

@@ -29,10 +29,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Iridium.DB.CoreUtil;
 
 namespace Iridium.DB
 {
-    internal sealed class DataSet<T> : IDataSet<T>
+    internal interface IDeferredList
+    {
+        IList DeferredList { get; }
+    }
+
+    internal sealed class DataSet<T> : IDataSet<T>, IDeferredList
     {
         private readonly Repository<T> _repository;
         private readonly FilterSpec _filter;
@@ -42,12 +48,15 @@ namespace Iridium.DB
         private int? _take;
         private readonly TableSchema.Relation _parentRelation;
         private readonly object _parentObject;
+        private List<T> _deferredList;
 
         public DataSet(Repository repository)
         {
             _repository = (Repository<T>) repository;
         }
-        
+
+        public bool IsBound => true;
+
         [Preserve]
         public DataSet(Repository repository, FilterSpec filter)
         {
@@ -89,6 +98,8 @@ namespace Iridium.DB
             _parentRelation = baseDataSet._parentRelation;
             _parentObject = baseDataSet._parentObject;
         }
+
+        public IList DeferredList => _deferredList;
 
         public IAsyncDataSet<T> Async()
         {
@@ -181,14 +192,51 @@ namespace Iridium.DB
             return _repository.Context.RunTransaction(() => objects.All(o => InsertOrUpdate(o, saveRelations)));
         }
 
-        public bool Insert(T obj, bool saveRelations = false)
+        public bool Insert(T obj, bool saveRelations = false, bool? deferSave = null)
         {
+            var isOneToMany = _parentRelation?.RelationType == TableSchema.RelationType.OneToMany;
+
+            if (isOneToMany)
+            {
+                var hasParentId = _parentRelation.LocalField.GetField(_parentObject) != _parentRelation.LocalField.FieldType.Inspector().DefaultValue();
+
+                if (deferSave == null)
+                {
+                    deferSave = !hasParentId;
+                }
+                else
+                {
+                    if (!deferSave.Value && !hasParentId)
+                        throw new ArgumentException($"{nameof(deferSave)} cannot be false when parent object is not saved yet");
+                }
+
+                if (!deferSave.Value)
+                {
+                    if (_parentRelation.ReverseRelation != null)
+                        _parentRelation.ReverseRelation.SetField(obj, _parentObject);
+
+                    _parentRelation.ForeignField.SetField(obj, _parentRelation.LocalField.GetField(_parentObject));
+                }
+                else
+                {
+                    if (_deferredList == null)
+                        _deferredList = new List<T>();
+
+                    DeferredList.Add(obj);
+                }
+            }
+            else
+            {
+                if (deferSave == true)
+                    throw new ArgumentException($"{nameof(deferSave)} is only applicable for one-to-many relations");
+            }
+
             return _repository.Save(obj, saveRelations, create: true);
         }
 
-        public bool Insert(IEnumerable<T> objects, bool saveRelations = false)
+        public bool Insert(IEnumerable<T> objects, bool saveRelations = false, bool? deferSave = null)
         {
-            return _repository.Context.RunTransaction(() => objects.All(o => Insert(o, saveRelations)));
+            return _repository.Context.RunTransaction(() => objects.All(o => Insert(o, saveRelations, deferSave)));
         }
 
         public bool Update(T obj, bool saveRelations = false)

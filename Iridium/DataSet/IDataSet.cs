@@ -81,13 +81,13 @@ namespace Iridium.DB
 
         bool Save(T obj, bool saveRelations = false, bool? create = null);
         bool Update(T obj, bool saveRelations = false);
-        bool Insert(T obj, bool saveRelations = false);
+        bool Insert(T obj, bool saveRelations = false, bool? deferSave = null);
         bool InsertOrUpdate(T obj, bool saveRelations);
         bool Delete(T obj);
 
         bool Save(IEnumerable<T> objects, bool saveRelations = false, bool? create = null);
         bool InsertOrUpdate(IEnumerable<T> objects, bool saveRelations = false);
-        bool Insert(IEnumerable<T> objects, bool saveRelations = false);
+        bool Insert(IEnumerable<T> objects, bool saveRelations = false, bool? deferSave = null);
         bool Update(IEnumerable<T> objects, bool saveRelations = false);
         bool Delete(IEnumerable<T> objects);
 
@@ -96,5 +96,7 @@ namespace Iridium.DB
         bool Delete(QueryExpression filterExpression);
 
         IObjectEvents<T> Events { get; }
+
+        bool IsBound { get; }
     }
 }
