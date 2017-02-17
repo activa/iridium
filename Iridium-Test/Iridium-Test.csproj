@@ -54,8 +54,23 @@
   <ItemGroup>
     <Compile Include="AssertHelper.cs" />
     <Compile Include="FieldTypeTests.cs" />
-    <Compile Include="Model.cs" />
+    <Compile Include="Model\OneToOneRec1.cs" />
+    <Compile Include="Model\OneToOneRec2.cs" />
+    <Compile Include="Model\Orders\Customer.cs" />
+    <Compile Include="Model\Orders\CustomerPaymentMethodLink.cs" />
     <Compile Include="DBContext.cs" />
+    <Compile Include="Model\Orders\Order.cs" />
+    <Compile Include="Model\Orders\OrderItem.cs" />
+    <Compile Include="Model\Orders\PaymentMethod.cs" />
+    <Compile Include="Model\Orders\Product.cs" />
+    <Compile Include="Model\Orders\SalesPerson.cs" />
+    <Compile Include="Model\Enums\TestEnum.cs" />
+    <Compile Include="Model\Enums\TestEnumWithZero.cs" />
+    <Compile Include="Model\Enums\TestFlagsEnum.cs" />
+    <Compile Include="Model\RecordWithAllTypes.cs" />
+    <Compile Include="Model\RecordWithCompositeKey.cs" />
+    <Compile Include="Model\RecordWithIgnoredFields.cs" />
+    <Compile Include="Model\RecordWithInterface.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestFixture.cs" />
     <Compile Include="WithEmptyDB.cs" />
@@ -86,9 +101,7 @@
       <Name>Iridium-DB-SqlServer</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Model\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>

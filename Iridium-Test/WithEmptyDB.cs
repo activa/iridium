@@ -1089,9 +1089,9 @@ namespace Iridium.DB.Test
         [Test]
         public void FilterOnInterfaceFields()
         {
-            DB.RecordsWithInterface.Insert(new RecordWithInterface() {Name = "A"});
-            DB.RecordsWithInterface.Insert(new RecordWithInterface() {Name = "B"});
-            DB.RecordsWithInterface.Insert(new RecordWithInterface() {Name = "C"});
+            DB.DataSet<RecordWithInterface>().Insert(new RecordWithInterface() {Name = "A"});
+            DB.DataSet<RecordWithInterface>().Insert(new RecordWithInterface() {Name = "B"});
+            DB.DataSet<RecordWithInterface>().Insert(new RecordWithInterface() {Name = "C"});
 
             GenericFilterOnInterfaceFields<RecordWithInterface>();
         }
@@ -1100,7 +1100,7 @@ namespace Iridium.DB.Test
         {
             var dataSet = DB.DataSet<T>();
 
-            long n = dataSet.Where(rec => rec.Name == "B").Count();
+            long n = dataSet.Count(rec => rec.Name == "B");
 
             Assert.That(n, Is.EqualTo(1));
 

@@ -130,9 +130,8 @@ namespace Iridium.DB
             {
                 return Translate(lambda);
             }
-            catch (SqlExpressionTranslatorException ex)
+            catch (SqlExpressionTranslatorException)
             {
-                Debug.WriteLine("Sql Translator exception: {0}",ex.Message);
                 return null; // we couldn't translate the given expression
             }
         }

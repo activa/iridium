@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Philippe Leybaert")]
 [assembly: AssemblyProduct("Iridium")]
-[assembly: AssemblyCopyright("Copyright © 2015-2016 Philippe Leybaert")]
+[assembly: AssemblyCopyright("Copyright © 2015-2017 Philippe Leybaert")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: NeutralResourcesLanguage("en")]

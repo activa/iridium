@@ -64,8 +64,6 @@ namespace Iridium.DB.SqlService
 
             var json = result.Content.ReadAsStringAsync().Result;
 
-            Debug.WriteLine("Received JSON: {0}", json);
-
             JsonObject jsonResult = JsonParser.Parse(json);
 
             _lastRowId.Value = jsonResult["lastrowid"].As<long>();
@@ -81,8 +79,6 @@ namespace Iridium.DB.SqlService
                 parameters = parameters?.ToDictionary(kvp => kvp.Name, kvp => kvp.Value is byte[] ? new[] {Convert.ToBase64String((byte[]) kvp.Value)} : kvp.Value is DateTime ? ((DateTime) kvp.Value).Ticks : kvp.Value)
             });
 
-            Debug.WriteLine("Sending payload: {0}",json);
-
             return new StringContent(json, Encoding.UTF8);
         }
 
@@ -94,8 +90,6 @@ namespace Iridium.DB.SqlService
             var result = _httpClient.PostAsync(new Uri(_server + "/svc/executereader"), content).Result;
 
             var json = result.Content.ReadAsStringAsync().Result;
-
-            Debug.WriteLine("Received JSON: {0}",json);
 
             JsonObject jsonResult = JsonParser.Parse(json);
 

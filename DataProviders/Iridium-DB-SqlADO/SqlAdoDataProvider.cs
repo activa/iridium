@@ -103,8 +103,6 @@ namespace Iridium.DB.Sql
 
         protected DbCommand CreateCommand(string sqlQuery, QueryParameterCollection parameters)
         {
-            Debug.WriteLine(sqlQuery);
-
             DbCommand dbCommand = Connection.CreateCommand();
 
             dbCommand.CommandType = CommandType.Text;

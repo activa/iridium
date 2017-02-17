@@ -177,8 +177,6 @@ namespace Iridium.DB
         {
             IntPtr stmt;
 
-            Debug.WriteLine("{0}", sql);
-
             SqliteReturnCode returnCode = _sqlite3.prepare_v2(DbHandle, sql, out stmt);
 
             if (returnCode != SqliteReturnCode.Ok)

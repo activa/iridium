@@ -184,7 +184,7 @@ namespace Iridium.DB.Test
 
             order.Should().NotBeNull();
 
-            DB.LoadRelations(order, _ => _.Customer);
+            DB.LoadRelations(order, o => o.Customer);
 
             order.Customer.Should().NotBeNull();
             order.Customer.CustomerID.Should().Be(customer.CustomerID);
@@ -211,15 +211,15 @@ namespace Iridium.DB.Test
         {
             var orders = DB.Orders.ToArray();
 
-            orders.Length.Should().Be(90);
+            Assert.That(orders.Length, Is.EqualTo(90));
 
             IOrder order = orders[0];
 
             DB.LoadRelation(() => order.Customer);
 
-            order.Customer.Should().NotBeNull();
+            Assert.That(order.Customer, Is.Not.Null);
 
-            order.Customer.CustomerID.Should().Be(orders[0].CustomerID);
+            Assert.That(order.Customer.CustomerID, Is.EqualTo(orders[0].CustomerID));
         }
 
 
@@ -298,10 +298,10 @@ namespace Iridium.DB.Test
         [Test]
         public void ScalarAny_Chained()
         {
-            DB.Customers.Where(c => c.CustomerID == 0).Any().Should().BeFalse();
-            DB.Customers.Where(c => c.CustomerID > 0).Any().Should().BeTrue();
-            DB.Customers.Where(c => c.CustomerID == 0).Where(c => c.CustomerID > 0).Any().Should().BeFalse();
-            DB.Customers.Where(c => c.CustomerID > 0).Where(c => c.CustomerID > 1).Any().Should().BeTrue();
+            Assert.That(DB.Customers.Where(c => c.CustomerID == 0).Any(), Is.False);
+            Assert.That(DB.Customers.Where(c => c.CustomerID > 0).Any(), Is.True);
+            Assert.That(DB.Customers.Where(c => c.CustomerID == 0).Where(c => c.CustomerID > 0).Any(), Is.False);
+            Assert.That(DB.Customers.Where(c => c.CustomerID > 0).Where(c => c.CustomerID > 1).Any(), Is.True);
 
             DB.Customers.Where(c => c.CustomerID == 0).Any(c => c.CustomerID > 0).Should().BeFalse();
             DB.Customers.Where(c => c.CustomerID > 0).Any(c => c.CustomerID > 1).Should().BeTrue();

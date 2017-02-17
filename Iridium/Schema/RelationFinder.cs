@@ -26,24 +26,29 @@
 
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Iridium.DB.CoreUtil;
 
 namespace Iridium.DB
 {
     internal class LambdaRelationFinder : ExpressionVisitor
     {
-        private LambdaRelationFinder(StorageContext context)
-        {
-            _context = context;
-        }
-
+        private readonly TableSchema _schema;
         private readonly HashSet<TableSchema.Relation> _relations = new HashSet<TableSchema.Relation>();
-        private readonly StorageContext _context;
+
+        private LambdaRelationFinder(TableSchema schema)
+        {
+            _schema = schema;
+        }
 
         protected override Expression VisitMember(MemberExpression node)
         {
             Visit(node.Expression);
 
-            var schema = _context.GetSchema(node.Expression.Type, autoCreate: false);
+            var schema = _schema.Repository.Context.GetSchema(node.Expression.Type, autoCreate: false);
+
+            if (schema == null && _schema.ObjectType.Inspector().ImplementsOrInherits(node.Expression.Type))
+                schema = _schema;
+
             var relation = schema?.Relations[node.Member.Name];
 
             if (relation == null) 
@@ -56,7 +61,7 @@ namespace Iridium.DB
 
         public static HashSet<TableSchema.Relation> FindRelations(LambdaExpression expression, TableSchema schema)
         {
-            var finder = new LambdaRelationFinder(schema.Repository.Context);
+            var finder = new LambdaRelationFinder(schema);
 
             finder.Visit(expression.Body);
 
