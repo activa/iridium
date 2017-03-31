@@ -113,6 +113,18 @@ namespace Iridium.DB.Test
         }
 
         [Test]
+        public void Range_TakeOnly_MixedFilter()
+        {
+            Func<Customer,bool> customFilter = c => c.CustomerID > 1;
+
+            var selectedCustomers = DB.Customers.OrderBy(c => c.CustomerID).Where(c => c.CustomerID<=10 && customFilter(c)).Take(5).ToArray();
+
+            selectedCustomers.Length.Should().Be(5);
+            selectedCustomers[0].CustomerID.Should().Be(2);
+            selectedCustomers[4].CustomerID.Should().Be(6);
+        }
+
+        [Test]
         public void Range_SkipOnly()
         {
             var selectedCustomers = DB.Customers.OrderBy(c => c.CustomerID).Skip(5).ToArray();

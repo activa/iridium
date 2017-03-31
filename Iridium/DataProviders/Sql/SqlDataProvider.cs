@@ -355,7 +355,7 @@ namespace Iridium.DB
                 // We split the translatable and non-translatable expressions
                 var translationResults = filterSpec.Expressions.Select(e => new {Expression = e, Sql = sqlTranslator.Translate(e)}).ToLookup(result => result.Sql != null);
 
-                filterSql = string.Join(" AND ", translationResults[true].Where(result => result.Sql != null).Select(result => $"({result.Sql})"));
+                filterSql = string.Join(" AND ", translationResults[true]/*.Where(result => result.Sql != null)*/.Select(result => $"({result.Sql})"));
 
                 if (translationResults[false].Any())
                 {
@@ -393,6 +393,15 @@ namespace Iridium.DB
                 Skip = skip,
                 Take = take
             };
+
+            // if we have a skip or take with a combined SQL/code query, only do the take and skip in code
+            if (codeQuerySpec != null)
+            {
+                codeQuerySpec.Skip = skip;
+                codeQuerySpec.Take = take;
+                sqlQuery.Skip = null;
+                sqlQuery.Take = null;
+            }
 
             return new QuerySpec(codeQuerySpec, sqlQuery);
         }
