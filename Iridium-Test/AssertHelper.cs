@@ -1,29 +1,30 @@
 using System;
 using System.Collections.Generic;
-using FluentAssertions;
+
 
 namespace Iridium.DB.Test
 {
     public static class AssertHelper
     {
-        public static void AssertSorting<T>(IEnumerable<T> list, Func<T,T, bool> getValue) where T:class
-        {
-            T prev = null;
 
-            foreach (var item in list)
-            {
-                if (prev == null)
-                {
-                    prev = item;
-                }
-                else
-                {
-                    getValue(prev, item).Should().BeTrue();
-
-                    prev = item;
-                }
-            }
-        }
+//        private static void AssertSorting<T>(IEnumerable<T> list, Func<T,T, bool> getValue) where T:class
+//        {
+//            T prev = null;
+//
+//            foreach (var item in list)
+//            {
+//                if (prev == null)
+//                {
+//                    prev = item;
+//                }
+//                else
+//                {
+//                    getValue(prev, item).Should().BeTrue();
+//
+//                    prev = item;
+//                }
+//            }
+//        }
 
         /*
         public static void AssertSorting<T>(IEnumerable<T> list, Func<T, object> getValue1, Func<object, ComparisonConstraint> constraint1, Func<T, object> getValue2, Func<object, ComparisonConstraint> constraint2)

@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium-DB-Sqlite-Native", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium-DB-Sqlite-Android", "DataProviders\Iridium-DB-Sqlite-Android\Iridium-DB-Sqlite-Android.csproj", "{8FB2856D-4CAD-48CB-BAE6-0AFDBA3A2119}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium-DB-Postgres", "DataProviders\Iridium-DB-Postgres\Iridium-DB-Postgres.csproj", "{76B89C01-4967-440E-B9D9-EBB279E9632D}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		DataProviders\Iridium-DB-Sqlite-Shared\Iridium-DB-Sqlite-Shared.projitems*{3624abdc-245d-4562-a41b-7cebaca8f213}*SharedItemsImports = 13
@@ -36,6 +38,7 @@ Global
 		DataProviders\Iridium-DB-SqlADO\Velox.DB.SqlADO.projitems*{680c31ca-c072-4af7-bcfc-8bd270bee7bc}*SharedItemsImports = 4
 		DataProviders\Iridium-DB-SqlServer-Shared\Velox.DB.SqlServer.Shared.projitems*{680c31ca-c072-4af7-bcfc-8bd270bee7bc}*SharedItemsImports = 4
 		DataProviders\Iridium-DB-Sqlite-Shared\Iridium-DB-Sqlite-Shared.projitems*{75a2a820-2c01-49b1-ba8b-69c93fd55503}*SharedItemsImports = 4
+		DataProviders\Iridium-DB-SqlADO\Velox.DB.SqlADO.projitems*{76b89c01-4967-440e-b9d9-ebb279e9632d}*SharedItemsImports = 4
 		DataProviders\Iridium-DB-Sqlite-Shared\Iridium-DB-Sqlite-Shared.projitems*{8fb2856d-4cad-48cb-bae6-0afdba3a2119}*SharedItemsImports = 4
 		DataProviders\Iridium-DB-SqlADO\Velox.DB.SqlADO.projitems*{a74d8405-74ee-482d-a03e-92b45c17f9f5}*SharedItemsImports = 4
 		DataProviders\Iridium-DB-SqlADO\Velox.DB.SqlADO.projitems*{c87ca7d9-c64f-4001-86c8-444255165594}*SharedItemsImports = 13
@@ -122,6 +125,18 @@ Global
 		{8FB2856D-4CAD-48CB-BAE6-0AFDBA3A2119}.Release|ARM.Build.0 = Release|Any CPU
 		{8FB2856D-4CAD-48CB-BAE6-0AFDBA3A2119}.Release|x86.ActiveCfg = Release|Any CPU
 		{8FB2856D-4CAD-48CB-BAE6-0AFDBA3A2119}.Release|x86.Build.0 = Release|Any CPU
+		{76B89C01-4967-440E-B9D9-EBB279E9632D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76B89C01-4967-440E-B9D9-EBB279E9632D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76B89C01-4967-440E-B9D9-EBB279E9632D}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{76B89C01-4967-440E-B9D9-EBB279E9632D}.Debug|ARM.Build.0 = Debug|Any CPU
+		{76B89C01-4967-440E-B9D9-EBB279E9632D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{76B89C01-4967-440E-B9D9-EBB279E9632D}.Debug|x86.Build.0 = Debug|Any CPU
+		{76B89C01-4967-440E-B9D9-EBB279E9632D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76B89C01-4967-440E-B9D9-EBB279E9632D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76B89C01-4967-440E-B9D9-EBB279E9632D}.Release|ARM.ActiveCfg = Release|Any CPU
+		{76B89C01-4967-440E-B9D9-EBB279E9632D}.Release|ARM.Build.0 = Release|Any CPU
+		{76B89C01-4967-440E-B9D9-EBB279E9632D}.Release|x86.ActiveCfg = Release|Any CPU
+		{76B89C01-4967-440E-B9D9-EBB279E9632D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -137,5 +152,6 @@ Global
 		{3624ABDC-245D-4562-A41B-7CEBACA8F213} = {869B052F-0EAD-4489-89B6-DBADBC8F4F58}
 		{75A2A820-2C01-49B1-BA8B-69C93FD55503} = {869B052F-0EAD-4489-89B6-DBADBC8F4F58}
 		{8FB2856D-4CAD-48CB-BAE6-0AFDBA3A2119} = {869B052F-0EAD-4489-89B6-DBADBC8F4F58}
+		{76B89C01-4967-440E-B9D9-EBB279E9632D} = {869B052F-0EAD-4489-89B6-DBADBC8F4F58}
 	EndGlobalSection
 EndGlobal

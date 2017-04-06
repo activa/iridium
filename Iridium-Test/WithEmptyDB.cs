@@ -1,5 +1,3 @@
-using System.Runtime.InteropServices.ComTypes;
-using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +11,11 @@ using NUnit.Framework;
 namespace Iridium.DB.Test
 {
     [TestFixture("sqlite")]
+    [TestFixture("sqlitemem")]
     [TestFixture("sqlserver")]
     [TestFixture("memory")]
-    //[TestFixture("mysql")]
+    [TestFixture("mysql")]
+    [TestFixture("postgres")]
     public class WithEmptyDB : TestFixture
     {
         public WithEmptyDB(string driver) : base(driver)
@@ -41,7 +41,8 @@ namespace Iridium.DB.Test
             DB.Save(new Customer() {Name = "A"});
             DB.Save(new Customer() {Name = "A"});
 
-            counter.Should().Be(4);
+            Assert.That(counter, Is.EqualTo(4));
+//            counter.Should().Be(4);
         }
 
         [Test]
@@ -59,11 +60,15 @@ namespace Iridium.DB.Test
             {
                 bool saveResult = DB.Save(new Customer() {Name = "A"});
 
-                DB.Customers.FirstOrDefault(c => c.Name == "A").Should().NotBeNull();
+                Assert.That(saveResult, Is.True);
+                Assert.That(DB.Customers.FirstOrDefault(c => c.Name == "A"), Is.Not.Null);
+                Assert.That(counter, Is.EqualTo(2));
 
-                saveResult.Should().Be(true);
-
-                counter.Should().Be(2);
+//                DB.Customers.FirstOrDefault(c => c.Name == "A").Should().NotBeNull();
+//
+//                saveResult.Should().Be(true);
+//
+//                counter.Should().Be(2);
             }
             finally
             {
@@ -87,11 +92,15 @@ namespace Iridium.DB.Test
             {
                 bool saveResult = DB.Save(new Customer() { Name = "A" });
 
-                DB.Customers.FirstOrDefault(c => c.Name == "A").Should().BeNull();
+                Assert.That(DB.Customers.FirstOrDefault(c => c.Name == "A"), Is.Null);
+                Assert.That(saveResult, Is.False);
+                Assert.That(counter, Is.EqualTo(2));
 
-                saveResult.Should().Be(false);
-
-                counter.Should().Be(2);
+//                DB.Customers.FirstOrDefault(c => c.Name == "A").Should().BeNull();
+//
+//                saveResult.Should().Be(false);
+//
+//                counter.Should().Be(2);
             }
             finally
             {
@@ -115,11 +124,15 @@ namespace Iridium.DB.Test
             {
                 bool saveResult = DB.Save(new Customer() { Name = "A" });
 
-                DB.Customers.FirstOrDefault(c => c.Name == "A").Should().BeNull();
+                Assert.That(saveResult, Is.False);
+                Assert.That(DB.Customers.FirstOrDefault(c => c.Name == "A"), Is.Null);
+                Assert.That(counter, Is.EqualTo(1));
 
-                saveResult.Should().Be(false);
-
-                counter.Should().Be(1);
+//                DB.Customers.FirstOrDefault(c => c.Name == "A").Should().BeNull();
+//
+//                saveResult.Should().Be(false);
+//
+//                counter.Should().Be(1);
             }
             finally
             {
@@ -193,13 +206,7 @@ namespace Iridium.DB.Test
 
             order = DB.Orders.Read(originalOrder.OrderID, o => o.OrderItems);
 
-            order.OrderItems.Should().HaveCount(5).And.OnlyContain(item => item.Order == order);
-
-            order = DB.Orders.Read(originalOrder.OrderID, o => o.OrderItems);
-            order.OrderItems.Should().HaveCount(5).And.OnlyContain(item => item.Order == order);
-
-            order = DB.Orders.Read(originalOrder.OrderID, o => o.OrderItems);
-            order.OrderItems.Should().HaveCount(5).And.OnlyContain(item => item.Order == order);
+            Assert.That(order.OrderItems, Has.Exactly(5).Items.And.All.Property(nameof(OrderItem.Order)).SameAs(order));
         }
 
         [Test]
@@ -217,7 +224,9 @@ namespace Iridium.DB.Test
 
             customer = DB.Customers.Read(customer.CustomerID);
 
-            customer.Orders.Should().HaveCount(5).And.OnlyContain(order => order.Customer == customer);
+            Assert.That(customer.Orders, Has.Exactly(5).Items.And.All.Property("Customer").SameAs(customer));
+
+//            customer.Orders.Should().HaveCount(5).And.OnlyContain(order => order.Customer == customer);
         }
 
         [Test]
@@ -237,7 +246,9 @@ namespace Iridium.DB.Test
 
             rec1 = DB.Read<OneToOneRec1>(rec1.OneToOneRec1ID, r=> r.Rec2 );
 
-            rec1.Rec2.Rec1.Should().Be(rec1);
+            Assert.That(rec1.Rec2.Rec1, Is.SameAs(rec1));
+
+//            rec1.Rec2.Rec1.Should().Be(rec1);
 
         }
 
@@ -265,8 +276,11 @@ namespace Iridium.DB.Test
 
             salesPerson = DB.SalesPeople.First();
 
-            salesPerson.Orders.Count().Should().Be(1);
-            salesPerson.Orders.First().OrderID.Should().Be(orders[1].OrderID);
+            Assert.That(salesPerson.Orders.Count(), Is.EqualTo(1));
+            Assert.That(salesPerson.Orders.First().OrderID, Is.EqualTo(orders[1].OrderID));
+
+//            salesPerson.Orders.Count().Should().Be(1);
+//            salesPerson.Orders.First().OrderID.Should().Be(orders[1].OrderID);
         }
 
         [Test]
@@ -275,7 +289,7 @@ namespace Iridium.DB.Test
             const int numThreads = 100;
 
             List<string> failedList = new List<string>();
-            Task<bool>[] saveTasks = new Task<bool>[numThreads];
+            Task[] saveTasks = new Task[numThreads];
             Customer[] customers = new Customer[numThreads];
             List<Customer> createdCustomers = new List<Customer>();
 
@@ -288,9 +302,9 @@ namespace Iridium.DB.Test
                 Customer customer = new Customer { Name = name };
 
                 customers[i] = customer;
-                saveTasks[i] = DB.Customers.Async().Insert(customer);
+                Task<bool> task = DB.Customers.Async().Insert(customer);
 
-                saveTasks[i].ContinueWith(t =>
+                saveTasks[i] = task.ContinueWith(t =>
                 {
                     if (customer.CustomerID == 0)
                         lock (failedList)
@@ -318,10 +332,16 @@ namespace Iridium.DB.Test
 
 
             Task.WaitAll(saveTasks);
+            
 
-            saveTasks.Should().NotContain(t => t.IsFaulted);
+            Assert.That(failedList, Is.Empty);
+            Assert.False(saveTasks.Any(t => t.IsFaulted));
 
-            createdCustomers.Count.Should().Be(numThreads);
+            //saveTasks.Should().NotContain(t => t.IsFaulted);
+
+            Assert.That(createdCustomers.Count, Is.EqualTo(numThreads));
+
+            //createdCustomers.Count.Should().Be(numThreads);
 
             foreach (var fail in failedList)
             {
@@ -387,7 +407,10 @@ namespace Iridium.DB.Test
                 Assert.Fail(fail);
             }
 
-            createdCustomers.Count.Should().Be(numThreads);
+            Assert.That(createdCustomers, Has.Count.EqualTo(numThreads));
+
+
+            //createdCustomers.Count.Should().Be(numThreads);
         }
 
         private void CreateRandomPricedProducts()
@@ -415,8 +438,11 @@ namespace Iridium.DB.Test
 
             var pr = (from p in DB.Products where p.Description.StartsWith("B") select p).ToArray();
 
-            pr.Count().Should().Be(2);
-            pr.All(p => p.Description.StartsWith("B")).Should().BeTrue();
+            Assert.That(pr, Has.Length.EqualTo(2));
+            Assert.True(pr.All(p => p.Description.StartsWith("B")));
+
+            //pr.Count().Should().Be(2);
+            //pr.All(p => p.Description.StartsWith("B")).Should().BeTrue();
 
         }
 
@@ -436,8 +462,11 @@ namespace Iridium.DB.Test
 
             var pr = (from p in DB.Products where p.Description.EndsWith("B") select p).ToArray();
 
-            pr.Count().Should().Be(2);
-            pr.All(p => p.Description.EndsWith("B")).Should().BeTrue();
+            Assert.That(pr, Has.Length.EqualTo(2));
+            Assert.True(pr.All(p => p.Description.EndsWith("B")));
+
+//            pr.Count().Should().Be(2);
+//            pr.All(p => p.Description.EndsWith("B")).Should().BeTrue();
         }
 
 
@@ -448,17 +477,21 @@ namespace Iridium.DB.Test
 
             var sortedProducts = from product in DB.Products orderby product.Price select product;
 
-            sortedProducts.Should().BeInAscendingOrder(product => product.Price);
+            Assert.That(sortedProducts.Select(product => product.Price), Is.Ordered.Ascending);
+
+//            sortedProducts.Should().BeInAscendingOrder(product => product.Price);
 
             sortedProducts = from product in DB.Products orderby product.Price descending select product;
 
-            sortedProducts.Should().BeInDescendingOrder(product => product.Price);
+            Assert.That(sortedProducts.Select(product => product.Price), Is.Ordered.Descending);
+
+//            sortedProducts.Should().BeInDescendingOrder(product => product.Price);
         }
 
         [Test]
-        public void ThousandsOfTransactions()
+        public void ManyTransactions()
         {
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 Customer customer = new Customer {Name = "A"};
 
@@ -543,9 +576,13 @@ namespace Iridium.DB.Test
 
             DB.LoadRelations(() => order.Customer);
 
-            order2.Customer.Name.Should().Be(order.Customer.Name);
-            order2.Customer.CustomerID.Should().Be(order.Customer.CustomerID);
-            order2.Customer.CustomerID.Should().Be(order.CustomerID);
+            Assert.That(order2.Customer.Name,Is.EqualTo(order.Customer.Name));
+            Assert.That(order2.Customer.CustomerID,Is.EqualTo(order.Customer.CustomerID));
+            Assert.That(order2.Customer.CustomerID,Is.EqualTo(order.CustomerID));
+
+            //            order2.Customer.Name.Should().Be(order.Customer.Name);
+            //            order2.Customer.CustomerID.Should().Be(order.Customer.CustomerID);
+            //            order2.Customer.CustomerID.Should().Be(order.CustomerID);
         }
 
         [Test]
@@ -709,7 +746,7 @@ namespace Iridium.DB.Test
         [Test]
         public void DeleteWithRelationFilter()
         {
-            if (Driver == "sqlite")
+            if (Driver.StartsWith("sqlite"))
                 return;
 
             List<Order> orders = new List<Order>();
@@ -862,7 +899,8 @@ namespace Iridium.DB.Test
 
             total2 = DB.OrderItems.Sum(item => item.Qty * item.Price);
 
-            total.Should().BeGreaterThan(total2);
+            Assert.That(total, Is.GreaterThan(total2));
+//            total.Should().BeGreaterThan(total2);
 
             Assert.AreEqual(95, DB.OrderItems.Count());
         }
@@ -880,10 +918,15 @@ namespace Iridium.DB.Test
 
             var rec = DB.Read<RecordWithCompositeKey>(new {Key1 = 1, Key2 = 2});
 
-            rec.Should().NotBeNull();
-            rec.Key1.Should().Be(1);
-            rec.Key2.Should().Be(2);
-            rec.Name.Should().Be("John");
+            Assert.NotNull(rec);
+            Assert.AreEqual(1,rec.Key1);
+            Assert.AreEqual(2, rec.Key2);
+            Assert.AreEqual("John",rec.Name);
+
+//            rec.Should().NotBeNull();
+//            rec.Key1.Should().Be(1);
+//            rec.Key2.Should().Be(2);
+//            rec.Name.Should().Be("John");
         }
 
         [Test]
@@ -892,7 +935,8 @@ namespace Iridium.DB.Test
             if (!DB.DataProvider.SupportsTransactions)
                 return;
 
-            DB.Products.Count().Should().Be(0);
+            Assert.That(DB.Products.Count(), Is.EqualTo(0));
+            //DB.Products.Count().Should().Be(0);
 
             using (var transaction = new Transaction(DB))
             {
@@ -901,7 +945,8 @@ namespace Iridium.DB.Test
                 transaction.Rollback();
             }
 
-            DB.Products.Count().Should().Be(0);
+            Assert.That(DB.Products.Count(), Is.EqualTo(0));
+            //DB.Products.Count().Should().Be(0);
 
 
         }
@@ -912,14 +957,16 @@ namespace Iridium.DB.Test
             if (!DB.DataProvider.SupportsTransactions)
                 return;
 
-            DB.Products.Count().Should().Be(0);
+            Assert.That(DB.Products.Count(), Is.EqualTo(0));
+            //DB.Products.Count().Should().Be(0);
 
             using (var transaction = new Transaction(DB))
             {
                 DB.Products.Insert(new Product() { ProductID = "X", Description = "X" });
             }
 
-            DB.Products.Count().Should().Be(0);
+            Assert.That(DB.Products.Count(), Is.EqualTo(0));
+            //DB.Products.Count().Should().Be(0);
 
 
         }
@@ -930,7 +977,8 @@ namespace Iridium.DB.Test
             if (!DB.DataProvider.SupportsTransactions)
                 return;
 
-            DB.Products.Count().Should().Be(0);
+            Assert.That(DB.Products.Count(), Is.EqualTo(0));
+            //DB.Products.Count().Should().Be(0);
 
             using (var transaction = new Transaction(DB))
             {
@@ -939,7 +987,8 @@ namespace Iridium.DB.Test
                 transaction.Commit();
             }
 
-            DB.Products.Count().Should().Be(1);
+            Assert.That(DB.Products.Count(), Is.EqualTo(1));
+            //DB.Products.Count().Should().Be(1);
         }
 
 
@@ -949,7 +998,8 @@ namespace Iridium.DB.Test
             if (!DB.DataProvider.SupportsTransactions)
                 return;
 
-            DB.Products.Count().Should().Be(0);
+            Assert.That(DB.Products.Count(), Is.EqualTo(0));
+            //DB.Products.Count().Should().Be(0);
 
             using (var transaction1 = new Transaction(DB))
             {
@@ -965,8 +1015,10 @@ namespace Iridium.DB.Test
                 transaction1.Commit();
             }
 
-            DB.Products.Count().Should().Be(1);
-            DB.Products.First().ProductID.Should().Be("X");
+            Assert.That(DB.Products.Count(), Is.EqualTo(1));
+            Assert.That(DB.Products.First().ProductID, Is.EqualTo("X"));
+            //DB.Products.Count().Should().Be(1);
+            //DB.Products.First().ProductID.Should().Be("X");
         }
 
         [Test]
@@ -975,7 +1027,8 @@ namespace Iridium.DB.Test
             if (!DB.DataProvider.SupportsTransactions)
                 return;
 
-            DB.Products.Count().Should().Be(0);
+            Assert.That(DB.Products.Count(), Is.EqualTo(0));
+            //DB.Products.Count().Should().Be(0);
 
             using (var transaction1 = new Transaction(DB))
             {
@@ -998,8 +1051,10 @@ namespace Iridium.DB.Test
                 transaction1.Commit();
             }
 
-            DB.Products.Count().Should().Be(1);
-            DB.Products.First().ProductID.Should().Be("X");
+            Assert.That(DB.Products.Count(), Is.EqualTo(1));
+            Assert.That(DB.Products.First().ProductID, Is.EqualTo("X"));
+            //DB.Products.Count().Should().Be(1);
+//            DB.Products.First().ProductID.Should().Be("X");
         }
 
         [Test]
@@ -1008,7 +1063,9 @@ namespace Iridium.DB.Test
             if (!DB.DataProvider.SupportsTransactions)
                 return;
 
-            DB.Products.Count().Should().Be(0);
+            Assert.That(DB.Products.Count(), Is.EqualTo(0));
+            
+//            DB.Products.Count().Should().Be(0);
 
             using (var transaction1 = new Transaction(DB))
             {
@@ -1031,9 +1088,13 @@ namespace Iridium.DB.Test
                 transaction1.Commit();
             }
 
-            DB.Products.Count().Should().Be(2);
-            DB.Products.OrderBy(p => p.ProductID).First().ProductID.Should().Be("X");
-            DB.Products.OrderBy(p => p.ProductID).Skip(1).First().ProductID.Should().Be("Y");
+            Assert.That(DB.Products.Count(), Is.EqualTo(2));
+            Assert.That(DB.Products.OrderBy(p => p.ProductID).First().ProductID, Is.EqualTo("X"));
+            Assert.That(DB.Products.OrderBy(p => p.ProductID).Skip(1).First().ProductID, Is.EqualTo("Y"));
+
+//            DB.Products.Count().Should().Be(2);
+//            DB.Products.OrderBy(p => p.ProductID).First().ProductID.Should().Be("X");
+//            DB.Products.OrderBy(p => p.ProductID).Skip(1).First().ProductID.Should().Be("Y");
         }
 
         [Test]
@@ -1042,7 +1103,8 @@ namespace Iridium.DB.Test
             if (!DB.DataProvider.SupportsTransactions)
                 return;
 
-            DB.Products.Count().Should().Be(0);
+            Assert.That(DB.Products.Count(), Is.EqualTo(0));
+//            DB.Products.Count().Should().Be(0);
 
             using (var transaction1 = new Transaction(DB))
             {
@@ -1065,7 +1127,8 @@ namespace Iridium.DB.Test
                 transaction1.Rollback();
             }
 
-            DB.Products.Count().Should().Be(0);
+            Assert.That(DB.Products.Count(), Is.EqualTo(0));
+//            DB.Products.Count().Should().Be(0);
         }
 
         [Test]

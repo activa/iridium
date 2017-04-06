@@ -30,7 +30,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
-using Iridium.DB.CoreUtil;
+using System.Reflection;
+using Iridium.Core;
 
 namespace Iridium.DB
 {
@@ -49,34 +50,34 @@ namespace Iridium.DB
 
         public class FieldOrRelation
         {
-            public readonly FieldOrPropertyInfo FieldInfo;
+            public readonly MemberInfo FieldInfo;
             public readonly string FieldName;
             public readonly Type FieldType;
 
-            protected FieldOrRelation(FieldOrPropertyInfo fieldInfo)
+            protected FieldOrRelation(MemberInfo fieldInfo)
             {
                 FieldInfo = fieldInfo;
                 FieldName = fieldInfo.Name;
-                FieldType = fieldInfo.Type;
+                FieldType = fieldInfo.Inspector().Type;
             }
 
             public object SetField(object target, object value)
             {
-                FieldInfo.SetValue(target, value);
+                FieldInfo.Inspector().SetValue(target, value);
 
                 return target;
             }
 
             public T SetField<T>(T target, object value)
             {
-                FieldInfo.SetValue(target, value);
+                FieldInfo.Inspector().SetValue(target, value);
 
                 return target;
             }
 
             public object GetField(object target)
             {
-                return FieldInfo.GetValue(target);
+                return FieldInfo.Inspector().GetValue(target);
             }
         }
 
@@ -84,11 +85,11 @@ namespace Iridium.DB
         {
             public readonly bool CanBeNull;
 
-            public Field(FieldOrPropertyInfo fieldInfo) : base(fieldInfo)
+            public Field(MemberInfo fieldInfo) : base(fieldInfo)
             {
                 MappedName = FieldName;
 
-                CanBeNull = FieldInfo.TypeInspector.CanBeNull;
+                CanBeNull = FieldInfo.Inspector().Type.Inspector().CanBeNull;
 
                 if (CanBeNull)
                     Flags |= FieldFlags.Nullable;
@@ -139,7 +140,7 @@ namespace Iridium.DB
             public bool ReadOnly; // If true, setting a relation object will not update the key value(s)
             public bool IsDataSet;
 
-            internal Relation(FieldOrPropertyInfo fieldInfo) : base(fieldInfo)
+            internal Relation(MemberInfo fieldInfo) : base(fieldInfo)
             {
             }
 
@@ -195,7 +196,7 @@ namespace Iridium.DB
                 {
                     var parameter = Expression.Parameter(ElementType, "x");
 
-                    Expression exp1 = Expression.MakeMemberAccess(parameter, ForeignField.FieldInfo.AsMember);
+                    Expression exp1 = Expression.MakeMemberAccess(parameter, ForeignField.FieldInfo);
                     Expression exp2 = Expression.Constant(localFieldValue, LocalField.FieldType);
 
                     if (exp2.Type != exp1.Type)

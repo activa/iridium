@@ -27,31 +27,35 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading;
-using MySql.Data.MySqlClient;
+using Iridium.DB.Postgres;
+using Iridium.DB.Sql;
+using Npgsql;
 
-namespace Iridium.DB.MySql
+
+namespace Iridium.DB.Postgres
 {
-    public class MySqlDataProvider : SqlAdoDataProvider<MySqlConnection, MySqlDialect>
+    public class PostgresDataProvider : SqlAdoDataProvider<NpgsqlConnection, PostgresDialect>
     {
-        public MySqlDataProvider()
+        public PostgresDataProvider()
         {
         }
 
-        public MySqlDataProvider(string connectionString) : base(connectionString)
+        public PostgresDataProvider(string connectionString) : base(connectionString)
         {
         }
 
         public override void ClearConnectionPool()
         {
-            MySqlConnection.ClearAllPools();
+            NpgsqlConnection.ClearAllPools();
         }
 
         public override bool RequiresAutoIncrementGetInSameStatement => true;
 
         private readonly ThreadLocal<Stack<string>> _transactionStack = new ThreadLocal<Stack<string>>(() => new Stack<string>());
-        private readonly ThreadLocal<MySqlTransaction> _transaction = new ThreadLocal<MySqlTransaction>(true);
+        private readonly ThreadLocal<NpgsqlTransaction> _transaction = new ThreadLocal<NpgsqlTransaction>(true);
 
         public override void BeginTransaction(IsolationLevel isolationLevel)
         {
@@ -61,7 +65,7 @@ namespace Iridium.DB.MySql
             {
                 if (_transaction.Value == null)
                 {
-                    _transaction.Value = ((MySqlConnection)Connection).BeginTransaction(AdoIsolationLevel(isolationLevel));
+                    _transaction.Value = ((NpgsqlConnection)Connection).BeginTransaction(AdoIsolationLevel(isolationLevel));
 
                     _transactionStack.Value.Push("");
                 }
@@ -69,9 +73,7 @@ namespace Iridium.DB.MySql
                 {
                     string savePoint = "SP" + _transactionStack.Value.Count;
 
-                    ExecuteSql("SAVEPOINT " + savePoint, null);
-
-                    //_transaction.Value.Save(savePoint);
+                    _transaction.Value.Save(savePoint);
                     _transactionStack.Value.Push(savePoint);
                 }
             }
@@ -94,7 +96,7 @@ namespace Iridium.DB.MySql
                     }
                     else
                     {
-                        ExecuteSql("RELEASE SAVEPOINT " + name, null);
+                        // no need to commit named savepoint
                     }
                 }
             }
@@ -120,7 +122,7 @@ namespace Iridium.DB.MySql
                     }
                     else
                     {
-                        ExecuteSql("ROLLBACK TO SAVEPOINT " + name, null);
+                        _transaction.Value.Rollback(name);
                     }
                 }
             }

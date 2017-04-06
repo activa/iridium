@@ -30,7 +30,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Iridium.DB.CoreUtil;
+using Iridium.Core;
 
 namespace Iridium.DB
 {
@@ -305,7 +305,7 @@ namespace Iridium.DB
 
             ExecuteSql("DELETE FROM " + tableName, null);
 
-            if (QueryScalar("select name from sqlite_master where name='sqlite_sequence'", null).Any())
+            if (SqlQueryScalar("select name from sqlite_master where name='sqlite_sequence'", null).Any())
                 ExecuteSql("delete from sqlite_sequence where name=@name", QueryParameterCollection.FromObject(new {name = schema.MappedName}));
         }
 

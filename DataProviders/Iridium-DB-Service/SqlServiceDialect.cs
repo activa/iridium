@@ -27,8 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Iridium.DB;
-using Iridium.DB.CoreUtil;
+using Iridium.Core;
 
 namespace Iridium.DB.SqlService
 {
@@ -105,7 +104,7 @@ namespace Iridium.DB.SqlService
 
             foreach (var field in schema.Fields)
             {
-                var columnMapping = columnMappings.FirstOrDefault(mapping => field.FieldInfo.TypeInspector.Is(mapping.Flags));
+                var columnMapping = columnMappings.FirstOrDefault(mapping => field.FieldInfo.Inspector().Type.Inspector().Is(mapping.Flags));
 
                 if (columnMapping == null)
                     continue;

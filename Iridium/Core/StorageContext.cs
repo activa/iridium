@@ -29,7 +29,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Iridium.DB.CoreUtil;
+using Iridium.Core;
 
 namespace Iridium.DB
 {
@@ -280,29 +280,54 @@ namespace Iridium.DB
             return GetRepository<T>().Delete(GetRepository<T>().CreateQuerySpec(new FilterSpec(condition)));
         }
 
-        public int Execute(string sql, object parameters = null)
+        public int SqlNonQuery(string sql, object parameters = null)
         {
-            return DataProvider.ExecuteSql(sql, QueryParameterCollection.FromObject(parameters));
+            var sqlProvider = DataProvider as ISqlDataProvider;
+
+            if (sqlProvider == null)
+                throw new NotSupportedException();
+
+            return sqlProvider.SqlNonQuery(sql, QueryParameterCollection.FromObject(parameters));
         }
 
-        public IEnumerable<T> Query<T>(string sql, object parameters = null) where T : new()
+        public IEnumerable<T> SqlQuery<T>(string sql, object parameters = null) where T : new()
         {
-            return DataProvider.Query(sql, QueryParameterCollection.FromObject(parameters)).Select(entity => entity.CreateObject<T>());
+            var sqlProvider = DataProvider as ISqlDataProvider;
+
+            if (sqlProvider == null)
+                throw new NotSupportedException();
+
+            return sqlProvider.SqlQuery(sql, QueryParameterCollection.FromObject(parameters)).Select(entity => entity.CreateObject<T>());
         }
 
-        public IEnumerable<Dictionary<string,object>> Query(string sql, object parameters = null)
+        public IEnumerable<Dictionary<string,object>> SqlQuery(string sql, object parameters = null)
         {
-            return DataProvider.Query(sql, QueryParameterCollection.FromObject(parameters)).Select(entity => entity.AsDictionary());
+            var sqlProvider = DataProvider as ISqlDataProvider;
+
+            if (sqlProvider == null)
+                throw new NotSupportedException();
+
+            return sqlProvider.SqlQuery(sql, QueryParameterCollection.FromObject(parameters)).Select(entity => entity.AsDictionary());
         }
 
-        public T QueryScalar<T>(string sql, object parameters = null) where T : new()
+        public T SqlQueryScalar<T>(string sql, object parameters = null) where T : new()
         {
-            return DataProvider.QueryScalar(sql, QueryParameterCollection.FromObject(parameters)).FirstOrDefault().Convert<T>();
+            var sqlProvider = DataProvider as ISqlDataProvider;
+
+            if (sqlProvider == null)
+                throw new NotSupportedException();
+
+            return sqlProvider.SqlQueryScalar(sql, QueryParameterCollection.FromObject(parameters)).FirstOrDefault().Convert<T>();
         }
 
-        public IEnumerable<T> QueryScalars<T>(string sql, object parameters = null) where T : new()
+        public IEnumerable<T> SqlQueryScalars<T>(string sql, object parameters = null) where T : new()
         {
-            return DataProvider.QueryScalar(sql, QueryParameterCollection.FromObject(parameters)).Select(scalar => scalar.Convert<T>());
+            var sqlProvider = DataProvider as ISqlDataProvider;
+
+            if (sqlProvider == null)
+                throw new NotSupportedException();
+
+            return sqlProvider.SqlQueryScalar(sql, QueryParameterCollection.FromObject(parameters)).Select(scalar => scalar.Convert<T>());
         }
 
         // Async methods
@@ -317,24 +342,30 @@ namespace Iridium.DB
             return Task.Factory.StartNew(() => CreateTable<T>(recreateTable, recreateIndexes));
         }
 
+        public Task<int> SqlNonQueryAsync(string sql, object parameters)
+        {
+            return Task.Factory.StartNew(() => SqlNonQuery(sql, parameters));
+        }
+
+        [Obsolete("Use SqlNonQueryAsync()")]
         public Task<int> ExecuteAsync(string sql, object parameters)
         {
-            return Task.Factory.StartNew(() => Execute(sql, parameters));
+            return SqlNonQueryAsync(sql, parameters);
         }
 
         public Task<T[]> QueryAsync<T>(string sql, object parameters = null) where T : new()
         {
-            return Task.Factory.StartNew(() => Query<T>(sql, parameters).ToArray());
+            return Task.Factory.StartNew(() => SqlQuery<T>(sql, parameters).ToArray());
         }
 
         public Task<T> QueryScalarAsync<T>(string sql, object parameters = null) where T : new()
         {
-            return Task.Factory.StartNew(() => QueryScalar<T>(sql, parameters));
+            return Task.Factory.StartNew(() => SqlQueryScalar<T>(sql, parameters));
         }
 
         public Task<T[]> QueryScalarsAsync<T>(string sql, object parameters = null) where T : new()
         {
-            return Task.Factory.StartNew(() => QueryScalars<T>(sql, parameters).ToArray());
+            return Task.Factory.StartNew(() => SqlQueryScalars<T>(sql, parameters).ToArray());
         }
 
         public Task<T> ReadAsync<T>(object key, params Expression<Func<T, object>>[] relationsToLoad)

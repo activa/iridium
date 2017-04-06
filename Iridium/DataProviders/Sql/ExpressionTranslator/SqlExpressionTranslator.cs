@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
-using Iridium.DB.CoreUtil;
+using Iridium.Core;
 
 namespace Iridium.DB
 {
@@ -442,8 +442,8 @@ namespace Iridium.DB
 
         private static LambdaExpression CreateToManyFilterExpression(TableSchema.Relation relation, Expression localExpression, LambdaExpression filterLambda, ParameterExpression lambdaParameter)
         {
-            Expression exp1 = Expression.MakeMemberAccess(localExpression, relation.LocalField.FieldInfo.AsMember);
-            Expression exp2 = Expression.MakeMemberAccess(lambdaParameter, relation.ForeignField.FieldInfo.AsMember);
+            Expression exp1 = Expression.MakeMemberAccess(localExpression, relation.LocalField.FieldInfo);
+            Expression exp2 = Expression.MakeMemberAccess(lambdaParameter, relation.ForeignField.FieldInfo);
 
             if (exp2.Type != exp1.Type)
                 exp2 = Expression.Convert(exp2, exp1.Type);

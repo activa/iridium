@@ -11,7 +11,10 @@
     <tags>iridium orm sql sqlite xamarin ios android uwp</tags>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Lightweight multi-platform ORM for mobile, desktop and servers. Support for Sqlite is built in for all platforms. Data providers for SQL Server and MySql are available on Nuget.</description>
-    <copyright>Copyright 2015-2016 Philippe Leybaert</copyright>
+    <copyright>Copyright 2015-2017 Philippe Leybaert</copyright>
+    <dependencies>
+      <dependency id="iridium.core" version="[1.2.1,1.3)" />
+    </dependencies>
   </metadata>
   <files>
     <file src="Iridium\bin\$Configuration$\Iridium.dll" target="lib\portable-net45+win8+wpa81"/>

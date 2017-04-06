@@ -27,7 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Iridium.DB.CoreUtil;
+using Iridium.Core;
 
 namespace Iridium.DB
 {
@@ -38,9 +38,9 @@ namespace Iridium.DB
         }
     }
 
-    public abstract class SqlDataProvider : IDataProvider
+    public abstract class SqlDataProvider : IDataProvider, ISqlDataProvider
     {
-        protected SqlDialect SqlDialect { get; }
+        public SqlDialect SqlDialect { get; }
 
         protected SqlDataProvider(SqlDialect sqlDialect)
         {
@@ -424,15 +424,20 @@ namespace Iridium.DB
             return true;
         }
 
+        public int SqlNonQuery(string sql, QueryParameterCollection parameters = null)
+        {
+            return ExecuteSql(sql, parameters);
+        }
+
         public abstract int ExecuteSql(string sql, QueryParameterCollection parameters = null);
         public abstract IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, QueryParameterCollection parameters);
 
-        public virtual IEnumerable<SerializedEntity> Query(string sql, QueryParameterCollection parameters = null)
+        public virtual IEnumerable<SerializedEntity> SqlQuery(string sql, QueryParameterCollection parameters = null)
         {
             return ExecuteSqlReader(sql, parameters).Select(rec => new SerializedEntity(rec));
         }
 
-        public virtual IEnumerable<object> QueryScalar(string sql, QueryParameterCollection parameters = null)
+        public virtual IEnumerable<object> SqlQueryScalar(string sql, QueryParameterCollection parameters = null)
         {
             var results = ExecuteSqlReader(sql, parameters);
 

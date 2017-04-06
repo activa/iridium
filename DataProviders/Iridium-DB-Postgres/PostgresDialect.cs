@@ -29,61 +29,18 @@ using System.Collections.Generic;
 using System.Linq;
 using Iridium.Core;
 
-namespace Iridium.DB.SqlServer
+namespace Iridium.DB.Postgres
 {
-    public class SqlServerDialect : SqlDialect
+    public class PostgresDialect : SqlDialect
     {
-        public override string SelectSql(SqlTableNameWithAlias tableName, IEnumerable<SqlExpressionWithAlias> columns, string sqlWhere, IEnumerable<SqlJoinDefinition> joins = null, string sqlSortExpression = null, int? start = null, int? numRecords = null, string afterSelect = null)
-        {
-            if (start == null && numRecords == null)
-                return base.SelectSql(tableName, columns, sqlWhere, joins, sqlSortExpression);
-
-            if (start == null)
-                return base.SelectSql(tableName, columns, sqlWhere, joins, sqlSortExpression, afterSelect: "TOP " + numRecords);
-
-            string subQueryAlias = SqlNameGenerator.NextTableAlias();
-            string rowNumAlias = SqlNameGenerator.NextFieldAlias();
-
-            int end = (numRecords == null ? int.MaxValue : (numRecords.Value + start - 1)).Value;
-
-            SqlExpressionWithAlias rowNumExpression = new SqlExpressionWithAlias("row_number() over (order by " + sqlSortExpression + ")", rowNumAlias);
-
-            string[] parts =
-            {
-                "select",
-                subQueryAlias + ".*",
-                "from",
-                "(",
-                base.SelectSql(tableName, columns.Union(new[] {rowNumExpression}), sqlWhere, joins),
-                ")",
-                "as",
-                subQueryAlias,
-                "where",
-                rowNumAlias,
-                "between",
-                start.ToString(),
-                "and",
-                end.ToString(),
-                "order by",
-                rowNumAlias
-            };
-
-            return string.Join(" ", parts);
-        }
-
         public override string QuoteField(string fieldName)
         {
-            int dotIdx = fieldName.IndexOf('.');
-
-            if (dotIdx > 0)
-                return fieldName.Substring(0, dotIdx + 1) + "[" + fieldName.Substring(dotIdx + 1) + "]";
-            
-            return "[" + fieldName + "]";
+            return "\"" + fieldName.Replace(".", "\".\"") + "\"";
         }
 
         public override string QuoteTable(string tableName)
         {
-            return "[" + tableName.Replace(".", "].[") + "]";
+            return "\"" + tableName.Replace("\"", "\".\"") + "\"";
         }
 
         public override string CreateParameterExpression(string parameterName)
@@ -91,23 +48,47 @@ namespace Iridium.DB.SqlServer
             return "@" + parameterName;
         }
 
-        public override string GetLastAutoincrementIdSql(string columnName, string alias, string tableName)
+        public override string SelectSql(SqlTableNameWithAlias tableName, IEnumerable<SqlExpressionWithAlias> columns, string sqlWhere, IEnumerable<SqlJoinDefinition> joins = null, string sqlSortExpression = null, int? start = null, int? numRecords = null, string afterSelect = null)
         {
-            return "select SCOPE_IDENTITY() as " + alias;
+            if (start == null && numRecords == null)
+                return base.SelectSql(tableName, columns, sqlWhere, joins, sqlSortExpression);
+
+            if (start == null)
+                return base.SelectSql(tableName, columns, sqlWhere, joins, sqlSortExpression, numRecords: numRecords);
+
+            string sql = base.SelectSql(tableName, columns, sqlWhere, joins, sqlSortExpression, numRecords: numRecords);
+
+            if (start.Value > 1)
+                sql += " OFFSET " + (start-1);
+
+            return sql;
+
         }
 
-        public override string SqlFunction(Function function, params string[] parameters)
+        public override string DeleteSql(SqlTableNameWithAlias tableName, string sqlWhere, IEnumerable<SqlJoinDefinition> joins)
         {
-            switch (function)
+            if (joins != null && joins.Any())
             {
-                case Function.StringLength:
-                    return $"len({parameters[0]})";
-                case Function.BlobLength:
-                    return $"datalength({parameters[0]})";
+                string sql = "delete from " + QuoteTable(tableName.TableName) + (tableName.Alias != null ? (" " + tableName.Alias + " ") : "");
 
-                default:
-                    return base.SqlFunction(function, parameters);
+                sql += "using " +  string.Join(",", joins.Select(join => QuoteTable(join.Right.Schema.MappedName) + " " + join.Right.Alias));
+
+                if (sqlWhere != null)
+                    sql += " where (" + sqlWhere + ")";
+
+                sql += " and ";
+
+                sql += string.Join(" and ", joins.Select(join => QuoteField(join.Left.Alias + "." + @join.Left.Field.MappedName) + "=" + QuoteField(join.Right.Alias + "." + @join.Right.Field.MappedName)));
+
+                return sql;
             }
+
+            return "delete from " + QuoteTable(tableName.TableName) + (tableName.Alias != null ? (" " + tableName.Alias + " ") : "") + (sqlWhere != null ? (" where " + sqlWhere) : "");
+        }
+
+        public override string GetLastAutoincrementIdSql(string columnName, string alias, string tableName)
+        {
+            return "select lastval() as " + alias;
         }
 
         public override void CreateOrUpdateTable(TableSchema schema, bool recreateTable, bool recreateIndexes, SqlDataProvider dataProvider)
@@ -116,17 +97,17 @@ namespace Iridium.DB.SqlServer
 
             var columnMappings = new[]
             {
-                new {Flags = TypeFlags.Array | TypeFlags.Byte, ColumnType = "IMAGE"},
-                new {Flags = TypeFlags.Boolean, ColumnType = "BIT"},
-                new {Flags = TypeFlags.Integer8, ColumnType = "TINYINT"},
-                new {Flags = TypeFlags.Integer16, ColumnType = "SMALLINT"},
-                new {Flags = TypeFlags.Integer32, ColumnType = "INT"},
-                new {Flags = TypeFlags.Integer64, ColumnType = "BIGINT"},
-                new {Flags = TypeFlags.Decimal, ColumnType = "DECIMAL({0},{1})"},
-                new {Flags = TypeFlags.Double, ColumnType = "FLOAT"},
-                new {Flags = TypeFlags.Single, ColumnType = "REAL"},
-                new {Flags = TypeFlags.String, ColumnType = "VARCHAR({0})"},
-                new {Flags = TypeFlags.DateTime, ColumnType = "DATETIME"}
+                new {Flags = TypeFlags.Array | TypeFlags.Byte, ColumnType = "bytea"},
+                new {Flags = TypeFlags.Boolean, ColumnType = "boolean"},
+                new {Flags = TypeFlags.Integer8, ColumnType = "smallint"},
+                new {Flags = TypeFlags.Integer16, ColumnType = "smallint"},
+                new {Flags = TypeFlags.Integer32, ColumnType = "integer"},
+                new {Flags = TypeFlags.Integer64, ColumnType = "bigint"},
+                new {Flags = TypeFlags.Decimal, ColumnType = "decimal({0},{1})"},
+                new {Flags = TypeFlags.Double, ColumnType = "double precision"},
+                new {Flags = TypeFlags.Single, ColumnType = "real"},
+                new {Flags = TypeFlags.String, ColumnType = "varchar({0})"},
+                new {Flags = TypeFlags.DateTime, ColumnType = "timestamp"}
             };
 
 
@@ -134,11 +115,11 @@ namespace Iridium.DB.SqlServer
             string tableSchemaName = tableNameParts.Length == 1 ? "dbo" : tableNameParts[0];
             string tableName = tableNameParts.Length == 1 ? tableNameParts[0] : tableNameParts[1];
 
-            var existingColumns = dataProvider.ExecuteSqlReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA=@schema and TABLE_NAME=@name",
-                QueryParameterCollection.FromObject(new { schema = tableSchemaName, name = tableName })).ToLookup(rec => rec["COLUMN_NAME"].ToString());
+            var existingColumns = dataProvider.ExecuteSqlReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME=@name",
+                QueryParameterCollection.FromObject(new { schema = tableSchemaName, name = tableName })).ToLookup(rec => rec["column_name"].ToString());
 
-            var tableExists = dataProvider.ExecuteSqlReader("select count(*) from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=@schema and TABLE_NAME=@name",
-                QueryParameterCollection.FromObject(new {schema = tableSchemaName, name = tableName})).Select(rec => rec.First().Value.Convert<int>()).First() == 1;
+            var tableExists = dataProvider.ExecuteSqlReader("select count(*) from INFORMATION_SCHEMA.TABLES where TABLE_NAME=@name",
+                                  QueryParameterCollection.FromObject(new { schema = tableSchemaName, name = tableName })).Select(rec => rec.First().Value.Convert<int>()).First() == 1;
 
             var parts = new List<string>();
 
@@ -160,17 +141,23 @@ namespace Iridium.DB.SqlServer
                 if (columnMapping.Flags == TypeFlags.String && field.ColumnSize == int.MaxValue)
                     columnMapping = new { columnMapping.Flags, ColumnType = longTextType };
 
-                var part = string.Format("{0} {1}", QuoteField(field.MappedName), string.Format(columnMapping.ColumnType, field.ColumnSize, field.ColumnScale));
-
-                if (!field.ColumnNullable || field.PrimaryKey)
-                    part += " NOT";
-
-                part += " NULL";
-
                 if (field.AutoIncrement)
-                    part += " IDENTITY(1,1)";
+                {
+                    parts.Add($"{QuoteField(field.MappedName)} SERIAL");
+                }
+                else
+                {
 
-                parts.Add(part);
+                    var part = $"{QuoteField(field.MappedName)} {string.Format(columnMapping.ColumnType, field.ColumnSize, field.ColumnScale)}";
+
+                    if (!field.ColumnNullable || field.PrimaryKey)
+                        part += " NOT";
+
+                    part += " NULL";
+
+                    parts.Add(part);
+                }
+                
             }
 
             if (parts.Any() && schema.PrimaryKeys.Length > 0)
@@ -195,8 +182,9 @@ namespace Iridium.DB.SqlServer
                 dataProvider.ExecuteSql(sql, null);
             }
 
+            /*
             var existingIndexes = dataProvider.ExecuteSqlReader("SELECT ind.name as IndexName FROM sys.indexes ind INNER JOIN sys.tables t ON ind.object_id = t.object_id WHERE ind.name is not null and ind.is_primary_key = 0 AND t.is_ms_shipped = 0 AND t.name=@tableName",
-                 QueryParameterCollection.FromObject(new { tableName })).ToLookup(rec => rec["IndexName"].ToString());
+                QueryParameterCollection.FromObject(new { tableName })).ToLookup(rec => rec["IndexName"].ToString());
 
             foreach (var index in schema.Indexes)
             {
@@ -215,7 +203,21 @@ namespace Iridium.DB.SqlServer
                 createIndexSql += ")";
 
                 dataProvider.ExecuteSql(createIndexSql, null);
+            }*/
+        }
+
+        public override string SqlFunction(Function function, params string[] parameters)
+        {
+            switch (function)
+            {
+                /*
+                case Function.Coalesce:
+                    return $"coalesce({parameters[0]},{parameters[1]})";
+                    */
+                default:
+                    return base.SqlFunction(function,parameters);
             }
         }
+
     }
 }

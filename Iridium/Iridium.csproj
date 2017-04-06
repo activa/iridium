@@ -34,6 +34,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Iridium-Core, Version=1.2.1.36205, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\iridium.core.1.2.1.19\lib\portable-net45+win8+wpa81\Iridium-Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Iridium.DB.SqlServer.Android">
       <HintPath>..\DataProviders\Iridium-DB-SqlServer-Android\bin\Release\Iridium.DB.SqlServer.Android.dll</HintPath>
     </Reference>
@@ -45,19 +49,7 @@
     <Compile Include="Attributes\PreserveAttribute.cs" />
     <Compile Include="Attributes\RelationAttributes.cs" />
     <Compile Include="Attributes\TableAttributes.cs" />
-    <Compile Include="CoreUtil\Reflection\FieldOrPropertyInfo.cs" />
-    <Compile Include="CoreUtil\Reflection\Inspectors\AssemblyInspector.cs" />
-    <Compile Include="CoreUtil\Reflection\Inspectors\MemberInspector.cs" />
-    <Compile Include="CoreUtil\Reflection\Inspectors\PropertyInspector.cs" />
-    <Compile Include="CoreUtil\Reflection\Inspectors\TypeInspector.cs" />
-    <Compile Include="CoreUtil\Reflection\ObjectMapper.cs" />
-    <Compile Include="CoreUtil\Reflection\ReflectionExtensions.cs" />
-    <Compile Include="CoreUtil\Reflection\Platform.cs" />
-    <Compile Include="CoreUtil\Reflection\SmartBinder.cs" />
-    <Compile Include="CoreUtil\SafeDictionary.cs" />
-    <Compile Include="CoreUtil\SmartConverter\IStringConverter.cs" />
-    <Compile Include="CoreUtil\SmartConverter\ObjectConverter.cs" />
-    <Compile Include="CoreUtil\SmartConverter\StringConverter.cs" />
+    <Compile Include="DataProviders\ISqlDataProvider.cs" />
     <Compile Include="DataProviders\Sql\ExpressionTranslator\SqlExpressionTranslator.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -112,7 +104,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DataProviders\Sqlite\iridium.targets" />
-    <None Include="Iridium.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

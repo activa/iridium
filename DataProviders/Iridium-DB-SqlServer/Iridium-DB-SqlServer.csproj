@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Iridium-Core, Version=1.2.1.36205, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\iridium.core.1.2.1.19\lib\portable-net45+win8+wpa81\Iridium-Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -49,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Iridium.DB.SqlServer.nuspec" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="..\Velox.DB.SqlServer.Shared\Velox.DB.SqlServer.Shared.projitems" Label="Shared" Condition="Exists('..\Velox.DB.SqlServer.Shared\Velox.DB.SqlServer.Shared.projitems')" />
   <Import Project="..\Velox.DB.SqlADO\Velox.DB.SqlADO.projitems" Label="Shared" Condition="Exists('..\Velox.DB.SqlADO\Velox.DB.SqlADO.projitems')" />

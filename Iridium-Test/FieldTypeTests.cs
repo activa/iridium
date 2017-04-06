@@ -1,6 +1,4 @@
-﻿using FluentAssertions;
-using System;
-using FluentAssertions.Common;
+﻿using System;
 using NUnit.Framework;
 
 namespace Iridium.DB.Test
@@ -8,7 +6,9 @@ namespace Iridium.DB.Test
     [TestFixture("sqlite")]
     [TestFixture("sqlserver")]
     [TestFixture("memory")]
-   // [TestFixture("mysql")]
+    [TestFixture("mysql")]
+    [TestFixture("postgres")]
+    [TestFixture("sqlitemem")]
     public class FieldTypeTests : TestFixture
     {
         [SetUp]
@@ -36,27 +36,45 @@ namespace Iridium.DB.Test
 
             rec = SaveAndReload(new RecordWithAllTypes { });
 
-            rec.IntField.Should().Be(default(int));
-            rec.IntFieldNullable.Should().NotHaveValue();
+            Assert.That(rec.IntField, Is.EqualTo(default(int)));
+            Assert.That(rec.IntFieldNullable, Is.Null);
+
+//            rec.IntField.Should().Be(default(int));
+//            rec.IntFieldNullable.Should().NotHaveValue();
 
             rec = SaveAndReload(new RecordWithAllTypes {IntField = 111});
 
-            rec.IntField.Should().Be(111);
-            rec.IntFieldNullable.Should().NotHaveValue();
+            Assert.That(rec.IntField, Is.EqualTo(111));
+            Assert.That(rec.IntFieldNullable, Is.Null);
+
+//            rec.IntField.Should().Be(111);
+//            rec.IntFieldNullable.Should().NotHaveValue();
 
             rec = SaveAndReload(new RecordWithAllTypes() {IntFieldNullable = 111});
 
-            rec.IntField.Should().Be(0);
-            rec.IntFieldNullable.Should().Be(111);
+            Assert.That(rec.IntField, Is.Zero);
+            Assert.That(rec.IntFieldNullable, Is.EqualTo(111));
 
-            DB.RecordsWithAllTypes.Count(r => r.IntField == 111).Should().Be(1);
-            DB.RecordsWithAllTypes.Count(r => r.IntField == 0).Should().Be(2);
-            DB.RecordsWithAllTypes.Count(r => r.IntField == r.IntFieldNullable).Should().Be(0);
-            DB.RecordsWithAllTypes.Count(r => r.IntFieldNullable == null).Should().Be(2);
-            DB.RecordsWithAllTypes.Count(r => r.IntFieldNullable != null).Should().Be(1);
-            DB.RecordsWithAllTypes.Count(r => r.IntFieldNullable == 111).Should().Be(1);
-            DB.RecordsWithAllTypes.Count(r => (r.IntFieldNullable ?? 0) == 111).Should().Be(1);
-            DB.RecordsWithAllTypes.Count(r => (r.IntFieldNullable ?? 0) == 0).Should().Be(2);
+            //            rec.IntField.Should().Be(0);
+            //            rec.IntFieldNullable.Should().Be(111);
+
+            Assert.That(DB.RecordsWithAllTypes.Count(r => r.IntField == 111),Is.EqualTo(1));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => r.IntField == 0),Is.EqualTo(2));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => r.IntField == r.IntFieldNullable),Is.EqualTo(0));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => r.IntFieldNullable == null),Is.EqualTo(2));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => r.IntFieldNullable != null),Is.EqualTo(1));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => r.IntFieldNullable == 111),Is.EqualTo(1));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => (r.IntFieldNullable ?? 0) == 111),Is.EqualTo(1));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => (r.IntFieldNullable ?? 0) == 0),Is.EqualTo(2));
+
+//            DB.RecordsWithAllTypes.Count(r => r.IntField == 111).Should().Be(1);
+//            DB.RecordsWithAllTypes.Count(r => r.IntField == 0).Should().Be(2);
+//            DB.RecordsWithAllTypes.Count(r => r.IntField == r.IntFieldNullable).Should().Be(0);
+//            DB.RecordsWithAllTypes.Count(r => r.IntFieldNullable == null).Should().Be(2);
+//            DB.RecordsWithAllTypes.Count(r => r.IntFieldNullable != null).Should().Be(1);
+//            DB.RecordsWithAllTypes.Count(r => r.IntFieldNullable == 111).Should().Be(1);
+//            DB.RecordsWithAllTypes.Count(r => (r.IntFieldNullable ?? 0) == 111).Should().Be(1);
+//            DB.RecordsWithAllTypes.Count(r => (r.IntFieldNullable ?? 0) == 0).Should().Be(2);
         }
 
         [Test]
@@ -66,18 +84,26 @@ namespace Iridium.DB.Test
 
             rec = SaveAndReload(new RecordWithAllTypes { });
 
-            rec.EnumField.Should().Be(default(TestEnum));
-            rec.EnumFieldNullable.Should().BeNull();
+            Assert.That(rec.EnumField, Is.EqualTo(default(TestEnum)));
+            Assert.That(rec.EnumFieldNullable, Is.Null);
+
+//            rec.EnumField.Should().Be(default(TestEnum));
+//            rec.EnumFieldNullable.Should().BeNull();
 
             rec = SaveAndReload(new RecordWithAllTypes { EnumField = default(TestEnum), EnumFieldNullable = null});
 
-            rec.EnumField.Should().Be(default(TestEnum));
-            rec.EnumFieldNullable.Should().BeNull();
+            Assert.That(rec.EnumField, Is.EqualTo(default(TestEnum)));
+            Assert.That(rec.EnumFieldNullable, Is.Null);
+
+//            rec.EnumField.Should().Be(default(TestEnum));
+//            rec.EnumFieldNullable.Should().BeNull();
 
             rec = SaveAndReload(new RecordWithAllTypes { EnumField = TestEnum.One, EnumFieldNullable = TestEnum.One});
 
-            rec.EnumField.Should().Be(TestEnum.One);
-            rec.EnumFieldNullable.Should().Be(TestEnum.One);
+            Assert.That(rec.EnumField, Is.EqualTo(TestEnum.One));
+            Assert.That(rec.EnumFieldNullable, Is.EqualTo(TestEnum.One));
+//            rec.EnumField.Should().Be(TestEnum.One);
+//            rec.EnumFieldNullable.Should().Be(TestEnum.One);
 
             rec = SaveAndReload(new RecordWithAllTypes { EnumField = (TestEnum)100, EnumFieldNullable = (TestEnum)100});
 
@@ -92,23 +118,33 @@ namespace Iridium.DB.Test
 
             rec = SaveAndReload(new RecordWithAllTypes { });
 
-            rec.EnumWithZeroField.Should().Be(default(TestEnumWithZero));
-            rec.EnumWithZeroFieldNullable.Should().BeNull();
+            Assert.That(rec.EnumWithZeroField, Is.EqualTo(default(TestEnumWithZero)));
+            Assert.Null(rec.EnumWithZeroFieldNullable);
+            
+//            rec.EnumWithZeroField.Should().Be(default(TestEnumWithZero));
+//            rec.EnumWithZeroFieldNullable.Should().BeNull();
 
             rec = SaveAndReload(new RecordWithAllTypes { EnumWithZeroField = default(TestEnumWithZero), EnumWithZeroFieldNullable = default(TestEnumWithZero) });
 
-            rec.EnumWithZeroField.Should().Be(TestEnumWithZero.Zero);
-            rec.EnumWithZeroFieldNullable.Should().Be(TestEnumWithZero.Zero);
+            Assert.That(rec.EnumWithZeroField, Is.EqualTo(TestEnumWithZero.Zero));
+            Assert.That(rec.EnumWithZeroFieldNullable, Is.EqualTo(TestEnumWithZero.Zero));
+//
+//            rec.EnumWithZeroField.Should().Be(TestEnumWithZero.Zero);
+//            rec.EnumWithZeroFieldNullable.Should().Be(TestEnumWithZero.Zero);
 
             rec = SaveAndReload(new RecordWithAllTypes { EnumWithZeroField = TestEnumWithZero.One, EnumWithZeroFieldNullable = TestEnumWithZero.One });
 
-            rec.EnumWithZeroField.Should().Be(TestEnumWithZero.One);
-            rec.EnumWithZeroFieldNullable.Should().Be(TestEnumWithZero.One);
+            Assert.That(rec.EnumWithZeroField, Is.EqualTo(TestEnumWithZero.One));
+            Assert.That(rec.EnumWithZeroFieldNullable, Is.EqualTo(TestEnumWithZero.One));
+//            rec.EnumWithZeroField.Should().Be(TestEnumWithZero.One);
+//            rec.EnumWithZeroFieldNullable.Should().Be(TestEnumWithZero.One);
 
             rec = SaveAndReload(new RecordWithAllTypes { EnumWithZeroField = (TestEnumWithZero)100, EnumWithZeroFieldNullable = (TestEnumWithZero)100 });
 
-            Assert.That(rec.EnumWithZeroField,Is.EqualTo(TestEnumWithZero.Zero).Or.EqualTo((TestEnumWithZero)100));
-            Assert.That(rec.EnumWithZeroFieldNullable,Is.Null.Or.EqualTo((TestEnumWithZero)100));
+            Assert.That(rec.EnumWithZeroField, Is.EqualTo((TestEnumWithZero)100).Or.EqualTo(TestEnumWithZero.Zero));
+            Assert.That(rec.EnumWithZeroFieldNullable, Is.Null.Or.EqualTo((TestEnumWithZero)100));
+//            Assert.That(rec.EnumWithZeroField,Is.EqualTo(TestEnumWithZero.Zero).Or.EqualTo((TestEnumWithZero)100));
+//            Assert.That(rec.EnumWithZeroFieldNullable,Is.Null.Or.EqualTo((TestEnumWithZero)100));
         }
 
         [Test]
@@ -120,7 +156,9 @@ namespace Iridium.DB.Test
 
             rec = SaveAndReload(new RecordWithAllTypes() { LongStringField = bigText });
 
-            rec.LongStringField.Should().Be(bigText);
+            Assert.That(rec.LongStringField, Is.EqualTo(bigText));
+
+            //rec.LongStringField.Should().Be(bigText);
         }
 
         [Test]
@@ -132,7 +170,9 @@ namespace Iridium.DB.Test
 
             rec = SaveAndReload(new RecordWithAllTypes() { StringField = s });
 
-            rec.StringField.Should().Be(s);
+            Assert.That(rec.StringField, Is.EqualTo(s));
+
+            //rec.StringField.Should().Be(s);
         }
 
         [Test]
@@ -147,7 +187,8 @@ namespace Iridium.DB.Test
             {
                 rec = SaveAndReload(new RecordWithAllTypes() {StringField = tooLongString});
 
-                rec.StringField.Should().BeOneOf(tooLongString, fixedTooLongString);
+                Assert.That(rec.StringField, Is.EqualTo(tooLongString).Or.EqualTo(fixedTooLongString));
+//                rec.StringField.Should().BeOneOf(tooLongString, fixedTooLongString);
             }
             catch
             {
@@ -168,29 +209,39 @@ namespace Iridium.DB.Test
 
             rec = SaveAndReload(new RecordWithAllTypes { DateTimeField = now});
 
-            rec.DateTimeField.Should().BeCloseTo(now, 1000); // some data providers have a 1 second precision on DateTime
-            rec.DateTimeFieldNullable.Should().NotHaveValue();
+            Assert.That(rec.DateTimeField, Is.EqualTo(now).Within(1).Seconds);
+            Assert.Null(rec.DateTimeFieldNullable);
+
+//            rec.DateTimeField.Should().BeCloseTo(now, 1000); // some data providers have a 1 second precision on DateTime
+//            rec.DateTimeFieldNullable.Should().NotHaveValue();
 
             now = rec.DateTimeField; // to get the actual value in the database, rounded to database precision
 
             rec = SaveAndReload(new RecordWithAllTypes { });
 
-            rec.DateTimeField.Should().Be(defaultDate);
-            rec.DateTimeFieldNullable.Should().NotHaveValue();
+            Assert.That(rec.DateTimeField, Is.EqualTo(defaultDate));
+            Assert.Null(rec.DateTimeFieldNullable);
+
+//            rec.DateTimeField.Should().Be(defaultDate);
+//            rec.DateTimeFieldNullable.Should().NotHaveValue();
 
             rec = SaveAndReload(new RecordWithAllTypes { DateTimeFieldNullable = now });
 
-            rec.DateTimeField.Should().Be(defaultDate);
-            rec.DateTimeFieldNullable.Should().HaveValue();
-            rec.DateTimeFieldNullable.Should().BeCloseTo(now, 1000);
+            Assert.That(rec.DateTimeField, Is.EqualTo(defaultDate));
+            Assert.NotNull(rec.DateTimeFieldNullable);
+            Assert.That(rec.DateTimeFieldNullable, Is.EqualTo(now).Within(1).Seconds);
 
-            DB.RecordsWithAllTypes.Count(r => r.DateTimeField == now).Should().Be(1);
-            DB.RecordsWithAllTypes.Count(r => r.DateTimeField == defaultDate).Should().Be(2);
-            DB.RecordsWithAllTypes.Count(r => r.DateTimeFieldNullable == null).Should().Be(2);
-            DB.RecordsWithAllTypes.Count(r => r.DateTimeFieldNullable != null).Should().Be(1);
-            DB.RecordsWithAllTypes.Count(r => r.DateTimeFieldNullable == now).Should().Be(1);
-            DB.RecordsWithAllTypes.Count(r => (r.DateTimeFieldNullable ?? defaultDate) == now).Should().Be(1);
-            DB.RecordsWithAllTypes.Count(r => (r.DateTimeFieldNullable ?? defaultDate) == defaultDate).Should().Be(2);
+//            rec.DateTimeField.Should().Be(defaultDate);
+//            rec.DateTimeFieldNullable.Should().HaveValue();
+//            rec.DateTimeFieldNullable.Should().BeCloseTo(now, 1000);
+
+            Assert.That(DB.RecordsWithAllTypes.Count(r => r.DateTimeField == now),Is.EqualTo(1));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => r.DateTimeField == defaultDate),Is.EqualTo(2));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => r.DateTimeFieldNullable == null),Is.EqualTo(2));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => r.DateTimeFieldNullable != null),Is.EqualTo(1));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => r.DateTimeFieldNullable == now),Is.EqualTo(1));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => (r.DateTimeFieldNullable ?? defaultDate) == now),Is.EqualTo(1));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => (r.DateTimeFieldNullable ?? defaultDate) == defaultDate),Is.EqualTo(2));
         }
 
         [Test]
@@ -200,40 +251,54 @@ namespace Iridium.DB.Test
 
             rec = SaveAndReload(new RecordWithAllTypes() { BooleanField = true });
 
-            rec.BooleanField.Should().BeTrue();
-            rec.BooleanFieldNullable.Should().NotHaveValue();
+            Assert.True(rec.BooleanField);
+            Assert.Null(rec.BooleanFieldNullable);
+
+//            rec.BooleanField.Should().BeTrue();
+//            rec.BooleanFieldNullable.Should().NotHaveValue();
 
             rec = SaveAndReload(new RecordWithAllTypes() { BooleanField = false });
 
-            rec.BooleanField.Should().BeFalse();
-            rec.BooleanFieldNullable.Should().NotHaveValue();
+            Assert.False(rec.BooleanField);
+            Assert.Null(rec.BooleanFieldNullable);
+//            rec.BooleanField.Should().BeFalse();
+//            rec.BooleanFieldNullable.Should().NotHaveValue();
 
             rec = SaveAndReload(new RecordWithAllTypes() {  });
 
-            rec.BooleanField.Should().BeFalse();
-            rec.BooleanFieldNullable.Should().NotHaveValue();
+            Assert.False(rec.BooleanField);
+            Assert.Null(rec.BooleanFieldNullable);
+//            rec.BooleanField.Should().BeFalse();
+//            rec.BooleanFieldNullable.Should().NotHaveValue();
 
             rec = SaveAndReload(new RecordWithAllTypes() { BooleanFieldNullable = true });
 
-            rec.BooleanField.Should().BeFalse();
-            rec.BooleanFieldNullable.Should().HaveValue();
-            rec.BooleanFieldNullable.Should().BeTrue();
+            Assert.False(rec.BooleanField);
+            Assert.NotNull(rec.BooleanFieldNullable);
+            Assert.True(rec.BooleanFieldNullable.Value);
+
+//            rec.BooleanField.Should().BeFalse();
+//            rec.BooleanFieldNullable.Should().HaveValue();
+//            rec.BooleanFieldNullable.Should().BeTrue();
 
             rec = SaveAndReload(new RecordWithAllTypes() { BooleanFieldNullable = false });
 
-            rec.BooleanField.Should().BeFalse();
-            rec.BooleanFieldNullable.Should().HaveValue();
-            rec.BooleanFieldNullable.Should().BeFalse();
+            Assert.False(rec.BooleanField);
+            Assert.NotNull(rec.BooleanFieldNullable);
+            Assert.False(rec.BooleanFieldNullable.Value);
+//            rec.BooleanField.Should().BeFalse();
+//            rec.BooleanFieldNullable.Should().HaveValue();
+//            rec.BooleanFieldNullable.Should().BeFalse();
 
 
-            DB.RecordsWithAllTypes.Count(r => r.BooleanField).Should().Be(1);
-            DB.RecordsWithAllTypes.Count(r => !r.BooleanField).Should().Be(4);
-            DB.RecordsWithAllTypes.Count(r => r.BooleanFieldNullable == null).Should().Be(3);
-            DB.RecordsWithAllTypes.Count(r => r.BooleanFieldNullable != null).Should().Be(2);
-            DB.RecordsWithAllTypes.Count(r => r.BooleanFieldNullable == true).Should().Be(1);
-            DB.RecordsWithAllTypes.Count(r => r.BooleanFieldNullable == false).Should().Be(1);
-            DB.RecordsWithAllTypes.Count(r => (r.BooleanFieldNullable ?? false)).Should().Be(1);
-            DB.RecordsWithAllTypes.Count(r => !(r.BooleanFieldNullable ?? false)).Should().Be(4);
+            Assert.That(DB.RecordsWithAllTypes.Count(r => r.BooleanField),Is.EqualTo(1));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => !r.BooleanField),Is.EqualTo(4));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => r.BooleanFieldNullable == null),Is.EqualTo(3));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => r.BooleanFieldNullable != null),Is.EqualTo(2));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => r.BooleanFieldNullable == true),Is.EqualTo(1));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => r.BooleanFieldNullable == false),Is.EqualTo(1));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => (r.BooleanFieldNullable ?? false)),Is.EqualTo(1));
+            Assert.That(DB.RecordsWithAllTypes.Count(r => !(r.BooleanFieldNullable ?? false)),Is.EqualTo(4));
         }
 
         [Test]
@@ -257,10 +322,7 @@ namespace Iridium.DB.Test
         {
             DB.Insert(new RecordWithAllTypes {IntField = 1, IntFieldNullable = 1});
 
-            DB.RecordsWithAllTypes.Count(rec => rec.IntField == rec.IntFieldNullable).Should().Be(1);
-
-
-
+            Assert.That(DB.RecordsWithAllTypes.Count(rec => rec.IntField == rec.IntFieldNullable), Is.EqualTo(1));
         }
 
     }

@@ -48,6 +48,7 @@
     <None Include="nuget\Iridium.DB.Sqlite.Win32.targets">
       <SubType>Designer</SubType>
     </None>
+    <None Include="packages.config" />
     <None Include="sqlite3-src\sqlite3.c" />
     <None Include="sqlite3-src\sqlite3.h" />
     <None Include="sqlite3-src\sqlite3ext.h" />
@@ -62,6 +63,12 @@
     <None Include="Iridium.DB.Sqlite.Win32.nuspec">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Iridium-Core, Version=1.2.1.36205, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\iridium.core.1.2.1.19\lib\portable-net45+win8+wpa81\Iridium-Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <Import Project="..\Iridium-DB-Sqlite-Shared\Iridium-DB-Sqlite-Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

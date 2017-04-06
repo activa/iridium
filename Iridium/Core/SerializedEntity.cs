@@ -25,7 +25,7 @@
 #endregion
 
 using System.Collections.Generic;
-using Iridium.DB.CoreUtil;
+using Iridium.Core;
 
 namespace Iridium.DB
 {

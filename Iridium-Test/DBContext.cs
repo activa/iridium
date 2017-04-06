@@ -6,13 +6,23 @@ using System.Linq.Expressions;
 using System.Runtime.Remoting;
 using Iridium.DB;
 using Iridium.DB.MySql;
+using Iridium.DB.Postgres;
 using Iridium.DB.SqlServer;
 using Iridium.DB.SqlService;
 
 namespace Iridium.DB.Test
 {
+    public class SERVERS
+    {
+        public const string SQLSERVER = "192.168.1.100";
+        public const string MYSQL = "192.168.1.32";
+        public const string POSTGRES = "192.168.1.32";
+    }
+
+
     public class DBContext : StorageContext
     {
+
         public IDataSet<Order> Orders { get; set; }
         public IDataSet<Customer> Customers { get; set; }
         public IDataSet<OrderItem> OrderItems { get; set; }
@@ -78,9 +88,11 @@ namespace Iridium.DB.Test
         {
             _contextFactories = new Dictionary<string,Func<DBContext>>()
             {
-               { "sqlite", () => new SqliteStorage() },
+                { "sqlite", () => new SqliteStorage() },
+                { "sqlitemem", () => new SqliteMemStorage() },
                 { "sqlserver", () => new SqlServerStorage() },
                 { "mysql", () => new MySqlStorage() },
+                { "postgres", () => new PostgresStorage() },
                 { "memory", () => new MemoryStorage() }
             };
 
@@ -99,18 +111,30 @@ namespace Iridium.DB.Test
 
     public class MySqlStorage : DBContext
     {
-        public MySqlStorage() : base(new MySqlDataProvider("Server=192.168.1.32;Database=velox;UID=velox;PWD=velox")) { }
+        public MySqlStorage() : base(new MySqlDataProvider($"Server={SERVERS.MYSQL};Database=velox;UID=velox;PWD=velox")) { }
+    }
+
+    public class PostgresStorage : DBContext
+    {
+        public PostgresStorage() : base(new PostgresDataProvider($"Host={SERVERS.POSTGRES};Database=velox;Username=velox;Password=velox")) { }
     }
 
     public class SqlServerStorage : DBContext
     {
-        public SqlServerStorage() : base(new SqlServerDataProvider("Server=NOOKIE;Database=velox;UID=velox;PWD=velox")) { }
+        public SqlServerStorage() : base(new SqlServerDataProvider($"Server={SERVERS.SQLSERVER};Database=velox;UID=velox;PWD=velox")) { }
     }
 
     public class SqliteStorage : DBContext
     {
         public SqliteStorage() : base(new SqliteDataProvider("velox.sqlite")) { }
     }
+
+    public class SqliteMemStorage : DBContext
+    {
+        public SqliteMemStorage() : base(new SqliteDataProvider(":memory:")) { }
+    }
+
+
 
     public class MemoryStorage : DBContext
     {

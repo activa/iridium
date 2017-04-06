@@ -27,7 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Iridium.DB.CoreUtil;
+using Iridium.Core;
 
 namespace Iridium.DB
 {
@@ -77,12 +77,12 @@ namespace Iridium.DB
 
             foreach (var field in ObjectType.Inspector().GetFieldsAndProperties(BindingFlags.Instance | BindingFlags.Public).Where(field => _mappableTypes.Any(f => f(field.Type.Inspector()))))
             {
-                var fieldInspector = field.Inspector;
+                var fieldInspector = field;
 
-                if (fieldInspector.HasAttribute<Column.IgnoreAttribute>() || (!fieldInspector.IsWritePublic))
+                if (fieldInspector.HasAttribute<Column.IgnoreAttribute>() || (fieldInspector.IsProperty && !fieldInspector.IsWritePublic))
                     continue;
 
-                var schemaField = new Field(field);
+                var schemaField = new Field(field.MemberInfo);
 
                 var fieldPropertiesFromConvention = Ir.Config.NamingConvention.GetFieldProperties(this, schemaField);
 
@@ -219,7 +219,7 @@ namespace Iridium.DB
                 Type collectionType = field.Type.Inspector().GetInterfaces().FirstOrDefault(tI => tI.IsConstructedGenericType && tI.GetGenericTypeDefinition() == typeof (IEnumerable<>));
                 bool isDataSet = field.Type.IsConstructedGenericType && field.Type.GetGenericTypeDefinition() == typeof(IDataSet<>);
 
-                var relationAttribute = field.Inspector.GetAttribute<RelationAttribute>();
+                var relationAttribute = field.GetAttribute<RelationAttribute>();
 
                 if (!field.Type.Inspector().ImplementsOrInherits<IEntity>() && relationAttribute == null && !isDataSet)
                     continue;
@@ -228,7 +228,7 @@ namespace Iridium.DB
                 Field localField;
                 TableSchema foreignSchema;
 
-                Relation relation = new Relation(field)
+                Relation relation = new Relation(field.MemberInfo)
                 {
                     LocalSchema = this
                 };

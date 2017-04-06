@@ -28,6 +28,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Iridium.Core;
 
 namespace Iridium.DB
 {
@@ -66,7 +67,7 @@ namespace Iridium.DB
                 if (Schema.IncrementKeys.Length == 0)
                     throw new Exception("Save()/InsertOrUpdate() is only supported for objects with autoincremnt primary keys. Use explicit Insert() or Update()");
                 
-                create = Schema.IncrementKeys.Length > 0 && Equals(Schema.IncrementKeys[0].GetField(obj), Schema.IncrementKeys[0].FieldInfo.TypeInspector.DefaultValue());
+                create = Schema.IncrementKeys.Length > 0 && Equals(Schema.IncrementKeys[0].GetField(obj), Schema.IncrementKeys[0].FieldInfo.Inspector().Type.Inspector().DefaultValue());
             }
 
             bool cancelSave = false;

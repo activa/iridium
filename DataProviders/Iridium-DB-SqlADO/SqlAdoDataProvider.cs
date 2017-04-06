@@ -32,7 +32,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Iridium.DB.CoreUtil;
+using Iridium.Core;
 
 #if IRIDIUM_SQLSERVER
 namespace Iridium.DB.SqlServer
@@ -47,7 +47,6 @@ namespace Iridium.DB.Sql
         public string ConnectionString { get; set; }
 
         private readonly ThreadLocal<DbConnection> _localConnection = new ThreadLocal<DbConnection>(true);
-        private readonly ThreadLocal<Stack<DbTransaction>> _transactionStack = new ThreadLocal<Stack<DbTransaction>>(() => new Stack<DbTransaction>());
 
         protected SqlAdoDataProvider()
         {
@@ -281,42 +280,7 @@ namespace Iridium.DB.Sql
 
         }
 
-        public override void BeginTransaction(IsolationLevel isolationLevel)
-        {
-            if (isolationLevel == IsolationLevel.None)
-                _transactionStack.Value.Push(null);
-            else
-            {
-                var transaction = Connection.BeginTransaction(AdoIsolationLevel(isolationLevel));
-
-                _transactionStack.Value.Push(transaction);
-            }
-        }
-
-        public override void CommitTransaction()
-        {
-            _transactionStack.Value.Pop()?.Commit();
-
-            if (_transactionStack.Value.Count == 0)
-                CloseConnection();
-        }
-
-        public override void RollbackTransaction()
-        {
-            _transactionStack.Value.Pop()?.Rollback();
-
-            if (_transactionStack.Value.Count == 0)
-                CloseConnection();
-        }
-
-        protected virtual DbTransaction CurrentTransaction
-        {
-            get { return _transactionStack.Value.FirstOrDefault(t => t != null); }
-        }
-
-        //private DbTransaction _currentTransaction;
-
-        //private readonly Stack<DbTransaction> _transactionStack = new Stack<DbTransaction>();
+        protected abstract DbTransaction CurrentTransaction { get; }
     }
 
     public interface ITransaction

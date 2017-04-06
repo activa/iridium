@@ -49,10 +49,6 @@ namespace Iridium.DB
 
         bool CreateOrUpdateTable(TableSchema schema, bool recreateTable = false, bool recreateIndexes = false);
 
-        int ExecuteSql(string sql, QueryParameterCollection parameters);
-        IEnumerable<SerializedEntity> Query(string sql, QueryParameterCollection parameters);
-        IEnumerable<object> QueryScalar(string sql, QueryParameterCollection parameters);
-
         void BeginTransaction(IsolationLevel isolationLevel = IsolationLevel.None);
         void CommitTransaction();
         void RollbackTransaction();

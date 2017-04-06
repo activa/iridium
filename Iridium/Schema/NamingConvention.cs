@@ -26,7 +26,7 @@
 
 using System;
 using System.Text.RegularExpressions;
-using Iridium.DB.CoreUtil;
+using Iridium.Core;
 
 namespace Iridium.DB
 {
@@ -65,7 +65,7 @@ namespace Iridium.DB
             if (field.FieldName.Equals(pkName, StringComparison.OrdinalIgnoreCase))
             {
                 fieldProperties.PrimaryKey = true;
-                fieldProperties.AutoIncrement = UseAutoIncrement && field.FieldInfo.TypeInspector.Is(TypeFlags.Integer);
+                fieldProperties.AutoIncrement = UseAutoIncrement && field.FieldInfo.Inspector().Type.Inspector().Is(TypeFlags.Integer);
                 fieldProperties.Indexed = false;
             }
 
