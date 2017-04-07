@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqliteDataProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Iridium-Core, Version=1.2.1.36205, Culture=neutral, processorArchitecture=MSIL">

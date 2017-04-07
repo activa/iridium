@@ -22,10 +22,6 @@
     <file src="Iridium\bin\$Configuration$\Iridium.dll" target="lib\net45"/>
     <file src="Iridium\DataProviders\Sqlite\Iridium.DB.Sqlite.Win32.dll" target="lib\net45" />
 
-    <file src="Iridium\DataProviders\Sqlite\win32-x64\sqlite3.dll" target="build\net45\sqlite-native\win32-x64" />
-    <file src="Iridium\DataProviders\Sqlite\win32-x86\sqlite3.dll" target="build\net45\sqlite-native\win32-x86" />
-    <file src="Iridium\DataProviders\Sqlite\iridium.targets" target="build\net45\" />
-
     <file src="Iridium\bin\$Configuration$\Iridium.dll" target="lib\Xamarin.iOS"/>
     <file src="Iridium\DataProviders\Sqlite\Iridium.DB.Sqlite.Native.dll" target="lib\Xamarin.iOS" />
 

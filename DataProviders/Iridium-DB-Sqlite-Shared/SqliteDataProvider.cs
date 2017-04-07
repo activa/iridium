@@ -34,24 +34,23 @@ using Iridium.Core;
 
 namespace Iridium.DB
 {
-    public class SqliteDataProvider : SqlDataProvider<SqliteDialect>
+    public abstract class SqliteDataProviderCommon : SqlDataProvider<SqliteDialect>
     {
         private IntPtr? _db;
         private readonly ThreadLocal<long?> _lastRowId = new ThreadLocal<long?>();
         private readonly ISqliteAPI _sqlite3;
 
-        static SqliteDataProvider()
+        protected SqliteDataProviderCommon(INativeLibraryLoader loader)
         {
-            Win32Loader.CheckAndLoadSqliteLibrary();
-        }
+            loader?.LoadLibrary();
 
-        public SqliteDataProvider()
-        {
             _sqlite3 = new SqliteAPI();
         }
 
-        public SqliteDataProvider(string fileName = null, SqliteDateFormat dateFormat = SqliteDateFormat.String)
+        protected SqliteDataProviderCommon(INativeLibraryLoader loader, string fileName, SqliteDateFormat dateFormat)
         {
+            loader?.LoadLibrary();
+
             _sqlite3 = new SqliteAPI();
 
             FileName = fileName;

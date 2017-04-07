@@ -6,6 +6,11 @@ using Iridium.Core;
 
 namespace Iridium.DB
 {
+    public interface INativeLibraryLoader
+    {
+        object LoadLibrary();
+    }
+
     internal static class Win32Loader
     {
         [DllImport("kernel32", CallingConvention = CallingConvention.Winapi, BestFitMapping = false, ThrowOnUnmappableChar = true, SetLastError = true)]
@@ -28,6 +33,7 @@ namespace Iridium.DB
 
                 var dllName = Path.Combine(Path.GetDirectoryName(assemblyPath.LocalPath), "win32-" + Platform.Properties.Architecture + "\\sqlite3.dll");
 
+                
                 var dll = LoadLibrary(dllName);
 
                 if ((long)dll == 0)

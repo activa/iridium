@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqliteDataProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedNativeLibrary Include="Native\libs\arm64-v8a\libsqlite_emb.so" />

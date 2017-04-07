@@ -9,14 +9,13 @@
     <Import_RootNamespace>Iridium_DB_Sqlite_Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)INativeLibraryLoader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ISqliteAPI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)sqlite3.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SqliteAPI.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SqliteContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SqliteDataProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SqliteDateFormat.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SqliteDialect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SqliteException.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Win32Loader.cs" />
   </ItemGroup>
 </Project>

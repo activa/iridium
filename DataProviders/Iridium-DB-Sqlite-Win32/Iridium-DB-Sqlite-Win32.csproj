@@ -12,8 +12,6 @@
     <AssemblyName>Iridium.DB.Sqlite.Win32</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <TargetFrameworkProfile>Profile111</TargetFrameworkProfile>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -34,14 +32,22 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <!-- A reference to the entire .NET Framework is automatically included -->
-    <ProjectReference Include="..\..\Iridium\Iridium.csproj">
-      <Project>{8db31db3-ae35-44c3-876e-940c19689c59}</Project>
-      <Name>Iridium</Name>
-    </ProjectReference>
+    <Reference Include="Iridium-Core, Version=1.2.1.36205, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\iridium.core.1.2.1.19\lib\portable-net45+win8+wpa81\Iridium-Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NativeLibraryLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqliteDataProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="sqlite3-src\howtocompile.txt" />
@@ -52,12 +58,8 @@
     <None Include="sqlite3-src\sqlite3.c" />
     <None Include="sqlite3-src\sqlite3.h" />
     <None Include="sqlite3-src\sqlite3ext.h" />
-    <Content Include="win32-x64\sqlite3.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="win32-x86\sqlite3.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <EmbeddedResource Include="win32-x64\sqlite3.dll" />
+    <EmbeddedResource Include="win32-x86\sqlite3.dll" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Iridium.DB.Sqlite.Win32.nuspec">
@@ -65,13 +67,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Iridium-Core, Version=1.2.1.36205, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\iridium.core.1.2.1.19\lib\portable-net45+win8+wpa81\Iridium-Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <ProjectReference Include="..\..\Iridium\Iridium.csproj">
+      <Project>{8db31db3-ae35-44c3-876e-940c19689c59}</Project>
+      <Name>Iridium</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="..\Iridium-DB-Sqlite-Shared\Iridium-DB-Sqlite-Shared.projitems" Label="Shared" />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="BeforeBuild">
   </Target>
   <Target Name="AfterBuild">
