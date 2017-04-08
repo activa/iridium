@@ -100,7 +100,6 @@
     <Compile Include="Core\StorageContext.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="DataProviders\Sqlite\iridium.targets" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
@@ -108,8 +107,6 @@
     <None Include="DataProviders\Sqlite\Iridium.DB.Sqlite.Android.dll" />
     <None Include="DataProviders\Sqlite\Iridium.DB.Sqlite.Native.dll" />
     <None Include="DataProviders\Sqlite\Iridium.DB.Sqlite.Win32.dll" />
-    <None Include="DataProviders\Sqlite\win32-x64\sqlite3.dll" />
-    <None Include="DataProviders\Sqlite\win32-x86\sqlite3.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Target Name="BeforeBuild">
