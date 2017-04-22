@@ -98,197 +98,197 @@ namespace Iridium.DB
 
         public Task<T> Read(object key, params Expression<Func<T, object>>[] relationsToLoad)
         {
-            return Task.Factory.StartNew( () => _dataSet.Read(key, relationsToLoad));
+            return Task.Run( () => _dataSet.Read(key, relationsToLoad));
         }
 
         public Task<T> Read(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] relationsToLoad)
         {
-            return Task.Factory.StartNew(() => _dataSet.Read(condition, relationsToLoad));
+            return Task.Run(() => _dataSet.Read(condition, relationsToLoad));
         }
 
         public Task<T> Load(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad)
         {
-            return Task.Factory.StartNew( () => _dataSet.Load(obj, key, relationsToLoad));
+            return Task.Run( () => _dataSet.Load(obj, key, relationsToLoad));
         }
 
         public Task<bool> Save(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return Task.Factory.StartNew(() => _dataSet.Save(obj, relationsToSave));
+            return Task.Run(() => _dataSet.Save(obj, relationsToSave));
         }
 
         public Task<bool> InsertOrUpdate(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return Task.Factory.StartNew( () => _dataSet.InsertOrUpdate(obj, relationsToSave));
+            return Task.Run( () => _dataSet.InsertOrUpdate(obj, relationsToSave));
         }
 
         public Task<bool> Insert(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return Task.Factory.StartNew( () => _dataSet.Insert(obj, relationsToSave: relationsToSave));
+            return Task.Run( () => _dataSet.Insert(obj, relationsToSave: relationsToSave));
         }
 
         public Task<bool> Update(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return Task.Factory.StartNew(() => _dataSet.Update(obj, relationsToSave));
+            return Task.Run(() => _dataSet.Update(obj, relationsToSave));
         }
 
         public Task<bool> Delete(T obj)
         {
-            return Task.Factory.StartNew( () => _dataSet.Delete(obj));
+            return Task.Run( () => _dataSet.Delete(obj));
         }
 
         public Task<bool> DeleteAll()
         {
-            return Task.Factory.StartNew(() => _dataSet.DeleteAll());
+            return Task.Run(() => _dataSet.DeleteAll());
         }
 
         public Task<bool> Delete(Expression<Func<T, bool>> filter)
         {
-            return Task.Factory.StartNew( () => _dataSet.Delete(filter));
+            return Task.Run( () => _dataSet.Delete(filter));
         }
 
         public Task<bool> Delete(QueryExpression filterExpression)
         {
-            return Task.Factory.StartNew(() => _dataSet.Delete(filterExpression));
+            return Task.Run(() => _dataSet.Delete(filterExpression));
         }
 
         public Task<T> First()
         {
-            return Task.Factory.StartNew(() => _dataSet.First());
+            return Task.Run(() => _dataSet.First());
         }
 
         public Task<T> First(Expression<Func<T, bool>> filter)
         {
-            return Task.Factory.StartNew(() => _dataSet.First(filter));
+            return Task.Run(() => _dataSet.First(filter));
         }
 
         public Task<T> FirstOrDefault()
         {
-            return Task.Factory.StartNew(() => _dataSet.FirstOrDefault());
+            return Task.Run(() => _dataSet.FirstOrDefault());
         }
 
         public Task<T> FirstOrDefault(Expression<Func<T, bool>> filter)
         {
-            return Task.Factory.StartNew(() => _dataSet.FirstOrDefault(filter));
+            return Task.Run(() => _dataSet.FirstOrDefault(filter));
         }
 
         public Task<long> Count()
         {
-            return Task.Factory.StartNew(() => _dataSet.Count());
+            return Task.Run(() => _dataSet.Count());
         }
 
         public Task<long> Count(Expression<Func<T, bool>> filter)
         {
-            return Task.Factory.StartNew(() => _dataSet.Count(filter));
+            return Task.Run(() => _dataSet.Count(filter));
         }
 
         public Task<TScalar> Max<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter)
         {
-            return Task.Factory.StartNew(() => _dataSet.Max(expression, filter));
+            return Task.Run(() => _dataSet.Max(expression, filter));
         }
 
         public Task<TScalar> Min<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter)
         {
-            return Task.Factory.StartNew(() => _dataSet.Min(expression, filter));
+            return Task.Run(() => _dataSet.Min(expression, filter));
         }
 
         public Task<TScalar> Sum<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter)
         {
-            return Task.Factory.StartNew(() => _dataSet.Sum(expression, filter));
+            return Task.Run(() => _dataSet.Sum(expression, filter));
         }
 
         public Task<bool> All(Expression<Func<T, bool>> filter)
         {
-            return Task.Factory.StartNew(() => _dataSet.All(filter));
+            return Task.Run(() => _dataSet.All(filter));
         }
 
         public Task<TScalar> Max<TScalar>(Expression<Func<T, TScalar>> expression)
         {
-            return Task.Factory.StartNew(() => _dataSet.Max(expression));
+            return Task.Run(() => _dataSet.Max(expression));
         }
 
         public Task<TScalar> Min<TScalar>(Expression<Func<T, TScalar>> expression)
         {
-            return Task.Factory.StartNew(() => _dataSet.Min(expression));
+            return Task.Run(() => _dataSet.Min(expression));
         }
 
         public Task<TScalar> Sum<TScalar>(Expression<Func<T, TScalar>> expression)
         {
-            return Task.Factory.StartNew(() => _dataSet.Sum(expression));
+            return Task.Run(() => _dataSet.Sum(expression));
         }
 
         public Task<TScalar> Average<TScalar>(Expression<Func<T, TScalar>> expression)
         {
-            return Task.Factory.StartNew(() => _dataSet.Average(expression));
+            return Task.Run(() => _dataSet.Average(expression));
         }
 
         public Task<bool> Any()
         {
-            return Task.Factory.StartNew(() => _dataSet.Any());
+            return Task.Run(() => _dataSet.Any());
         }
 
         public Task<TScalar> Average<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter)
         {
-            return Task.Factory.StartNew(() => _dataSet.Average(expression, filter));
+            return Task.Run(() => _dataSet.Average(expression, filter));
         }
 
         public Task<bool> Any(Expression<Func<T, bool>> filter)
         {
-            return Task.Factory.StartNew(() => _dataSet.Any(filter));
+            return Task.Run(() => _dataSet.Any(filter));
         }
 
         public Task<T> ElementAt(int index)
         {
-            return Task.Factory.StartNew(() => _dataSet.ElementAt(index));
+            return Task.Run(() => _dataSet.ElementAt(index));
         }
 
         public Task<List<T>> ToList()
         {
-            return Task.Factory.StartNew(() => _dataSet.ToList());
+            return Task.Run(() => _dataSet.ToList());
         }
 
         public Task<T[]> ToArray()
         {
-            return Task.Factory.StartNew(() => _dataSet.ToArray());
+            return Task.Run(() => _dataSet.ToArray());
         }
 
         public Task<Dictionary<TKey, T>> ToDictionary<TKey>(Func<T, TKey> keySelector)
         {
-            return Task.Factory.StartNew(() => _dataSet.ToDictionary(keySelector));
+            return Task.Run(() => _dataSet.ToDictionary(keySelector));
         }
 
         public Task<Dictionary<TKey, T>> ToDictionary<TKey>(Func<T, TKey> keySelector, IEqualityComparer<TKey> comparer)
         {
-            return Task.Factory.StartNew(() => _dataSet.ToDictionary(keySelector, comparer));
+            return Task.Run(() => _dataSet.ToDictionary(keySelector, comparer));
         }
 
         public Task<Dictionary<TKey, TValue>> ToDictionary<TKey, TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector)
         {
-            return Task.Factory.StartNew(() => _dataSet.ToDictionary(keySelector, valueSelector));
+            return Task.Run(() => _dataSet.ToDictionary(keySelector, valueSelector));
         }
 
         public Task<Dictionary<TKey, TValue>> ToDictionary<TKey, TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector, IEqualityComparer<TKey> comparer)
         {
-            return Task.Factory.StartNew(() => _dataSet.ToDictionary(keySelector, valueSelector, comparer));
+            return Task.Run(() => _dataSet.ToDictionary(keySelector, valueSelector, comparer));
         }
 
         public Task<ILookup<TKey, T>> ToLookup<TKey>(Func<T, TKey> keySelector)
         {
-            return Task.Factory.StartNew(() => _dataSet.ToLookup(keySelector));
+            return Task.Run(() => _dataSet.ToLookup(keySelector));
         }
 
         public Task<ILookup<TKey, T>> ToLookup<TKey>(Func<T, TKey> keySelector, IEqualityComparer<TKey> comparer)
         {
-            return Task.Factory.StartNew(() => _dataSet.ToLookup(keySelector, comparer));
+            return Task.Run(() => _dataSet.ToLookup(keySelector, comparer));
         }
 
         public Task<ILookup<TKey, TValue>> ToLookup<TKey,TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector)
         {
-            return Task.Factory.StartNew(() => _dataSet.ToLookup(keySelector, valueSelector));
+            return Task.Run(() => _dataSet.ToLookup(keySelector, valueSelector));
         }
 
         public Task<ILookup<TKey, TValue>> ToLookup<TKey, TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector, IEqualityComparer<TKey> comparer)
         {
-            return Task.Factory.StartNew(() => _dataSet.ToLookup(keySelector, valueSelector, comparer));
+            return Task.Run(() => _dataSet.ToLookup(keySelector, valueSelector, comparer));
         }
 
     }

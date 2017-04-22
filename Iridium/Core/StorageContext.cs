@@ -280,6 +280,18 @@ namespace Iridium.DB
             return GetRepository<T>().Delete(GetRepository<T>().CreateQuerySpec(new FilterSpec(condition)));
         }
 
+        public void UpdateOrCreateOnlyRecord<T>(T rec)
+        {
+            using (var transaction = CreateTransaction())
+            {
+                DataSet<T>().Purge();
+
+                Insert(rec);
+
+                transaction.Commit();
+            }
+        }
+
         public int SqlNonQuery(string sql, object parameters = null)
         {
             var sqlProvider = DataProvider as ISqlDataProvider;
@@ -339,12 +351,12 @@ namespace Iridium.DB
 
         public Task CreateTableAsync<T>(bool recreateTable = false, bool recreateIndexes = false)
         {
-            return Task.Factory.StartNew(() => CreateTable<T>(recreateTable, recreateIndexes));
+            return Task.Run(() => CreateTable<T>(recreateTable, recreateIndexes));
         }
 
         public Task<int> SqlNonQueryAsync(string sql, object parameters)
         {
-            return Task.Factory.StartNew(() => SqlNonQuery(sql, parameters));
+            return Task.Run(() => SqlNonQuery(sql, parameters));
         }
 
         [Obsolete("Use SqlNonQueryAsync()")]
@@ -355,22 +367,22 @@ namespace Iridium.DB
 
         public Task<T[]> QueryAsync<T>(string sql, object parameters = null) where T : new()
         {
-            return Task.Factory.StartNew(() => SqlQuery<T>(sql, parameters).ToArray());
+            return Task.Run(() => SqlQuery<T>(sql, parameters).ToArray());
         }
 
         public Task<T> QueryScalarAsync<T>(string sql, object parameters = null) where T : new()
         {
-            return Task.Factory.StartNew(() => SqlQueryScalar<T>(sql, parameters));
+            return Task.Run(() => SqlQueryScalar<T>(sql, parameters));
         }
 
         public Task<T[]> QueryScalarsAsync<T>(string sql, object parameters = null) where T : new()
         {
-            return Task.Factory.StartNew(() => SqlQueryScalars<T>(sql, parameters).ToArray());
+            return Task.Run(() => SqlQueryScalars<T>(sql, parameters).ToArray());
         }
 
         public Task<T> ReadAsync<T>(object key, params Expression<Func<T, object>>[] relationsToLoad)
         {
-            return Task.Factory.StartNew(() => GetRepository<T>().Read(key, relationsToLoad));
+            return Task.Run(() => GetRepository<T>().Read(key, relationsToLoad));
         }
 
         public Task<T> ReadAsync<T>(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] relationsToLoad)
@@ -380,27 +392,32 @@ namespace Iridium.DB
 
         public Task<T> LoadAsync<T>(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad)
         {
-            return Task.Factory.StartNew(() => GetRepository<T>().Load(obj, key, relationsToLoad));
+            return Task.Run(() => GetRepository<T>().Load(obj, key, relationsToLoad));
         }
 
         public Task<bool> SaveAsync<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return Task.Factory.StartNew(() => DataSet<T>().Save(obj, relationsToSave));
+            return Task.Run(() => DataSet<T>().Save(obj, relationsToSave));
         }
 
         public Task<bool> InsertAsync<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return Task.Factory.StartNew(() => DataSet<T>().Insert(obj, relationsToSave));
+            return Task.Run(() => DataSet<T>().Insert(obj, relationsToSave));
         }
 
         public Task<bool> UpdateAsync<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return Task.Factory.StartNew(() => DataSet<T>().Update(obj, relationsToSave));
+            return Task.Run(() => DataSet<T>().Update(obj, relationsToSave));
         }
 
         public Task<bool> DeleteAsync<T>(T obj)
         {
-            return Task.Factory.StartNew(() => GetRepository<T>().Delete(obj));
+            return Task.Run(() => GetRepository<T>().Delete(obj));
+        }
+
+        public Task UpdateOrCreatOnlyRecordAsync<T>(T rec)
+        {
+            return Task.Run(() => UpdateOrCreateOnlyRecord(rec));
         }
 
         // IDisposable

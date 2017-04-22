@@ -8,7 +8,6 @@ using Iridium.DB;
 using Iridium.DB.MySql;
 using Iridium.DB.Postgres;
 using Iridium.DB.SqlServer;
-using Iridium.DB.SqlService;
 
 namespace Iridium.DB.Test
 {
@@ -139,12 +138,5 @@ namespace Iridium.DB.Test
     public class MemoryStorage : DBContext
     {
         public MemoryStorage() : base(new MemoryDataProvider()) { }
-    }
-
-    public class ServiceStorage : DBContext
-    {
-        public ServiceStorage() : base(new SqlServiceDataProvider("http://localhost:55768",null,null))
-        {
-        }
     }
 }

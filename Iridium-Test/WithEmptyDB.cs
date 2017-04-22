@@ -367,7 +367,7 @@ namespace Iridium.DB.Test
             {
                 string name = "C" + (i + 1);
 
-                tasks[i] = Task.Factory.StartNew(() =>
+                tasks[i] = Task.Run(() =>
                 {
                     Customer customer = new Customer { Name = name };
 
