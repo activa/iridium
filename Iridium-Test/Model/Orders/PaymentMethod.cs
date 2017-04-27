@@ -6,7 +6,6 @@ namespace Iridium.DB.Test
     {
         public int PaymentMethodID { get; set; }
         public string Name { get; set; }
-        public int MonthlyCost { get; set; }
 
         [Relation]
         public ICollection<CustomerPaymentMethodLink> LinkedCustomers { get; set; }

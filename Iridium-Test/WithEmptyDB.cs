@@ -225,8 +225,6 @@ namespace Iridium.DB.Test
             customer = DB.Customers.Read(customer.CustomerID);
 
             Assert.That(customer.Orders, Has.Exactly(5).Items.And.All.Property("Customer").SameAs(customer));
-
-//            customer.Orders.Should().HaveCount(5).And.OnlyContain(order => order.Customer == customer);
         }
 
         [Test]
@@ -247,9 +245,6 @@ namespace Iridium.DB.Test
             rec1 = DB.Read<OneToOneRec1>(rec1.OneToOneRec1ID, r=> r.Rec2 );
 
             Assert.That(rec1.Rec2.Rec1, Is.SameAs(rec1));
-
-//            rec1.Rec2.Rec1.Should().Be(rec1);
-
         }
 
         [Test]
@@ -278,9 +273,6 @@ namespace Iridium.DB.Test
 
             Assert.That(salesPerson.Orders.Count(), Is.EqualTo(1));
             Assert.That(salesPerson.Orders.First().OrderID, Is.EqualTo(orders[1].OrderID));
-
-//            salesPerson.Orders.Count().Should().Be(1);
-//            salesPerson.Orders.First().OrderID.Should().Be(orders[1].OrderID);
         }
 
         [Test]
@@ -337,11 +329,7 @@ namespace Iridium.DB.Test
             Assert.That(failedList, Is.Empty);
             Assert.False(saveTasks.Any(t => t.IsFaulted));
 
-            //saveTasks.Should().NotContain(t => t.IsFaulted);
-
             Assert.That(createdCustomers.Count, Is.EqualTo(numThreads));
-
-            //createdCustomers.Count.Should().Be(numThreads);
 
             foreach (var fail in failedList)
             {
@@ -408,9 +396,6 @@ namespace Iridium.DB.Test
             }
 
             Assert.That(createdCustomers, Has.Count.EqualTo(numThreads));
-
-
-            //createdCustomers.Count.Should().Be(numThreads);
         }
 
         private void CreateRandomPricedProducts()
@@ -440,10 +425,6 @@ namespace Iridium.DB.Test
 
             Assert.That(pr, Has.Length.EqualTo(2));
             Assert.True(pr.All(p => p.Description.StartsWith("B")));
-
-            //pr.Count().Should().Be(2);
-            //pr.All(p => p.Description.StartsWith("B")).Should().BeTrue();
-
         }
 
         [Test]
@@ -464,9 +445,6 @@ namespace Iridium.DB.Test
 
             Assert.That(pr, Has.Length.EqualTo(2));
             Assert.True(pr.All(p => p.Description.EndsWith("B")));
-
-//            pr.Count().Should().Be(2);
-//            pr.All(p => p.Description.EndsWith("B")).Should().BeTrue();
         }
 
 
@@ -479,14 +457,10 @@ namespace Iridium.DB.Test
 
             Assert.That(sortedProducts.Select(product => product.Price), Is.Ordered.Ascending);
 
-//            sortedProducts.Should().BeInAscendingOrder(product => product.Price);
-
             sortedProducts = from product in DB.Products orderby product.Price descending select product;
 
             Assert.That(sortedProducts.Select(product => product.Price), Is.Ordered.Descending);
-
-//            sortedProducts.Should().BeInDescendingOrder(product => product.Price);
-        }
+       }
 
         [Test]
         public void ManyTransactions()
@@ -579,10 +553,6 @@ namespace Iridium.DB.Test
             Assert.That(order2.Customer.Name,Is.EqualTo(order.Customer.Name));
             Assert.That(order2.Customer.CustomerID,Is.EqualTo(order.Customer.CustomerID));
             Assert.That(order2.Customer.CustomerID,Is.EqualTo(order.CustomerID));
-
-            //            order2.Customer.Name.Should().Be(order.Customer.Name);
-            //            order2.Customer.CustomerID.Should().Be(order.Customer.CustomerID);
-            //            order2.Customer.CustomerID.Should().Be(order.CustomerID);
         }
 
         [Test]

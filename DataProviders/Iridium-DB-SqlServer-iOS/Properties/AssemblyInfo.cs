@@ -2,36 +2,19 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
-[assembly: AssemblyTitle("Velox.DB.SqlServer.iOS")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Iridium.DB.SqlServer")]
+[assembly: AssemblyDescription("Iridium Driver for SQL Server 2008+")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Velox.DB.SqlServer.iOS")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
+[assembly: AssemblyCompany("Philippe Leybaert")]
+[assembly: AssemblyProduct("Iridium.DB.SqlServer")]
+[assembly: AssemblyCopyright("Copyright © 2015-2017 Philippe Leybaert")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
-// COM, set the ComVisible attribute to true on that type.
+[assembly: AssemblyVersion("2.0.0.*")]
+[assembly: AssemblyFileVersion("2.0.0")]
+[assembly: AssemblyInformationalVersion("2.0.0")]
+
 [assembly: ComVisible(false)]
 
-// The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("25489ab0-7a64-44be-9fb3-4b0357e3bfab")]
-
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version 
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.9.49.*")]
-
-[assembly: AssemblyInformationalVersion("0.9.49")]

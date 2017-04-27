@@ -38,6 +38,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Iridium-Core, Version=1.2.1.36205, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\iridium.core.1.2.1.19\lib\portable-net45+win8+wpa81\Iridium-Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -49,6 +53,9 @@
       <Project>{8db31db3-ae35-44c3-876e-940c19689c59}</Project>
       <Name>Iridium</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="..\Velox.DB.SqlServer.Shared\Velox.DB.SqlServer.Shared.projitems" Label="Shared" Condition="Exists('..\Velox.DB.SqlServer.Shared\Velox.DB.SqlServer.Shared.projitems')" />
   <Import Project="..\Velox.DB.SqlADO\Velox.DB.SqlADO.projitems" Label="Shared" Condition="Exists('..\Velox.DB.SqlADO\Velox.DB.SqlADO.projitems')" />

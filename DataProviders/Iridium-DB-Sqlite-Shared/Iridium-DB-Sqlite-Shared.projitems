@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ISqliteAPI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)sqlite3.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SqliteAPI.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SqliteContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SqliteDataProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SqliteDateFormat.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SqliteDialect.cs" />

@@ -18,6 +18,16 @@ namespace Iridium.DB.Test
         private const int NUM_PRODUCTS = 5;
         private int FIRST_CUSTOMERID = 0;
         
+        /*
+        Products: (5)
+           {
+              ProductID: "A" ... "E"
+              Description: "Product 1" ... "Product 5"
+              MinQty: 1 ... 5
+              Price: random
+           }
+             
+         */
         public WithStandardTestData(string driver) : base(driver)
         {
             DB.CreateAllTables();
@@ -80,6 +90,17 @@ namespace Iridium.DB.Test
                         DB.OrderItems.Save(item);
                     }
                 }
+            }
+
+            DB.PaymentMethods.Insert(new PaymentMethod() {Name = "Cash"});
+            DB.PaymentMethods.Insert(new PaymentMethod() { Name = "Visa" });
+            DB.PaymentMethods.Insert(new PaymentMethod() { Name = "Mastercard" });
+            DB.PaymentMethods.Insert(new PaymentMethod() { Name = "Amex" });
+
+
+            for (int i = 0; i < NUM_CUSTOMERS; i++)
+            {
+                
             }
 
             FIRST_CUSTOMERID = customers[0].CustomerID;
