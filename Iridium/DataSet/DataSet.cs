@@ -175,6 +175,11 @@ namespace Iridium.DB
             return _repository.Save(obj, null, LambdaRelationFinder.FindRelations(relationsToSave, _repository.Schema));
         }
 
+        public bool Save(T obj, bool insert, params Expression<Func<T, object>>[] relationsToSave)
+        {
+            return _repository.Save(obj, insert, LambdaRelationFinder.FindRelations(relationsToSave, _repository.Schema));
+        }
+
         public bool Save(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave)
         {
             return _repository.Context.RunTransaction(() => objects.All(o => Save(o, relationsToSave)));
@@ -183,6 +188,11 @@ namespace Iridium.DB
         public bool InsertOrUpdate(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
             return _repository.Save(obj, null, LambdaRelationFinder.FindRelations(relationsToSave, _repository.Schema));
+        }
+
+        public bool InsertOrUpdate(T obj, bool insert, params Expression<Func<T, object>>[] relationsToSave)
+        {
+            return _repository.Save(obj, insert, LambdaRelationFinder.FindRelations(relationsToSave, _repository.Schema));
         }
 
         public bool InsertOrUpdate(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave)

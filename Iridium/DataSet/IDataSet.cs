@@ -81,10 +81,12 @@ namespace Iridium.DB
         T Load(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad);
 
         bool Save(T obj, params Expression<Func<T, object>>[] relationsToSave);
+        bool Save(T obj, bool insert, params Expression<Func<T, object>>[] relationsToSave);
         bool Update(T obj, params Expression<Func<T, object>>[] relationsToSave);
         bool Insert(T obj, params Expression<Func<T, object>>[] relationsToSave);
         bool Insert(T obj, bool? deferSave, params Expression<Func<T,object>>[] relationsToSave);
         bool InsertOrUpdate(T obj, params Expression<Func<T, object>>[] relationsToSave);
+        bool InsertOrUpdate(T obj, bool insert, params Expression<Func<T, object>>[] relationsToSave);
         bool Delete(T obj);
 
         bool Save(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave);

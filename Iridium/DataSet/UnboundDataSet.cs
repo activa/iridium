@@ -203,6 +203,11 @@ namespace Iridium.DB
             throw new NotSupportedException();
         }
 
+        public bool Save(T obj, bool insert, params Expression<Func<T, object>>[] relationsToSave)
+        {
+            throw new NotSupportedException();
+        }
+
         public bool Update(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
             throw new NotSupportedException();
@@ -224,6 +229,11 @@ namespace Iridium.DB
         }
 
         public bool InsertOrUpdate(T obj, params Expression<Func<T, object>>[] relationsToSave)
+        {
+            throw new NotSupportedException();
+        }
+
+        public bool InsertOrUpdate(T obj, bool insert, params Expression<Func<T, object>>[] relationsToSave)
         {
             throw new NotSupportedException();
         }

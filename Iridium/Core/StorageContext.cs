@@ -255,9 +255,19 @@ namespace Iridium.DB
             return DataSet<T>().Save(obj, relationsToSave);
         }
 
+        public bool Save<T>(T obj, bool insert, params Expression<Func<T, object>>[] relationsToSave)
+        {
+            return DataSet<T>().Save(obj, relationsToSave);
+        }
+
         public bool InsertOrUpdate<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
             return DataSet<T>().Save(obj, relationsToSave);
+        }
+
+        public bool InsertOrUpdate<T>(T obj, bool insert, params Expression<Func<T, object>>[] relationsToSave)
+        {
+            return DataSet<T>().Save(obj, insert, relationsToSave);
         }
 
         public bool Update<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
