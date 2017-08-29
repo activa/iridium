@@ -35,12 +35,12 @@ namespace Iridium.DB.Postgres
     {
         public override string QuoteField(string fieldName)
         {
-            return "\"" + fieldName.Replace(".", "\".\"") + "\"";
+            return $"\"{fieldName.Replace(".", "\".\"")}\"";
         }
 
         public override string QuoteTable(string tableName)
         {
-            return "\"" + tableName.Replace("\"", "\".\"") + "\"";
+            return $"\"{tableName.Replace("\"", "\".\"")}\"";
         }
 
         public override string CreateParameterExpression(string parameterName)
@@ -62,7 +62,6 @@ namespace Iridium.DB.Postgres
                 sql += " OFFSET " + (start-1);
 
             return sql;
-
         }
 
         public override string DeleteSql(SqlTableNameWithAlias tableName, string sqlWhere, IEnumerable<SqlJoinDefinition> joins)
@@ -74,7 +73,7 @@ namespace Iridium.DB.Postgres
                 sql += "using " +  string.Join(",", joins.Select(join => QuoteTable(join.Right.Schema.MappedName) + " " + join.Right.Alias));
 
                 if (sqlWhere != null)
-                    sql += " where (" + sqlWhere + ")";
+                    sql += $" where ({sqlWhere})";
 
                 sql += " and ";
 
@@ -181,39 +180,12 @@ namespace Iridium.DB.Postgres
 
                 dataProvider.ExecuteSql(sql, null);
             }
-
-            /*
-            var existingIndexes = dataProvider.ExecuteSqlReader("SELECT ind.name as IndexName FROM sys.indexes ind INNER JOIN sys.tables t ON ind.object_id = t.object_id WHERE ind.name is not null and ind.is_primary_key = 0 AND t.is_ms_shipped = 0 AND t.name=@tableName",
-                QueryParameterCollection.FromObject(new { tableName })).ToLookup(rec => rec["IndexName"].ToString());
-
-            foreach (var index in schema.Indexes)
-            {
-                if (existingIndexes["IX_" + index.Name].Any())
-                {
-                    if (recreateIndexes || recreateTable)
-                        dataProvider.ExecuteSql($"DROP INDEX {QuoteTable("IX_" + index.Name)} ON {QuoteTable(schema.MappedName)}", null);
-                    else
-                        continue;
-                }
-
-                string createIndexSql = $"CREATE INDEX {QuoteTable("IX_" + index.Name)} ON {QuoteTable(schema.MappedName)} (";
-
-                createIndexSql += string.Join(",", index.FieldsWithOrder.Select(field => QuoteField(field.Item1.MappedName) + " " + (field.Item2 == SortOrder.Ascending ? "ASC" : "DESC")));
-
-                createIndexSql += ")";
-
-                dataProvider.ExecuteSql(createIndexSql, null);
-            }*/
         }
 
         public override string SqlFunction(Function function, params string[] parameters)
         {
             switch (function)
             {
-                /*
-                case Function.Coalesce:
-                    return $"coalesce({parameters[0]},{parameters[1]})";
-                    */
                 default:
                     return base.SqlFunction(function,parameters);
             }

@@ -10,10 +10,11 @@
     <iconUrl>http://dstyler.com/vici/32x32/im-_IconPlain100-w32-h32.png</iconUrl>
     <tags>iridium orm sql sqlite xamarin ios android uwp</tags>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Lightweight multi-platform ORM for mobile, desktop and servers. Support for Sqlite is built in for all platforms. Data providers for SQL Server and MySql are available on Nuget.</description>
+    <summary>Lightweight multi-platform ORM for mobile, desktop and servers. Support for Sqlite is built in for all platforms.</summary>
+    <description>Lightweight multi-platform ORM for mobile, desktop and servers. Support for Sqlite is built in for all platforms. Data providers for SQL Server, MySql and Postgres are available on Nuget.</description>
     <copyright>Copyright 2015-2017 Philippe Leybaert</copyright>
     <dependencies>
-      <dependency id="iridium.core" version="1.3.3" />
+      <dependency id="iridium.core" version="1.3.3.23" />
     </dependencies>
   </metadata>
   <files>
