@@ -76,6 +76,9 @@ namespace Iridium.DB
 
         private DataSet(DataSet<T> baseDataSet, FilterSpec newFilterSpec = null, SortOrderSpec newSortSpec = null, IEnumerable<Expression<Func<T,object>>> additionalRelations = null)
         {
+            if (baseDataSet._newObjects != null && baseDataSet._newObjects.Count > 0)
+                throw new Exception("DataSet with added objects can't be chained");
+
             _repository = baseDataSet._repository;
 
             _skip = baseDataSet._skip;
@@ -136,6 +139,9 @@ namespace Iridium.DB
 
         private IEnumerable<T> Enumerate()
         {
+            if (_newObjects != null && _newObjects.Count > 0)
+                throw new Exception("Trying to enumerate dataset with pending changes");
+
             return _repository.List(_repository.CreateQuerySpec(_filter, sortSpec: _sortOrder, skip: _skip, take: _take), _relationsToLoad, _parentRelation, _parentObject);
         }
 

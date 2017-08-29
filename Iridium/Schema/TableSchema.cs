@@ -133,6 +133,9 @@ namespace Iridium.DB
                 if (fieldInspector.HasAttribute<Column.ReadOnlyAttribute>())
                     schemaField.UpdateFlags(FieldFlags.ReadOnly, true);
 
+                if (schemaField.PrimaryKey)
+                    schemaField.UpdateFlags(FieldFlags.Nullable, false);
+
                 if (fieldInspector.HasAttribute<Column.ReadbackAttribute>())
                 {
                     var readbackAttribute = fieldInspector.GetAttribute<Column.ReadbackAttribute>();

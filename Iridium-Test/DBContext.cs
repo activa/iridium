@@ -14,7 +14,7 @@ namespace Iridium.DB.Test
     public class SERVERS
     {
         public const string SQLSERVER = "192.168.1.100";
-        public const string MYSQL = "192.168.1.32";
+        public const string MYSQL = "192.168.1.100";
         public const string POSTGRES = "192.168.1.32";
     }
 

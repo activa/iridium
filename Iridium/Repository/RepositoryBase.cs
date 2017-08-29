@@ -115,7 +115,10 @@ namespace Iridium.DB
                     var dataSet = foreignCollection as DataSet;
 
                     if (dataSet != null)
+                    {
                         foreignCollection = dataSet.NewObjects;
+                        dataSet.NewObjects = null;
+                    }
 
                     if (foreignCollection == null)
                         continue;

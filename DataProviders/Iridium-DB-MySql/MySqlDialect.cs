@@ -115,15 +115,12 @@ namespace Iridium.DB.MySql
                 if (columnMapping.Flags == TypeFlags.String && field.ColumnSize == int.MaxValue)
                     columnMapping = new { columnMapping.Flags, ColumnType = longTextType };
 
-                var part = string.Format("{0} {1}", QuoteField(field.MappedName), string.Format(columnMapping.ColumnType, field.ColumnSize, field.ColumnScale));
+                var part = $"{QuoteField(field.MappedName)} {string.Format(columnMapping.ColumnType, field.ColumnSize, field.ColumnScale)}";
 
                 if (!field.ColumnNullable)
                     part += " NOT";
 
                 part += " NULL";
-
-//                if (field.PrimaryKey)
-//                    part += " PRIMARY KEY";
 
                 if (field.AutoIncrement)
                     part += " AUTO_INCREMENT";
