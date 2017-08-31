@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.10
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium", "Iridium\Iridium.csproj", "{8DB31DB3-AE35-44C3-876E-940C19689C59}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium-Test", "Iridium-Test\Iridium-Test.csproj", "{AA0A0646-FC49-496A-AE0F-7F24DF7675FA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{BAA00DEC-D55A-4960-90E4-9FACE1896676}"
@@ -31,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium-DB-Postgres", "Data
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium-DB-Sqlite-UWP", "DataProviders\Iridium-DB-Sqlite-UWP\Iridium-DB-Sqlite-UWP.csproj", "{9A753ADF-218B-44A2-983F-36298AD1FE65}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Iridium-DB", "Iridium-DB\Iridium-DB.csproj", "{B29894D4-48FC-4B63-9E53-B1F1520A2757}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		DataProviders\Iridium-DB-Sqlite-Shared\Iridium-DB-Sqlite-Shared.projitems*{3624abdc-245d-4562-a41b-7cebaca8f213}*SharedItemsImports = 13
@@ -56,18 +56,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Debug|x64.Build.0 = Debug|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Release|ARM.ActiveCfg = Release|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Release|x64.ActiveCfg = Release|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Release|x64.Build.0 = Release|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Release|x86.ActiveCfg = Release|Any CPU
 		{AA0A0646-FC49-496A-AE0F-7F24DF7675FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AA0A0646-FC49-496A-AE0F-7F24DF7675FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA0A0646-FC49-496A-AE0F-7F24DF7675FA}.Debug|ARM.ActiveCfg = Debug|Any CPU
@@ -180,6 +168,22 @@ Global
 		{9A753ADF-218B-44A2-983F-36298AD1FE65}.Release|x64.Build.0 = Release|x64
 		{9A753ADF-218B-44A2-983F-36298AD1FE65}.Release|x86.ActiveCfg = Release|x86
 		{9A753ADF-218B-44A2-983F-36298AD1FE65}.Release|x86.Build.0 = Release|x86
+		{B29894D4-48FC-4B63-9E53-B1F1520A2757}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B29894D4-48FC-4B63-9E53-B1F1520A2757}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B29894D4-48FC-4B63-9E53-B1F1520A2757}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{B29894D4-48FC-4B63-9E53-B1F1520A2757}.Debug|ARM.Build.0 = Debug|Any CPU
+		{B29894D4-48FC-4B63-9E53-B1F1520A2757}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B29894D4-48FC-4B63-9E53-B1F1520A2757}.Debug|x64.Build.0 = Debug|Any CPU
+		{B29894D4-48FC-4B63-9E53-B1F1520A2757}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B29894D4-48FC-4B63-9E53-B1F1520A2757}.Debug|x86.Build.0 = Debug|Any CPU
+		{B29894D4-48FC-4B63-9E53-B1F1520A2757}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B29894D4-48FC-4B63-9E53-B1F1520A2757}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B29894D4-48FC-4B63-9E53-B1F1520A2757}.Release|ARM.ActiveCfg = Release|Any CPU
+		{B29894D4-48FC-4B63-9E53-B1F1520A2757}.Release|ARM.Build.0 = Release|Any CPU
+		{B29894D4-48FC-4B63-9E53-B1F1520A2757}.Release|x64.ActiveCfg = Release|Any CPU
+		{B29894D4-48FC-4B63-9E53-B1F1520A2757}.Release|x64.Build.0 = Release|Any CPU
+		{B29894D4-48FC-4B63-9E53-B1F1520A2757}.Release|x86.ActiveCfg = Release|Any CPU
+		{B29894D4-48FC-4B63-9E53-B1F1520A2757}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -9,8 +9,21 @@ using Iridium.DB.MySql;
 using Iridium.DB.Postgres;
 using Iridium.DB.SqlServer;
 
+/*
+using Iridium.DB.MySql;
+using Iridium.DB.Postgres;
+using Iridium.DB.SqlServer;
+*/
+
 namespace Iridium.DB.Test
 {
+
+    public static class Program
+    {
+        public static void Main()
+        {
+        }
+    }
     public class SERVERS
     {
         public const string SQLSERVER = "192.168.1.100";
@@ -87,6 +100,7 @@ namespace Iridium.DB.Test
         {
             _contextFactories = new Dictionary<string,Func<DBContext>>()
             {
+                
                 { "sqlite", () => new SqliteStorage() },
                 { "sqlitemem", () => new SqliteMemStorage() },
                 { "sqlserver", () => new SqlServerStorage() },

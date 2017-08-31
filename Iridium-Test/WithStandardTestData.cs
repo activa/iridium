@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using Iridium.DB.Postgres;
+//using Iridium.DB.Postgres;
 using NUnit.Framework;
 
 namespace Iridium.DB.Test

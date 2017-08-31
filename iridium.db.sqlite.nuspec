@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>iridium.db.sqlite</id>
+    <version>2.1.0.202</version>
+    <title>Iridium Sqlite Data Provider</title>
+    <authors>Philippe Leybaert</authors>
+    <projectUrl>http://github.com/activa/iridium</projectUrl>
+    <licenseUrl>https://github.com/activa/iridium/blob/master/LICENSE</licenseUrl>
+    <iconUrl>http://dstyler.com/vici/32x32/im-_IconPlain100-w32-h32.png</iconUrl>
+    <tags>iridium orm sql sqlite xamarin ios android uwp</tags>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>Sqlite Data Provider for Iridium ORM</summary>
+    <description>Sqlite Data Provider for Iridium ORM</description>
+    <copyright>Copyright 2015-2017 Philippe Leybaert</copyright>
+    <dependencies>
+      <group>
+          <dependency id="iridium.core" version="1.4.0.203" />
+          <dependency id="iridium" version="2.1.0.200" />
+      </group>
+      <group targetFramework="uap">
+          <dependency id="iridium.db.sqlite.native" version="3.20.1.1" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="DataProviders\Iridium-DB-Sqlite-Win32\bin\$Configuration$\Iridium.DB.Sqlite.Win32.dll" target="lib\net45" />
+    <file src="DataProviders\Iridium-DB-Sqlite-Native\bin\$Configuration$\Iridium.DB.Sqlite.Native.dll" target="lib\Xamarin.iOS" />
+    <file src="DataProviders\Iridium-DB-Sqlite-Android\bin\$Configuration$\Iridium.DB.Sqlite.Android.dll" target="lib\MonoAndroid" />
+    <file src="DataProviders\Iridium-DB-Sqlite-Native\bin\$Configuration$\Iridium.DB.Sqlite.Native.dll" target="lib\MonoTouch" />
+    <file src="DataProviders\Iridium-DB-Sqlite-Native\bin\$Configuration$\Iridium.DB.Sqlite.Native.dll" target="lib\win8" />
+    <file src="DataProviders\Iridium-DB-Sqlite-Native\bin\$Configuration$\Iridium.DB.Sqlite.Native.dll" target="lib\wpa81" />
+    <file src="DataProviders\Iridium-DB-Sqlite-UWP\bin\$Configuration$\Iridium.DB.Sqlite.UWP.dll" target="lib\uap" />
+  </files>
+  </package>

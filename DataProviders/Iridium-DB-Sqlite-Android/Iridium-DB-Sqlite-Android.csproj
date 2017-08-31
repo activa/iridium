@@ -35,8 +35,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Iridium-Core, Version=1.3.3.21827, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\iridium.core.1.3.3.23\lib\portable-net45+win8+wpa81\Iridium-Core.dll</HintPath>
+    <Reference Include="Iridium-Core, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\iridium.core.1.4.0.203\lib\netstandard1.0\Iridium-Core.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Android" />
     <Reference Include="mscorlib" />
@@ -63,12 +63,6 @@
     <AndroidResource Include="Resources\Values\Strings.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Iridium\Iridium.csproj">
-      <Project>{8db31db3-ae35-44c3-876e-940c19689c59}</Project>
-      <Name>Iridium</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Native\jni\Android.mk" />
     <None Include="Native\jni\Application.mk" />
     <None Include="Native\jni\sqlite3.c" />
@@ -76,6 +70,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\Release\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Iridium-DB\Iridium-DB.csproj">
+      <Project>{b29894d4-48fc-4b63-9e53-b1f1520a2757}</Project>
+      <Name>Iridium-DB</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="..\Iridium-DB-Sqlite-Shared\Iridium-DB-Sqlite-Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

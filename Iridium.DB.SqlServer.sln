@@ -1,10 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium", "Iridium\Iridium.csproj", "{8DB31DB3-AE35-44C3-876E-940C19689C59}"
-EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Iridium-DB-SqlServer-Shared", "DataProviders\Iridium-DB-SqlServer-Shared\Iridium-DB-SqlServer-Shared.shproj", "{3F04700D-5917-4596-A2B2-873D4D320892}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium-DB-SqlServer", "DataProviders\Iridium-DB-SqlServer\Iridium-DB-SqlServer.csproj", "{680C31CA-C072-4AF7-BCFC-8BD270BEE7BC}"
@@ -14,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium-DB-SqlServer-iOS", "DataProviders\Iridium-DB-SqlServer-iOS\Iridium-DB-SqlServer-iOS.csproj", "{58368073-CE91-440C-948A-B75235B72CFC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium-DB-SqlServer-Android", "DataProviders\Iridium-DB-SqlServer-Android\Iridium-DB-SqlServer-Android.csproj", "{C791357B-B3A6-4904-8170-4D405F49B71A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Iridium-DB", "Iridium-DB\Iridium-DB.csproj", "{DC1DF999-B304-4850-9AB6-336E6181E2D6}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -35,14 +35,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Release|ARM.ActiveCfg = Release|Any CPU
-		{8DB31DB3-AE35-44C3-876E-940C19689C59}.Release|x86.ActiveCfg = Release|Any CPU
 		{680C31CA-C072-4AF7-BCFC-8BD270BEE7BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{680C31CA-C072-4AF7-BCFC-8BD270BEE7BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{680C31CA-C072-4AF7-BCFC-8BD270BEE7BC}.Debug|ARM.ActiveCfg = Debug|Any CPU
@@ -75,8 +67,23 @@ Global
 		{C791357B-B3A6-4904-8170-4D405F49B71A}.Release|ARM.Build.0 = Release|Any CPU
 		{C791357B-B3A6-4904-8170-4D405F49B71A}.Release|x86.ActiveCfg = Release|Any CPU
 		{C791357B-B3A6-4904-8170-4D405F49B71A}.Release|x86.Build.0 = Release|Any CPU
+		{DC1DF999-B304-4850-9AB6-336E6181E2D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC1DF999-B304-4850-9AB6-336E6181E2D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC1DF999-B304-4850-9AB6-336E6181E2D6}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{DC1DF999-B304-4850-9AB6-336E6181E2D6}.Debug|ARM.Build.0 = Debug|Any CPU
+		{DC1DF999-B304-4850-9AB6-336E6181E2D6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DC1DF999-B304-4850-9AB6-336E6181E2D6}.Debug|x86.Build.0 = Debug|Any CPU
+		{DC1DF999-B304-4850-9AB6-336E6181E2D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC1DF999-B304-4850-9AB6-336E6181E2D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC1DF999-B304-4850-9AB6-336E6181E2D6}.Release|ARM.ActiveCfg = Release|Any CPU
+		{DC1DF999-B304-4850-9AB6-336E6181E2D6}.Release|ARM.Build.0 = Release|Any CPU
+		{DC1DF999-B304-4850-9AB6-336E6181E2D6}.Release|x86.ActiveCfg = Release|Any CPU
+		{DC1DF999-B304-4850-9AB6-336E6181E2D6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0D4FD614-F941-4490-837E-53F2539D9215}
 	EndGlobalSection
 EndGlobal

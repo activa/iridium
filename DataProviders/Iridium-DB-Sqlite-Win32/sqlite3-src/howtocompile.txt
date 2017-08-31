@@ -1,7 +1,0 @@
-﻿vcvarsall amd64
-cl sqlite3.c -DSQLITE_API=__declspec(dllexport) -link -dll -out:../win32-x64/sqlite3.dll
-vcvarsall amd64_x86
-cl sqlite3.c -DSQLITE_API=__declspec(dllexport) -link -dll -out:../win32-x86/sqlite3.dll
-vcvarsall amd64_x86
-cl sqlite3.c -DSQLITE_API=__declspec(dllexport) -link -dll -out:../win32-arm/sqlite3.dll
-

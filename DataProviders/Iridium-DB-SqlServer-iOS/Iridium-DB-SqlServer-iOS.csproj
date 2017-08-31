@@ -49,13 +49,13 @@
     <Reference Include="Xamarin.iOS" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Iridium\Iridium.csproj">
-      <Project>{8db31db3-ae35-44c3-876e-940c19689c59}</Project>
-      <Name>Iridium</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ProjectReference Include="..\..\Iridium-DB\Iridium-DB.csproj">
+      <Project>{dc1df999-b304-4850-9ab6-336e6181e2d6}</Project>
+      <Name>Iridium-DB</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="..\Velox.DB.SqlServer.Shared\Velox.DB.SqlServer.Shared.projitems" Label="Shared" Condition="Exists('..\Velox.DB.SqlServer.Shared\Velox.DB.SqlServer.Shared.projitems')" />
   <Import Project="..\Velox.DB.SqlADO\Velox.DB.SqlADO.projitems" Label="Shared" Condition="Exists('..\Velox.DB.SqlADO\Velox.DB.SqlADO.projitems')" />

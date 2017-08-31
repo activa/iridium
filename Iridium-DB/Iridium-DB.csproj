@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.0</TargetFramework>
+    <AssemblyName>Iridium.DB</AssemblyName>
+    <RootNamespace>Iridium.DB</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="iridium.core" Version="1.4.0.203" />
+  </ItemGroup>
+
+</Project>
