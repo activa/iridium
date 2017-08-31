@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.1</TargetFramework>
+    <AssemblyName>Iridium.DB.Sqlite.Native</AssemblyName>
+    <RootNamespace>Iridium.DB.Sqlite.Native</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
