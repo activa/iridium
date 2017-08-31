@@ -4,6 +4,12 @@
     <TargetFramework>netstandard1.0</TargetFramework>
     <AssemblyName>Iridium.DB</AssemblyName>
     <RootNamespace>Iridium.DB</RootNamespace>
+    <Version>2.0.1</Version>
+    <Authors>Philippe Leybaert</Authors>
+    <Company />
+    <Product>Iridium</Product>
+    <Description />
+    <Copyright>2015-2017 Philippe Leybaert</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
