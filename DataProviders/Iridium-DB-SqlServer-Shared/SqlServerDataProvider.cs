@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -44,8 +44,6 @@ namespace Iridium.DB.SqlServer
         {}
 
         public override void ClearConnectionPool() => SqlConnection.ClearAllPools();
-
-        public override bool RequiresAutoIncrementGetInSameStatement => true;
 
         private readonly ThreadLocal<Stack<string>> _transactionStack = new ThreadLocal<Stack<string>>(() => new Stack<string>());
         private readonly ThreadLocal<SqlTransaction> _transaction = new ThreadLocal<SqlTransaction>(true);

@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -83,8 +83,6 @@ namespace Iridium.DB
 
         public string FileName { get; set; }
         public SqliteDateFormat DateFormat { get; set; } = SqliteDateFormat.String;
-
-        public override bool RequiresAutoIncrementGetInSameStatement => false;
 
         public override int ExecuteSql(string sql, QueryParameterCollection parameters = null)
         {

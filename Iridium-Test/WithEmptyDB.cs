@@ -21,7 +21,6 @@ namespace Iridium.DB.Test
         public WithEmptyDB(string driver) : base(driver)
         {
             DB.CreateAllTables();
-
         }
 
         [SetUp]
@@ -33,16 +32,17 @@ namespace Iridium.DB.Test
         [Test]
         public void Events_ObjectCreated()
         {
-            int counter = 0;
+            int counter1 = 0;
+            int counter2 = 0;
 
-            DB.Customers.Events.ObjectCreated += (sender, args) => { counter++; };
-            DB.Customers.Events.ObjectCreated += (sender, args) => { counter++; };
+            DB.RecordsWithAutonumKey.Events.ObjectCreated += (sender, args) => { counter1++; };
+            DB.RecordsWithAutonumKey.Events.ObjectCreated += (sender, args) => { counter2++; };
 
-            DB.Save(new Customer() {Name = "A"});
-            DB.Save(new Customer() {Name = "A"});
+            InsertRecord(new RecordWithAutonumKey() {Name = "A"});
+            InsertRecord(new RecordWithAutonumKey() {Name = "A"});
 
-            Assert.That(counter, Is.EqualTo(4));
-//            counter.Should().Be(4);
+            Assert.That(counter1, Is.EqualTo(2));
+            Assert.That(counter2, Is.EqualTo(2));
         }
 
         [Test]
@@ -58,17 +58,11 @@ namespace Iridium.DB.Test
 
             try
             {
-                bool saveResult = DB.Save(new Customer() {Name = "A"});
+                bool saveResult = DB.Insert(new Customer {Name = "A"});
 
                 Assert.That(saveResult, Is.True);
                 Assert.That(DB.Customers.FirstOrDefault(c => c.Name == "A"), Is.Not.Null);
                 Assert.That(counter, Is.EqualTo(2));
-
-//                DB.Customers.FirstOrDefault(c => c.Name == "A").Should().NotBeNull();
-//
-//                saveResult.Should().Be(true);
-//
-//                counter.Should().Be(2);
             }
             finally
             {
@@ -90,17 +84,11 @@ namespace Iridium.DB.Test
 
             try
             {
-                bool saveResult = DB.Save(new Customer() { Name = "A" });
+                bool saveResult = DB.Insert(new Customer() { Name = "A" });
 
                 Assert.That(DB.Customers.FirstOrDefault(c => c.Name == "A"), Is.Null);
                 Assert.That(saveResult, Is.False);
                 Assert.That(counter, Is.EqualTo(2));
-
-//                DB.Customers.FirstOrDefault(c => c.Name == "A").Should().BeNull();
-//
-//                saveResult.Should().Be(false);
-//
-//                counter.Should().Be(2);
             }
             finally
             {
@@ -122,17 +110,11 @@ namespace Iridium.DB.Test
 
             try
             {
-                bool saveResult = DB.Save(new Customer() { Name = "A" });
+                bool saveResult = DB.Insert(new Customer() { Name = "A" });
 
                 Assert.That(saveResult, Is.False);
                 Assert.That(DB.Customers.FirstOrDefault(c => c.Name == "A"), Is.Null);
                 Assert.That(counter, Is.EqualTo(1));
-
-//                DB.Customers.FirstOrDefault(c => c.Name == "A").Should().BeNull();
-//
-//                saveResult.Should().Be(false);
-//
-//                counter.Should().Be(1);
             }
             finally
             {
@@ -145,21 +127,14 @@ namespace Iridium.DB.Test
         [Test]
         public void ManyToOne()
         {
-            Customer customer = new Customer { Name = "x" };
+            var customer = InsertRecord(new Customer { Name = "x" });
+            var salesPerson = InsertRecord(new SalesPerson {Name = "Test"});
 
-            customer.Save();
-
-            SalesPerson salesPerson = new SalesPerson {Name = "Test"};
-
-            DB.SalesPeople.Save(salesPerson);
-
-            var order = new Order
+            var order = InsertRecord(new Order
             {
                 SalesPersonID = null,
                 CustomerID = customer.CustomerID
-            };
-
-            DB.Orders.Insert(order);
+            });
 
             int id = order.OrderID;
 
@@ -168,7 +143,7 @@ namespace Iridium.DB.Test
             Assert.AreEqual(order.Customer.CustomerID, customer.CustomerID);
 
             order.SalesPersonID = salesPerson.ID;
-            DB.Orders.Save(order);
+            DB.Orders.Update(order);
 
             order = DB.Orders.Read(id, (o) => o.SalesPerson);
 
@@ -176,7 +151,7 @@ namespace Iridium.DB.Test
 
             order.SalesPersonID = null;
             order.SalesPerson = null;
-            DB.Orders.Save(order);
+            DB.Orders.Update(order);
 
             order = DB.Orders.Read(id, o => o.SalesPerson);
 
@@ -187,16 +162,16 @@ namespace Iridium.DB.Test
         [Test]
         public void ReverseRelation_Generic()
         {
-            Order order = new Order()
+            Order order = new Order
             {
-                Customer = new Customer() {Name = "A"},
+                Customer = new Customer {Name = "A"},
                 OrderItems = new UnboundDataSet<OrderItem>
                 {
-                    new OrderItem() {Description = "X"},
-                    new OrderItem() {Description = "X"},
-                    new OrderItem() {Description = "X"},
-                    new OrderItem() {Description = "X"},
-                    new OrderItem() {Description = "X"},
+                    new OrderItem {Description = "X"},
+                    new OrderItem {Description = "X"},
+                    new OrderItem {Description = "X"},
+                    new OrderItem {Description = "X"},
+                    new OrderItem {Description = "X"},
                 }
             };
 
@@ -250,13 +225,8 @@ namespace Iridium.DB.Test
         [Test]
         public void OneToManyWithOptionalRelation()
         {
-            Customer customer = new Customer { Name = "x" };
-
-            customer.Save();
-
-            SalesPerson salesPerson = new SalesPerson { Name = "Test" };
-
-            DB.SalesPeople.Save(salesPerson);
+            var customer = InsertRecord(new Customer { Name = "x" });
+            var salesPerson = InsertRecord(new SalesPerson { Name = "Test" });
 
             Order[] orders =
             {
@@ -280,12 +250,12 @@ namespace Iridium.DB.Test
         {
             const int numThreads = 100;
 
-            List<string> failedList = new List<string>();
-            Task[] saveTasks = new Task[numThreads];
-            Customer[] customers = new Customer[numThreads];
-            List<Customer> createdCustomers = new List<Customer>();
+            var failedList = new List<string>();
+            var saveTasks = new Task[numThreads];
+            var customers = new Customer[numThreads];
+            var createdCustomers = new List<Customer>();
 
-            HashSet<int> ids = new HashSet<int>();
+            var ids = new HashSet<int>();
 
             for (int i = 0; i < numThreads; i++)
             {
@@ -322,10 +292,8 @@ namespace Iridium.DB.Test
                 });
             }
 
-
             Task.WaitAll(saveTasks);
             
-
             Assert.That(failedList, Is.Empty);
             Assert.False(saveTasks.Any(t => t.IsFaulted));
 
@@ -357,9 +325,7 @@ namespace Iridium.DB.Test
 
                 tasks[i] = Task.Run(() =>
                 {
-                    Customer customer = new Customer { Name = name };
-
-                    customer.Save();
+                    Customer customer = InsertRecord(new Customer {Name = name});
 
                     if (customer.CustomerID == 0)
                         lock (failedList)
@@ -402,12 +368,13 @@ namespace Iridium.DB.Test
         {
             Random rnd = new Random();
 
-            var products = Enumerable.Range(1, 20).Select(i => new Product() { ProductID = "P" + i, Description = "Product " + i, Price = (decimal)(rnd.NextDouble() * 100), MinQty = 1 });
-
-            foreach (var product in products)
-                DB.Products.Insert(product);
-
-
+            InsertRecords<Product>(20, (product, i) =>
+            {
+                product.ProductID = "P" + i;
+                product.Description = "Product " + i;
+                product.Price = (decimal) (rnd.NextDouble() * 100);
+                product.MinQty = 1;
+            });
         }
 
         [Test]
@@ -467,9 +434,7 @@ namespace Iridium.DB.Test
         {
             for (int i = 0; i < 100; i++)
             {
-                Customer customer = new Customer {Name = "A"};
-
-                customer.Save();
+                Customer customer = InsertRecord(new Customer {Name = "A"});
 
                 Assert.IsTrue(customer.CustomerID > 0);
 
@@ -490,9 +455,7 @@ namespace Iridium.DB.Test
         [Test]
         public void CreateAndReadSingleObject()
         {
-            Customer customer = new Customer { Name = "A" };
-
-            customer.Save();
+            var customer = InsertRecord(new Customer { Name = "A" });
 
             Assert.IsTrue(customer.CustomerID > 0);
 
@@ -507,14 +470,12 @@ namespace Iridium.DB.Test
         [Test]
         public void CreateAndUpdateSingleObject()
         {
-            Customer customer = new Customer { Name = "A" };
-
-            customer.Save();
+            var customer = InsertRecord(new Customer { Name = "A" });
 
             customer = DB.Customers.Read(customer.CustomerID);
 
             customer.Name = "B";
-            customer.Save();
+            customer.Update();
 
             customer = DB.Customers.Read(customer.CustomerID);
 
@@ -534,9 +495,7 @@ namespace Iridium.DB.Test
         [Test]
         public void CreateWithRelation_ManyToOne_ByID()
         {
-            Customer customer = new Customer { Name = "A" };
-
-            customer.Save();
+            var customer = InsertRecord(new Customer { Name = "A" });
 
             var order = new Order
             {
@@ -544,7 +503,7 @@ namespace Iridium.DB.Test
                 CustomerID = customer.CustomerID
             };
 
-            Assert.IsTrue(DB.Orders.Save(order));
+            Assert.IsTrue(DB.Orders.Insert(order));
 
             Order order2 = DB.Orders.Read(order.OrderID, o => o.Customer);
 
@@ -558,9 +517,7 @@ namespace Iridium.DB.Test
         [Test]
         public void CreateWithRelation_ManyToOne_ByRelationObject()
         {
-            Customer customer = new Customer() { Name = "me" };
-
-            customer.Save();
+            var customer = InsertRecord(new Customer { Name = "me" });
 
             var order = new Order
             {
@@ -568,7 +525,7 @@ namespace Iridium.DB.Test
                 Customer = customer
             };
 
-            Assert.IsTrue(DB.Orders.Save(order));
+            Assert.IsTrue(DB.Orders.Insert(order));
 
             Order order2 = DB.Orders.Read(order.OrderID, o => o.Customer);
 
@@ -590,7 +547,7 @@ namespace Iridium.DB.Test
                 Customer = customer
             };
 
-            Assert.IsTrue(DB.Orders.Save(order, relationsToSave: o => o.Customer));
+            Assert.IsTrue(DB.Orders.Insert(order, relationsToSave: o => o.Customer));
 
             Order order2 = DB.Orders.Read(order.OrderID, o => o.Customer);
 
@@ -605,9 +562,7 @@ namespace Iridium.DB.Test
         [Test]
         public void CreateOrderWithNewCustomer()
         {
-            Customer customer = new Customer() {Name = "me"};
-
-            customer.Save();
+            var customer = InsertRecord(new Customer { Name = "me" });
 
             var order = new Order
             {
@@ -615,7 +570,7 @@ namespace Iridium.DB.Test
                 CustomerID = customer.CustomerID
             };
 
-            Assert.IsTrue(DB.Orders.Save(order));
+            Assert.IsTrue(DB.Orders.Insert(order));
 
             DB.LoadRelations(() => order.Customer);
 
@@ -635,16 +590,18 @@ namespace Iridium.DB.Test
         {
             Customer cust = new Customer { Name = "A" };
 
-            cust.Save();
+            cust.Insert();
 
             cust = DB.Customers.Read(cust.CustomerID);
 
             Order order = new Order { CustomerID = cust.CustomerID };
 
 
-            Assert.IsTrue(DB.Orders.Save(order));
+            Assert.IsTrue(DB.Orders.Insert(order));
 
             order = DB.Orders.Read(order.OrderID);
+
+            Assert.IsNotNull(order);
 
             DB.LoadRelations(() => order.Customer);
             DB.LoadRelations(() => order.Customer.Orders);
@@ -656,7 +613,7 @@ namespace Iridium.DB.Test
             Assert.AreEqual((order.Customer.Orders.First()).CustomerID, cust.CustomerID);
 
             order.Customer.Name = "B";
-            order.Customer.Save();
+            order.Customer.Update();
 
 
             order = DB.Orders.Read(order.OrderID);
@@ -671,37 +628,19 @@ namespace Iridium.DB.Test
         [Test]
         public void DeleteSingleObject()
         {
-            List<Customer> customers = new List<Customer>();
+            var records = InsertRecords<RecordWithAutonumKey>(10, (c, i) => c.Name = "Customer " + i);
 
-            for (int i = 0; i < 10; i++)
-            {
-                Customer customer = new Customer() {Name = "Customer " + (i + 1)};
+            DB.RecordsWithAutonumKey.Delete(records[5]);
 
-                customer.Save();
+            Assert.IsNull(DB.Customers.Read(records[5].Key));
 
-                customers.Add(customer);
-            }
-
-            DB.Customers.Delete(customers[5]);
-
-            Assert.IsNull(DB.Customers.Read(customers[5].CustomerID));
-
-            Assert.AreEqual(9,DB.Customers.Count());
+            Assert.AreEqual(9,DB.RecordsWithAutonumKey.Count());
         }
 
         [Test]
         public void DeleteMultipleObjects()
         {
-            List<Customer> customers = new List<Customer>();
-
-            for (int i = 0; i < 10; i++)
-            {
-                Customer customer = new Customer() { Name = "Customer " + (i + 1) };
-
-                customer.Save();
-
-                customers.Add(customer);
-            }
+            var customers = InsertRecords<Customer>(10, (customer, i) => { customer.Name = "Customer " + i; });
 
             DB.Customers.Delete(c => c.Name == "Customer 2" || c.Name == "Customer 4");
 
@@ -752,16 +691,7 @@ namespace Iridium.DB.Test
         [Test]
         public void DeleteAllObjects()
         {
-            List<Customer> customers = new List<Customer>();
-
-            for (int i = 0; i < 10; i++)
-            {
-                Customer customer = new Customer() { Name = "Customer " + (i + 1) };
-
-                customer.Save();
-
-                customers.Add(customer);
-            }
+            InsertRecords<Customer>(10, (customer, i) => { customer.Name = "Customer " + i; });
 
             Assert.That(DB.Customers.Count(), Is.EqualTo(10));
 
@@ -786,7 +716,7 @@ namespace Iridium.DB.Test
                 }
             };
 
-            Assert.IsTrue(DB.Orders.Save(order, o => o.Customer, o => o.OrderItems));
+            Assert.IsTrue(DB.Orders.Insert(order, o => o.Customer, o => o.OrderItems));
 
             order = DB.Orders.Read(order.OrderID);
 
@@ -794,7 +724,7 @@ namespace Iridium.DB.Test
 
             order.OrderItems.Insert(new OrderItem { Description = "test", Qty = 2, Price = 1000.0 });
 
-            Assert.IsTrue(DB.Orders.Save(order, o => o.OrderItems));
+            Assert.IsTrue(DB.Orders.Update(order, o => o.OrderItems));
 
             order = DB.Orders.Read(order.OrderID);
 
@@ -802,7 +732,7 @@ namespace Iridium.DB.Test
 
             order.OrderItems.Insert(new OrderItem { Description = "test", Qty = 3, Price = 2000.0 }, deferSave:true);
 
-            Assert.IsTrue(DB.Orders.Save(order, o => o.OrderItems));
+            Assert.IsTrue(DB.Orders.Update(order, o => o.OrderItems));
 
             order = DB.Orders.Read(order.OrderID);
 
@@ -815,21 +745,16 @@ namespace Iridium.DB.Test
         {
             Random rnd = new Random();
 
-            Customer cust = new Customer { Name = "A" };
-
-            cust.Save();
+            Customer cust = InsertRecord(new Customer { Name = "A" });
 
             double total = 0.0;
 
             for (int i = 0; i < 5; i++)
             {
-                Order order = new Order
+                Order order = InsertRecord(new Order
                 {
                     Customer = cust
-                };
-
-
-                DB.Orders.Save(order);
+                });
 
                 for (int j = 0; j < 20; j++)
                 {
@@ -838,7 +763,7 @@ namespace Iridium.DB.Test
 
                     OrderItem item = new OrderItem() { Description = "test", Qty = (short)qty, Price = price, OrderID = order.OrderID };
 
-                    DB.OrderItems.Save(item);
+                    DB.OrderItems.Insert(item);
 
                     total += qty * price;
                 }
@@ -870,7 +795,6 @@ namespace Iridium.DB.Test
             total2 = DB.OrderItems.Sum(item => item.Qty * item.Price);
 
             Assert.That(total, Is.GreaterThan(total2));
-//            total.Should().BeGreaterThan(total2);
 
             Assert.AreEqual(95, DB.OrderItems.Count());
         }
@@ -889,14 +813,9 @@ namespace Iridium.DB.Test
             var rec = DB.Read<RecordWithCompositeKey>(new {Key1 = 1, Key2 = 2});
 
             Assert.NotNull(rec);
-            Assert.AreEqual(1,rec.Key1);
+            Assert.AreEqual(1, rec.Key1);
             Assert.AreEqual(2, rec.Key2);
             Assert.AreEqual("John",rec.Name);
-
-//            rec.Should().NotBeNull();
-//            rec.Key1.Should().Be(1);
-//            rec.Key2.Should().Be(2);
-//            rec.Name.Should().Be("John");
         }
 
         [Test]
@@ -928,17 +847,13 @@ namespace Iridium.DB.Test
                 return;
 
             Assert.That(DB.Products.Count(), Is.EqualTo(0));
-            //DB.Products.Count().Should().Be(0);
 
-            using (var transaction = new Transaction(DB))
+            using (new Transaction(DB))
             {
                 DB.Products.Insert(new Product() { ProductID = "X", Description = "X" });
             }
 
             Assert.That(DB.Products.Count(), Is.EqualTo(0));
-            //DB.Products.Count().Should().Be(0);
-
-
         }
 
         [Test]
@@ -987,8 +902,6 @@ namespace Iridium.DB.Test
 
             Assert.That(DB.Products.Count(), Is.EqualTo(1));
             Assert.That(DB.Products.First().ProductID, Is.EqualTo("X"));
-            //DB.Products.Count().Should().Be(1);
-            //DB.Products.First().ProductID.Should().Be("X");
         }
 
         [Test]
@@ -998,7 +911,6 @@ namespace Iridium.DB.Test
                 return;
 
             Assert.That(DB.Products.Count(), Is.EqualTo(0));
-            //DB.Products.Count().Should().Be(0);
 
             using (var transaction1 = new Transaction(DB))
             {
@@ -1023,8 +935,6 @@ namespace Iridium.DB.Test
 
             Assert.That(DB.Products.Count(), Is.EqualTo(1));
             Assert.That(DB.Products.First().ProductID, Is.EqualTo("X"));
-            //DB.Products.Count().Should().Be(1);
-//            DB.Products.First().ProductID.Should().Be("X");
         }
 
         [Test]
@@ -1035,8 +945,6 @@ namespace Iridium.DB.Test
 
             Assert.That(DB.Products.Count(), Is.EqualTo(0));
             
-//            DB.Products.Count().Should().Be(0);
-
             using (var transaction1 = new Transaction(DB))
             {
                 DB.Products.Insert(new Product() { ProductID = "X", Description = "X" });
@@ -1061,10 +969,6 @@ namespace Iridium.DB.Test
             Assert.That(DB.Products.Count(), Is.EqualTo(2));
             Assert.That(DB.Products.OrderBy(p => p.ProductID).First().ProductID, Is.EqualTo("X"));
             Assert.That(DB.Products.OrderBy(p => p.ProductID).Skip(1).First().ProductID, Is.EqualTo("Y"));
-
-//            DB.Products.Count().Should().Be(2);
-//            DB.Products.OrderBy(p => p.ProductID).First().ProductID.Should().Be("X");
-//            DB.Products.OrderBy(p => p.ProductID).Skip(1).First().ProductID.Should().Be("Y");
         }
 
         [Test]
@@ -1074,7 +978,6 @@ namespace Iridium.DB.Test
                 return;
 
             Assert.That(DB.Products.Count(), Is.EqualTo(0));
-//            DB.Products.Count().Should().Be(0);
 
             using (var transaction1 = new Transaction(DB))
             {
@@ -1098,7 +1001,6 @@ namespace Iridium.DB.Test
             }
 
             Assert.That(DB.Products.Count(), Is.EqualTo(0));
-//            DB.Products.Count().Should().Be(0);
         }
 
         [Test]
@@ -1137,12 +1039,57 @@ namespace Iridium.DB.Test
 
             Assert.That(n, Is.EqualTo(1));
 
-            n = dataSet.Where(rec => rec.Name == "D").Count();
+            n = dataSet.Count(rec => rec.Name == "D");
 
             Assert.That(n, Is.EqualTo(0));
         }
 
 
+
+
+        [Test]
+        public void InsertOrUpdate_NormalKey_Update()
+        {
+            InsertRecords<RecordWithSingleKey>(10, (r, i) => { r.Key = i; r.Name = i.ToString(); });
+
+            var rec = DB.RecordsWithSingleKey.Read(2);
+
+            Assert.That(rec, Is.Not.Null);
+            Assert.That(rec.Name, Is.EqualTo("2"));
+
+            rec.Name = "2A";
+
+            var success = DB.RecordsWithSingleKey.InsertOrUpdate(rec);
+
+            Assert.True(success);
+
+            rec = DB.RecordsWithSingleKey.Read(2);
+
+            Assert.That(rec, Is.Not.Null);
+            Assert.That(rec.Name, Is.EqualTo("2A"));
+        }
+
+        [Test]
+        public void InsertOrUpdate_NormalKey_Insert()
+        {
+            InsertRecords<RecordWithSingleKey>(10, (r, i) => { r.Key = i; r.Name = i.ToString(); });
+
+            var rec = DB.RecordsWithSingleKey.Read(2);
+
+            Assert.That(rec, Is.Not.Null);
+            Assert.That(rec.Name, Is.EqualTo("2"));
+
+            rec.Key = 101;
+
+            var success = DB.RecordsWithSingleKey.InsertOrUpdate(rec);
+
+            Assert.True(success);
+
+            rec = DB.RecordsWithSingleKey.Read(101);
+
+            Assert.That(rec, Is.Not.Null);
+            Assert.That(rec.Name, Is.EqualTo("2"));
+        }
 
     }
 }

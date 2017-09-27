@@ -24,40 +24,21 @@
 //=============================================================================
 #endregion
 
+using System;
+
 namespace Iridium.DB
 {
-    public class SqlExpressionWithAlias
+    public class QueryParameter
     {
-        public SqlExpressionWithAlias(string expression, string alias = null)
+        public QueryParameter(string name, object value, Type type = null)
         {
-            Expression = expression;
-            Alias = alias;
+            Name = name;
+            Value = value;
+            Type = (type ?? value?.GetType()) ?? typeof(object);
         }
 
-        public readonly string Expression;
-        public readonly string Alias;
-
-        public virtual bool ShouldQuote => false;
+        public readonly string Name;
+        public readonly object Value;
+        public readonly Type Type;
     }
-
-    public class SqlColumnNameWithAlias : SqlExpressionWithAlias
-    {
-        public SqlColumnNameWithAlias(string name, string alias = null) : base(name,alias)
-        {
-        }
-
-        public override bool ShouldQuote => true;
-    }
-
-    public class SqlTableNameWithAlias : SqlExpressionWithAlias
-    {
-        public SqlTableNameWithAlias(string name, string alias = null) : base(name, alias)
-        {
-        }
-
-        public string TableName => Expression;
-
-        public override bool ShouldQuote => true;
-    }
-
 }

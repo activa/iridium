@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -33,7 +33,7 @@ namespace Iridium.DB
         [AttributeUsage(AttributeTargets.Class)]
         public sealed class NameAttribute : Attribute
         {
-            public string Name { get; private set; }
+            public string Name { get; }
 
             public NameAttribute(string name)
             {

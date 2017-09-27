@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -28,15 +28,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 
 namespace Iridium.DB
 {
     public partial class Ir
     {
-
-        // Internal & private methods
-
         internal static T WithLoadedRelations<T>(T obj, IEnumerable<TableSchema.Relation> relations)
         {
             if (relations != null)

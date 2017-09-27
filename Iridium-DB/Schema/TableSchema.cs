@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -41,7 +41,7 @@ namespace Iridium.DB
         public Field[] WriteFields { get; private set; }
         public SafeDictionary<string, Relation> Relations { get; private set; }
         public Field[] PrimaryKeys { get; private set; }
-        public Field[] IncrementKeys { get; private set; }
+        public Field IncrementKey { get; private set; }
         public Type ObjectType { get; }
         public string MappedName { get; }
         public HashSet<Relation> DatasetRelations { get; private set; }
@@ -189,7 +189,7 @@ namespace Iridium.DB
             WriteFields = fieldList.Where(f => !f.ColumnReadOnly && !f.AutoIncrement).ToArray();
 
             PrimaryKeys = Fields.Where(f => f.PrimaryKey).ToArray();
-            IncrementKeys = Fields.Where(f => f.AutoIncrement).ToArray();
+            IncrementKey = Fields.FirstOrDefault(f => f.AutoIncrement);
         }
 
         internal void UpdateReverseRelations()

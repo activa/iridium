@@ -27,6 +27,7 @@
     <DefineConstants>TRACE;DEBUG;NETFX_CORE;WINDOWS_UWP;SQLITE_EMBEDDED</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -36,6 +37,7 @@
     <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP;SQLITE_EMBEDDED</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <PlatformTarget>x86</PlatformTarget>
@@ -116,7 +118,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="iridium.core">
-      <Version>1.4.0.203</Version>
+      <Version>1.4.3.216</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>5.4.0</Version>

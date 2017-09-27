@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -178,12 +178,7 @@ namespace Iridium.DB
 
         public bool Save(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return _repository.Save(obj, null, LambdaRelationFinder.FindRelations(relationsToSave, _repository.Schema));
-        }
-
-        public bool Save(T obj, bool insert, params Expression<Func<T, object>>[] relationsToSave)
-        {
-            return _repository.Save(obj, insert, LambdaRelationFinder.FindRelations(relationsToSave, _repository.Schema));
+            return _repository.Save(obj, create: null, relationsToSave: LambdaRelationFinder.FindRelations(relationsToSave, _repository.Schema));
         }
 
         public bool Save(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave)
@@ -193,12 +188,7 @@ namespace Iridium.DB
 
         public bool InsertOrUpdate(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
-            return _repository.Save(obj, null, LambdaRelationFinder.FindRelations(relationsToSave, _repository.Schema));
-        }
-
-        public bool InsertOrUpdate(T obj, bool insert, params Expression<Func<T, object>>[] relationsToSave)
-        {
-            return _repository.Save(obj, insert, LambdaRelationFinder.FindRelations(relationsToSave, _repository.Schema));
+            return _repository.Save(obj, create: null, relationsToSave: LambdaRelationFinder.FindRelations(relationsToSave, _repository.Schema));
         }
 
         public bool InsertOrUpdate(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave)

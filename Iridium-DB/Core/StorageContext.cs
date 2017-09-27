@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -162,9 +162,7 @@ namespace Iridium.DB
 
         public TProp LoadRelation<TProp>(Expression<Func<TProp>> propExpression)
         {
-            var memberExpression = propExpression.Body as MemberExpression;
-
-            if (memberExpression != null)
+            if (propExpression.Body is MemberExpression memberExpression)
             {
                 var obj = Expression.Lambda(memberExpression.Expression).Compile().DynamicInvoke();
 
@@ -180,16 +178,12 @@ namespace Iridium.DB
         {
             foreach (var relation in relationsToLoad)
             {
-                var memberExpression = relation.Body as MemberExpression;
-
-                if (memberExpression != null)
+                if (relation.Body is MemberExpression memberExpression)
                 {
                     _LoadRelations(Expression.Lambda(memberExpression.Expression).Compile().DynamicInvoke(), new[] { relation });
                 }
             }
         }
-
-
 
         private Repository<T> GetRepository<T>()
         {
@@ -255,19 +249,9 @@ namespace Iridium.DB
             return DataSet<T>().Save(obj, relationsToSave);
         }
 
-        public bool Save<T>(T obj, bool insert, params Expression<Func<T, object>>[] relationsToSave)
-        {
-            return DataSet<T>().Save(obj, relationsToSave);
-        }
-
         public bool InsertOrUpdate<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
             return DataSet<T>().Save(obj, relationsToSave);
-        }
-
-        public bool InsertOrUpdate<T>(T obj, bool insert, params Expression<Func<T, object>>[] relationsToSave)
-        {
-            return DataSet<T>().Save(obj, insert, relationsToSave);
         }
 
         public bool Update<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
@@ -302,54 +286,46 @@ namespace Iridium.DB
             }
         }
 
+        // Native SQL methods
+
         public int SqlNonQuery(string sql, object parameters = null)
         {
-            var sqlProvider = DataProvider as ISqlDataProvider;
+            if (DataProvider is ISqlDataProvider sqlProvider)
+                return sqlProvider.SqlNonQuery(sql, QueryParameterCollection.FromObject(parameters));
 
-            if (sqlProvider == null)
-                throw new NotSupportedException();
-
-            return sqlProvider.SqlNonQuery(sql, QueryParameterCollection.FromObject(parameters));
+            throw new NotSupportedException();
         }
 
         public IEnumerable<T> SqlQuery<T>(string sql, object parameters = null) where T : new()
         {
-            var sqlProvider = DataProvider as ISqlDataProvider;
+            if (DataProvider is ISqlDataProvider sqlProvider)
+                return sqlProvider.SqlQuery(sql, QueryParameterCollection.FromObject(parameters)).Select(entity => entity.CreateObject<T>());
 
-            if (sqlProvider == null)
-                throw new NotSupportedException();
-
-            return sqlProvider.SqlQuery(sql, QueryParameterCollection.FromObject(parameters)).Select(entity => entity.CreateObject<T>());
+            throw new NotSupportedException();
         }
 
         public IEnumerable<Dictionary<string,object>> SqlQuery(string sql, object parameters = null)
         {
-            var sqlProvider = DataProvider as ISqlDataProvider;
+            if (DataProvider is ISqlDataProvider sqlProvider)
+                return sqlProvider.SqlQuery(sql, QueryParameterCollection.FromObject(parameters)).Select(entity => entity.AsDictionary());
 
-            if (sqlProvider == null)
-                throw new NotSupportedException();
-
-            return sqlProvider.SqlQuery(sql, QueryParameterCollection.FromObject(parameters)).Select(entity => entity.AsDictionary());
+            throw new NotSupportedException();
         }
 
         public T SqlQueryScalar<T>(string sql, object parameters = null) where T : new()
         {
-            var sqlProvider = DataProvider as ISqlDataProvider;
+            if (DataProvider is ISqlDataProvider sqlProvider)
+                return sqlProvider.SqlQueryScalar(sql, QueryParameterCollection.FromObject(parameters)).FirstOrDefault().Convert<T>();
 
-            if (sqlProvider == null)
-                throw new NotSupportedException();
-
-            return sqlProvider.SqlQueryScalar(sql, QueryParameterCollection.FromObject(parameters)).FirstOrDefault().Convert<T>();
+            throw new NotSupportedException();
         }
 
         public IEnumerable<T> SqlQueryScalars<T>(string sql, object parameters = null) where T : new()
         {
-            var sqlProvider = DataProvider as ISqlDataProvider;
+            if (DataProvider is ISqlDataProvider sqlProvider)
+                return sqlProvider.SqlQueryScalar(sql, QueryParameterCollection.FromObject(parameters)).Select(scalar => scalar.Convert<T>());
 
-            if (sqlProvider == null)
-                throw new NotSupportedException();
-
-            return sqlProvider.SqlQueryScalar(sql, QueryParameterCollection.FromObject(parameters)).Select(scalar => scalar.Convert<T>());
+            throw new NotSupportedException();
         }
 
         // Async methods
@@ -364,28 +340,22 @@ namespace Iridium.DB
             return Task.Run(() => CreateTable<T>(recreateTable, recreateIndexes));
         }
 
-        public Task<int> SqlNonQueryAsync(string sql, object parameters)
+        public Task<int> SqlNonQueryAsync(string sql, object parameters = null)
         {
             return Task.Run(() => SqlNonQuery(sql, parameters));
         }
 
-        [Obsolete("Use SqlNonQueryAsync()")]
-        public Task<int> ExecuteAsync(string sql, object parameters)
-        {
-            return SqlNonQueryAsync(sql, parameters);
-        }
-
-        public Task<T[]> QueryAsync<T>(string sql, object parameters = null) where T : new()
+        public Task<T[]> SqlQueryAsync<T>(string sql, object parameters = null) where T : new()
         {
             return Task.Run(() => SqlQuery<T>(sql, parameters).ToArray());
         }
 
-        public Task<T> QueryScalarAsync<T>(string sql, object parameters = null) where T : new()
+        public Task<T> SqlQueryScalarAsync<T>(string sql, object parameters = null) where T : new()
         {
             return Task.Run(() => SqlQueryScalar<T>(sql, parameters));
         }
 
-        public Task<T[]> QueryScalarsAsync<T>(string sql, object parameters = null) where T : new()
+        public Task<T[]> SqlQueryScalarsAsync<T>(string sql, object parameters = null) where T : new()
         {
             return Task.Run(() => SqlQueryScalars<T>(sql, parameters).ToArray());
         }

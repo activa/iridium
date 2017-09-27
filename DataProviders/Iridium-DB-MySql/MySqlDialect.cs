@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -51,6 +51,22 @@ namespace Iridium.DB.MySql
         public override string GetLastAutoincrementIdSql(string columnName, string alias, string tableName)
         {
             return "select last_insert_id() as " + alias;
+        }
+
+        public override string InsertOrUpdateSql(string tableName, StringPair[] columns, string[] keyColumns, string sqlWhere)
+        {
+            var parts = new List<string>
+            {
+                "insert into",
+                QuoteTable(tableName),
+                '(' + string.Join(",", columns.Select(c => QuoteField(c.Key))) + ')',
+                "values",
+                "(" + string.Join(",", columns.Select(c => c.Value)) + ")",
+                "on duplicate key update",
+                string.Join(",", columns.Select(c => $"{QuoteField(c.Key)}={c.Value}")),
+            };
+
+            return string.Join(" ", parts);
         }
 
         public override void CreateOrUpdateTable(TableSchema schema, bool recreateTable, bool recreateIndexes, SqlDataProvider dataProvider)
@@ -155,5 +171,7 @@ namespace Iridium.DB.MySql
             }
         }
 
+        public override bool SupportsInsertOrUpdate => true;
+        public override bool RequiresAutoIncrementGetInSameStatement => true;
     }
 }

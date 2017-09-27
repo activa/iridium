@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -57,23 +57,6 @@ namespace Iridium.DB
         public sealed class IgnoreAttribute : Attribute
         {
         }
-
-        /*
-[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-public sealed class ManyToManyAttribute : RelationAttribute
-{
-    public bool Pure { get; set; }
-    public string LocalLinkKey { get; set; }
-    public string ForeignLinkKey { get; set; }
-    public string LinkTable { get; set; }
-
-    public ManyToManyAttribute(string linkTable)
-    {
-        LinkTable = linkTable;
-    }
-}
-*/
-
     }
 
 }

@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
@@ -24,40 +24,16 @@
 //=============================================================================
 #endregion
 
+using System;
+
 namespace Iridium.DB
 {
-    public class SqlExpressionWithAlias
+    [Flags]
+    public enum SaveOptions
     {
-        public SqlExpressionWithAlias(string expression, string alias = null)
-        {
-            Expression = expression;
-            Alias = alias;
-        }
-
-        public readonly string Expression;
-        public readonly string Alias;
-
-        public virtual bool ShouldQuote => false;
+        FieldsOnly = 0,
+        InsertNewToOneRelations = 4,
+        InsertNewToManyRelations = 8,
+        InsertNewRelations = InsertNewToManyRelations|InsertNewToOneRelations,
     }
-
-    public class SqlColumnNameWithAlias : SqlExpressionWithAlias
-    {
-        public SqlColumnNameWithAlias(string name, string alias = null) : base(name,alias)
-        {
-        }
-
-        public override bool ShouldQuote => true;
-    }
-
-    public class SqlTableNameWithAlias : SqlExpressionWithAlias
-    {
-        public SqlTableNameWithAlias(string name, string alias = null) : base(name, alias)
-        {
-        }
-
-        public string TableName => Expression;
-
-        public override bool ShouldQuote => true;
-    }
-
 }

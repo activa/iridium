@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -96,6 +96,29 @@ namespace Iridium.DB.SqlServer
             return "select SCOPE_IDENTITY() as " + alias;
         }
 
+        public override string InsertOrUpdateSql(string tableName, StringPair[] columns, string[] keyColumns, string sqlWhere)
+        {
+            var parts = new List<string>
+            {
+                "update",
+                QuoteTable(tableName),
+                "set",
+                string.Join(",", columns.Select(c => $"{QuoteField(c.Key)}={c.Value}")),
+                "where",
+                sqlWhere,
+                ";",
+                "if @@rowcount = 0 begin",
+                "insert into",
+                QuoteTable(tableName),
+                '(' + string.Join(",", columns.Select(c => QuoteField(c.Key))) + ')',
+                "values",
+                "(" + string.Join(",", columns.Select(c => c.Value)) + ")",
+                "end"
+            };
+
+            return string.Join(" ", parts);
+        }
+
         public override string SqlFunction(Function function, params string[] parameters)
         {
             switch (function)
@@ -109,6 +132,9 @@ namespace Iridium.DB.SqlServer
                     return base.SqlFunction(function, parameters);
             }
         }
+
+        public override bool SupportsInsertOrUpdate => true;
+        public override bool RequiresAutoIncrementGetInSameStatement => true;
 
         public override void CreateOrUpdateTable(TableSchema schema, bool recreateTable, bool recreateIndexes, SqlDataProvider dataProvider)
         {

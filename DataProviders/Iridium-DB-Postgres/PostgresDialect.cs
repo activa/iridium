@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -83,6 +83,24 @@ namespace Iridium.DB.Postgres
             }
 
             return "delete from " + QuoteTable(tableName.TableName) + (tableName.Alias != null ? (" " + tableName.Alias + " ") : "") + (sqlWhere != null ? (" where " + sqlWhere) : "");
+        }
+
+        public override string InsertOrUpdateSql(string tableName, StringPair[] columns, string[] keyColumns, string sqlWhere)
+        {
+            var parts = new List<string>
+            {
+                "insert into",
+                QuoteTable(tableName),
+                '(' + string.Join(",", columns.Select(c => QuoteField(c.Key))) + ')',
+                "values",
+                "(" + string.Join(",", columns.Select(c => c.Value)) + ")",
+                "on conflict",
+                "(" + string.Join(",", keyColumns.Select(c => QuoteField(c))) + ')' ,
+                "do update set",
+                string.Join(",", columns.Select(c => $"{QuoteField(c.Key)}={c.Value}")),
+            };
+
+            return string.Join(" ", parts);
         }
 
         public override string GetLastAutoincrementIdSql(string columnName, string alias, string tableName)
@@ -191,5 +209,7 @@ namespace Iridium.DB.Postgres
             }
         }
 
+        public override bool SupportsInsertOrUpdate => true;
+        public override bool RequiresAutoIncrementGetInSameStatement => true;
     }
 }

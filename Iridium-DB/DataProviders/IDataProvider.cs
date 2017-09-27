@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -34,7 +34,7 @@ namespace Iridium.DB
         object GetScalar(Aggregate aggregate, INativeQuerySpec nativeQuerySpec, TableSchema schema);
         IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec filter, TableSchema schema);
         IEnumerable<SerializedEntity> GetObjectsWithPrefetch(INativeQuerySpec filter, TableSchema schema, IEnumerable<TableSchema.Relation> prefetchRelations, out IEnumerable<Dictionary<TableSchema.Relation, SerializedEntity>> relatedEntities);
-        ObjectWriteResult WriteObject(SerializedEntity o, bool createNew, TableSchema schema);
+        ObjectWriteResult WriteObject(SerializedEntity o, bool? createNew, TableSchema schema);
         SerializedEntity ReadObject(Dictionary<string,object> keys, TableSchema schema);
         bool DeleteObject(SerializedEntity o, TableSchema schema);
         bool DeleteObjects(INativeQuerySpec filter, TableSchema schema);

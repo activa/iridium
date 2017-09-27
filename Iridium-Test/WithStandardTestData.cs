@@ -45,7 +45,7 @@ namespace Iridium.DB.Test
                     ProductID = "" + (char)('A' + productIndex), 
                     Description = "Product " + (productIndex + 1), 
                     MinQty = 1,
-                    Price = (decimal) (rnd.Next(100, 20000) / 100.0)
+                    Price = 1m + (decimal) (rnd.Next(100, 20000) / 100.0)
                 };
 
                 DB.Products.Insert(product);
@@ -593,12 +593,11 @@ namespace Iridium.DB.Test
             Func<string, string> quoteField = s => s;
             Func<string, string> quoteTable = s => s;
 
-            if (DB.DataProvider is SqlDataProvider)
+            if (DB.DataProvider is SqlDataProvider sqlDataProvider)
             {
-                quoteField = s => ((SqlDataProvider)DB.DataProvider).SqlDialect.QuoteField(s);
-                quoteTable = s => ((SqlDataProvider)DB.DataProvider).SqlDialect.QuoteTable(s);
+                quoteField = s => sqlDataProvider.SqlDialect.QuoteField(s);
+                quoteTable = s => sqlDataProvider.SqlDialect.QuoteTable(s);
             }
-
 
             var maxPrice1 = DB.SqlQueryScalar<decimal>($"select max({quoteField("Price")}) from {quoteTable("Product")} where {quoteField("Price")} < @price", new { price = 100.0m });
             var maxPrice2 = DB.Products.Max(p => p.Price, p => p.Price < 100.0m);

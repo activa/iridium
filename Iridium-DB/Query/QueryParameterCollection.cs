@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -24,7 +24,6 @@
 //=============================================================================
 #endregion
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,20 +31,6 @@ using Iridium.Core;
 
 namespace Iridium.DB
 {
-    public class QueryParameter
-    {
-        public QueryParameter(string name, object value, Type type = null)
-        {
-            Name = name;
-            Value = value;
-            Type = (type ?? value?.GetType()) ?? typeof(object);
-        }
-
-        public readonly string Name;
-        public readonly object Value;
-        public readonly Type Type;
-    }
-
     public class QueryParameterCollection : IEnumerable<QueryParameter>
     {
         private readonly Dictionary<string, QueryParameter> _dic;
@@ -53,7 +38,6 @@ namespace Iridium.DB
         public QueryParameterCollection()
         {
             _dic = new Dictionary<string, QueryParameter>();
-            
         }
 
         public QueryParameterCollection(IEnumerable<QueryParameter> parameters)
@@ -80,23 +64,22 @@ namespace Iridium.DB
 
         public QueryParameter this[string key]
         {
-            get { return _dic[key]; }
-            set { _dic[key] = value; }
+            get => _dic[key];
+            set => _dic[key] = value;
         }
 
         public IEnumerable<string> Keys => _dic.Keys;
 
         private IEnumerable<QueryParameter> EnumerateObject(object obj)
         {
-            if (obj is IDictionary)
+            switch (obj)
             {
-                var dictionary = ((IDictionary) obj);
+                case IDictionary dictionary:
+                    return from object key in dictionary.Keys select new QueryParameter(key.ToString(), dictionary[key]);
 
-                return from object key in dictionary.Keys select new QueryParameter(key.ToString(), dictionary[key]);
+                case QueryParameterCollection paramCollection:
+                    return paramCollection;
             }
-
-            if (obj is QueryParameterCollection)
-                return ((QueryParameterCollection) obj);
 
             var members = obj.GetType().Inspector().GetFieldsAndProperties(BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.Instance);
 

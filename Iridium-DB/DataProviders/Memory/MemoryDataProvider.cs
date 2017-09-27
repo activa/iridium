@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -80,6 +80,7 @@ namespace Iridium.DB
             {
                 _autoIncrementCounters.Clear();
                 _objects.Clear();
+                _indexedObjects.Clear();
             }
 
             public BucketAccessor Accessor() { return new BucketAccessor(this); }
@@ -136,17 +137,30 @@ namespace Iridium.DB
             throw new NotSupportedException();
         }
 
-        public ObjectWriteResult WriteObject(SerializedEntity o, bool createNew, TableSchema schema)
+        public ObjectWriteResult WriteObject(SerializedEntity o, bool? createNew, TableSchema schema)
         {
+            if (schema.IncrementKey != null && createNew == null)
+                return new ObjectWriteResult() {Success = false};
+
             var result = new ObjectWriteResult();
 
             using (var bucket = GetBucket(schema))
             {
-                if (createNew)
+                if (createNew == null)
                 {
-                    foreach (var incrementKey in schema.IncrementKeys.Where(incrementKey => o[incrementKey.MappedName].Convert<long>() == 0))
+                    if (schema.PrimaryKeys.Length == 0)
+                        return new ObjectWriteResult() { Success = false };
+
+                    var compositeKey = new CompositeKey(schema.PrimaryKeys.ToDictionary(field => field.MappedName, field => o[field.MappedName]));
+
+                    createNew = !bucket.IndexedObjects.ContainsKey(compositeKey);
+                }
+
+                if (createNew.Value)
+                {
+                    if (schema.IncrementKey != null)
                     {
-                        o[incrementKey.MappedName] = bucket.NextIncrementCounter(incrementKey.FieldName).Convert(incrementKey.FieldType);
+                        o[schema.IncrementKey.MappedName] = bucket.NextIncrementCounter(schema.IncrementKey.FieldName).Convert(schema.IncrementKey.FieldType);
 
                         result.OriginalUpdated = true;
                     }

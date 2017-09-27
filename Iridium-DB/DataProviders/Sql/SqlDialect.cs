@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -93,26 +93,39 @@ namespace Iridium.DB
             return string.Join(" ", parts);
         }
 
-        public virtual string JoinSql(SqlJoinDefinition join)
+        public virtual string JoinSql(SqlJoinDefinition j)
         {
-            return string.Format("{0} join {1} {2} on {3}={4}",
-                            join.Type == SqlJoinType.Inner ? "inner" : "left outer",
-                            QuoteTable(@join.Right.Schema.MappedName),
-                            join.Right.Alias,
-                            QuoteField(join.Left.Alias + "." + @join.Left.Field.MappedName),
-                            QuoteField(join.Right.Alias + "." + @join.Right.Field.MappedName)
-                            );
+            return $"{(j.Type == SqlJoinType.Inner ? "inner" : "left outer")} join {QuoteTable(j.Right.Schema.MappedName)} {j.Right.Alias} on {QuoteField(j.Left.Alias + "." + j.Left.Field.MappedName)}={QuoteField(j.Right.Alias + "." + j.Right.Field.MappedName)}";
         }
 
-        public virtual string InsertSql(string tableName, IEnumerable<string> columns, IEnumerable<string> values)
+        public virtual string InsertSql(string tableName, StringPair[] columns)
         {
             var parts = new List<string>
             {
                 "insert into", 
                 QuoteTable(tableName), 
-                '(' + string.Join(",", columns.Select(QuoteField)) + ')', 
+                '(' + string.Join(",", columns.Select(c => QuoteField(c.Key))) + ')', 
                 "values", 
-                "(" + string.Join(",", values) + ")"
+                "(" + string.Join(",", columns.Select(c => c.Value)) + ")"
+            };
+
+            return string.Join(" ", parts);
+        }
+
+        public virtual string UpdateSql(string table, StringPair[] setColumns, string[] keyColumns, string sqlWhere)
+        {
+            return $"update {QuoteTable(table)} set {string.Join(",", setColumns.Select(c => $"{QuoteField(c.Key)}={c.Value}"))} where {sqlWhere}";
+        }
+
+        public virtual string InsertOrUpdateSql(string tableName, StringPair[] columns, string[] keyColumns, string sqlWhere)
+        {
+            var parts = new List<string>
+            {
+                "replace into",
+                QuoteTable(tableName),
+                '(' + string.Join(",", columns.Select(c => QuoteField(c.Key))) + ')',
+                "values",
+                "(" + string.Join(",", columns.Select(c => c.Value)) + ")"
             };
 
             return string.Join(" ", parts);
@@ -150,23 +163,8 @@ namespace Iridium.DB
             }
 
             return string.Join(" ", parts);
-/*
-            if (tableName.Alias != null)
-                return "delete from " + QuoteTable(tableName.TableName) + (tableName.Alias != null ? (" " + tableName.Alias + " ") : "") + (sqlWhere != null ? (" where " + sqlWhere) : "");
-            else
-                return "delete from " + QuoteTable(tableName.TableName) + (sqlWhere != null ? (" where " + sqlWhere) : "");
-*/
         }
 
-        public virtual string UpdateSql(SqlTableNameWithAlias table, IEnumerable<Tuple<string, string>> setColumns, string sqlWhere)
-        {
-            return string.Format("update {0} set {1} where {2}",
-                            QuoteTable(table.TableName),
-                            string.Join(",", setColumns.Select(c => $"{QuoteField(c.Item1)}={c.Item2}")),
-                            sqlWhere
-                            );
-
-        }
 
         public abstract string GetLastAutoincrementIdSql(string columnName, string alias, string tableName);
 
@@ -200,5 +198,8 @@ namespace Iridium.DB
         {
             return '\'' + s + '\'';
         }
+
+        public abstract bool SupportsInsertOrUpdate { get; }
+        public abstract bool RequiresAutoIncrementGetInSameStatement { get; }
     }
 }

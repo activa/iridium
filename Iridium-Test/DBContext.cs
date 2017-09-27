@@ -44,6 +44,8 @@ namespace Iridium.DB.Test
         public IDataSet<CustomerPaymentMethodLink> CustomerPaymentMethodLinks { get; set; }
         public IDataSet<RecordWithAllTypes> RecordsWithAllTypes;
         public IDataSet<RecordWithCompositeKey> RecordsWithCompositeKey;
+        public IDataSet<RecordWithSingleKey> RecordsWithSingleKey;
+        public IDataSet<RecordWithAutonumKey> RecordsWithAutonumKey;
         public IDataSet<RecordWithIgnoredFields> RecordsWithIgnoredFields;
         public IDataSet<RecordWithInterface> RecordsWithInterface;
 
@@ -69,11 +71,12 @@ namespace Iridium.DB.Test
             Products.Purge();
             PaymentMethods.Purge();
             CustomerPaymentMethodLinks.Purge();
+
             RecordsWithAllTypes.Purge();
             RecordsWithCompositeKey.Purge();
+            RecordsWithSingleKey.Purge();
+            RecordsWithAutonumKey.Purge();
             RecordsWithIgnoredFields.Purge();
-            
-
         }
 
         public void CreateAllTables()
@@ -87,6 +90,8 @@ namespace Iridium.DB.Test
             CreateTable<CustomerPaymentMethodLink>(recreateTable: true);
             CreateTable<RecordWithAllTypes>(recreateTable: true);
             CreateTable<RecordWithCompositeKey>(recreateTable: true);
+            CreateTable<RecordWithSingleKey>(recreateTable: true);
+            CreateTable<RecordWithAutonumKey>(recreateTable: true);
             CreateTable<OneToOneRec1>(recreateTable:true);
             CreateTable<OneToOneRec2>(recreateTable:true);
             CreateTable<RecordWithIgnoredFields>(recreateTable: true);

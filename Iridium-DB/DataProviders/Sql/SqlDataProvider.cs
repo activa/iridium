@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -204,38 +204,38 @@ namespace Iridium.DB
             }
         }
 
-        public ObjectWriteResult WriteObject(SerializedEntity o, bool create, TableSchema schema)
+        public ObjectWriteResult WriteObject(SerializedEntity o, bool? create, TableSchema schema)
         {
             var result = new ObjectWriteResult();
 
-            string tableName = schema.MappedName;
-            var autoIncrementField = schema.IncrementKeys.FirstOrDefault();
+            var tableName = schema.MappedName;
+            var autoIncrementField = schema.IncrementKey;
             var columnList = (from f in schema.WriteFields where !f.AutoIncrement && !f.ColumnReadOnly select new { Field = f, ParameterName = SqlNameGenerator.NextParameterName()  }).ToArray();
             var parameters = new QueryParameterCollection(columnList.Select(c => new QueryParameter(c.ParameterName, o[c.Field.MappedName],c.Field.FieldType)));
 
+            if (autoIncrementField != null && create == null) 
+                throw new NotSupportedException("INT.ERR.27");
+
             string sql;
 
-            if (create)
+            if (create ?? false)
             {
                 sql = SqlDialect.InsertSql(
                                     tableName, 
-                                    columnList.Select(c => c.Field.MappedName), columnList.Select(c => SqlDialect.CreateParameterExpression(c.ParameterName))
+                                    columnList.Select(c => new StringPair(c.Field.MappedName,SqlDialect.CreateParameterExpression(c.ParameterName))).ToArray()
                                     );
-
-
-                
 
                 if (autoIncrementField != null)
                 {
                     object autoIncrementValue;
 
-                    if (RequiresAutoIncrementGetInSameStatement)
+                    if (SqlDialect.RequiresAutoIncrementGetInSameStatement)
                     {
                         string fieldAlias = SqlNameGenerator.NextFieldAlias();
 
                         sql += ';' + SqlDialect.GetLastAutoincrementIdSql(autoIncrementField.MappedName, fieldAlias, schema.MappedName);
 
-                        autoIncrementValue = ExecuteSqlReader(sql, parameters).FirstOrDefault()[fieldAlias];
+                        autoIncrementValue = ExecuteSqlReader(sql, parameters).First()[fieldAlias];
                     }
                     else
                     {
@@ -257,16 +257,37 @@ namespace Iridium.DB
             {
                 if (columnList.Length > 0 && schema.PrimaryKeys.Length > 0)
                 {
-                    var pkParameters = schema.PrimaryKeys.Select(pk => new KeyValuePair<string,TableSchema.Field>(SqlNameGenerator.NextParameterName(), pk)).ToArray();
+                    var pkParameters = schema.PrimaryKeys.Select(
+                        pk => new KeyValuePair<string,TableSchema.Field>(SqlNameGenerator.NextParameterName(), pk)
+                        ).ToArray();
 
                     foreach (var primaryKey in pkParameters)
                         parameters[primaryKey.Key] = new QueryParameter(primaryKey.Key, o[primaryKey.Value.MappedName], primaryKey.Value.FieldType);
 
-                    sql = SqlDialect.UpdateSql(
-                                        new SqlTableNameWithAlias(tableName),
-                                        columnList.Select(c => new Tuple<string, string>(c.Field.MappedName, SqlDialect.CreateParameterExpression(c.ParameterName))),
-                                        String.Join(" AND ", pkParameters.Select(pk => SqlDialect.QuoteField(pk.Value.MappedName) + "=" + SqlDialect.CreateParameterExpression(pk.Key)))
-                                    );
+                    var sqlWhere = string.Join(" AND ", pkParameters.Select(pk => SqlDialect.QuoteField(pk.Value.MappedName) + "=" + SqlDialect.CreateParameterExpression(pk.Key)));
+                    var fields = columnList.Select(c => new StringPair(c.Field.MappedName, SqlDialect.CreateParameterExpression(c.ParameterName))).ToArray();
+
+                    if (create == null && !SqlDialect.SupportsInsertOrUpdate)
+                        throw new NotSupportedException("InsertOrUpdate not supported by data provider");
+
+                    if (create == null)
+                    {
+                        sql = SqlDialect.InsertOrUpdateSql(
+                            tableName,
+                            fields,
+                            schema.PrimaryKeys.Select(pk => pk.MappedName).ToArray(),
+                            sqlWhere
+                        );
+                    }
+                    else
+                    {
+                        sql = SqlDialect.UpdateSql(
+                            tableName, 
+                            fields, 
+                            schema.PrimaryKeys.Select(pk => pk.MappedName).ToArray(), 
+                            sqlWhere
+                            );
+                    }
 
                     ExecuteSql(sql, parameters);
                 }
@@ -415,8 +436,6 @@ namespace Iridium.DB
         public virtual bool SupportsTransactions => true;
         public bool SupportsSql => true;
 
-        public abstract bool RequiresAutoIncrementGetInSameStatement { get; }
-
         public virtual bool CreateOrUpdateTable(TableSchema schema, bool recreateTable, bool recreateIndexes)
         {
             SqlDialect.CreateOrUpdateTable(schema, recreateTable, recreateIndexes, this);
@@ -457,12 +476,12 @@ namespace Iridium.DB
 
         public virtual long GetLastAutoIncrementValue(TableSchema schema)
         {
-            var autoIncrementField = schema.IncrementKeys.FirstOrDefault();
+            var autoIncrementField = schema.IncrementKey;
             var fieldAlias = SqlNameGenerator.NextFieldAlias();
 
             string sql = SqlDialect.GetLastAutoincrementIdSql(autoIncrementField.MappedName, fieldAlias, schema.MappedName);
 
-            var sqlResult = ExecuteSqlReader(sql, null).FirstOrDefault();
+            var sqlResult = ExecuteSqlReader(sql, null).First();
 
             return sqlResult[fieldAlias].Convert<long>();
         }

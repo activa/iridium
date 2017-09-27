@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -62,17 +62,14 @@ namespace Iridium.DB
 
         protected bool Save(object obj, bool? create, HashSet<TableSchema.Relation> relationsToSave)
         {
-            if (create == null)
+            if (create == null && Schema.IncrementKey != null)
             {
-                if (Schema.IncrementKeys.Length == 0)
-                    throw new Exception("Save()/InsertOrUpdate() is only supported for objects with autoincremnt primary keys. Use explicit Insert() or Update()");
-                
-                create = Schema.IncrementKeys.Length > 0 && Equals(Schema.IncrementKeys[0].GetField(obj), Schema.IncrementKeys[0].FieldInfo.Inspector().Type.Inspector().DefaultValue());
+                create = Equals(Schema.IncrementKey.GetField(obj), Schema.IncrementKey.FieldInfo.Inspector().Type.Inspector().DefaultValue());
             }
 
             bool cancelSave = false;
 
-            if (create.Value)
+            if (create ?? false)
                 Fire_ObjectCreating(obj, ref cancelSave);
             else
                 Fire_ObjectSaving(obj, ref cancelSave);
@@ -102,7 +99,7 @@ namespace Iridium.DB
 
             var serializedEntity = Schema.SerializeObject(obj);
 
-            var result = DataProvider.WriteObject(serializedEntity, create.Value, Schema);
+            var result = DataProvider.WriteObject(serializedEntity, create, Schema);
 
             if (result.OriginalUpdated)
                 Schema.UpdateObject(obj, serializedEntity);
@@ -112,9 +109,8 @@ namespace Iridium.DB
                 foreach (var relation in toManyRelations.Where(relationsToSave.Contains))
                 {
                     var foreignCollection = (IEnumerable) relation.GetField(obj);
-                    var dataSet = foreignCollection as DataSet;
 
-                    if (dataSet != null)
+                    if (foreignCollection is DataSet dataSet)
                     {
                         foreignCollection = dataSet.NewObjects;
                         dataSet.NewObjects = null;
@@ -137,7 +133,7 @@ namespace Iridium.DB
 
             if (result.Success)
             {
-                if (create.Value)
+                if (create ?? false)
                     Fire_ObjectCreated(obj);
                 else
                     Fire_ObjectSaved(obj);
@@ -183,14 +179,5 @@ namespace Iridium.DB
         public abstract void Fire_ObjectSaved(object obj);
         public abstract void Fire_ObjectDeleting(object obj, ref bool cancel);
         public abstract void Fire_ObjectDeleted(object obj);
-    }
-
-    [Flags]
-    public enum SaveOptions
-    {
-        FieldsOnly = 0,
-        InsertNewToOneRelations = 4,
-        InsertNewToManyRelations = 8,
-        InsertNewRelations = InsertNewToManyRelations|InsertNewToOneRelations,
     }
 }

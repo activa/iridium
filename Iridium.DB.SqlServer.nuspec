@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>iridium.db.sqlserver</id>
-    <version>2.1.0.201</version>
+    <version>2.2.0.221</version>
     <title>Iridium SQL Server Driver</title>
     <authors>Philippe Leybaert</authors>
     <projectUrl>http://github.com/activa/iridium</projectUrl>
@@ -14,13 +14,13 @@
     <description>SQL Server driver for Iridium, the lightweight multi-platform ORM for mobile, desktop and servers. This driver is compatible with .NET 4.5 (desktop/server), Xamarin.iOS and Xamarin.Android</description>
     <copyright>Copyright 2015-2017 Philippe Leybaert</copyright>
     <dependencies>
-      <dependency id="iridium" version="2.1.0.200" />
+      <dependency id="iridium" version="2.2.0.221" />
     </dependencies>
   </metadata>
   <files>
-    <file src="..\Iridium-DB-SqlServer\bin\Release\Iridium.DB.SqlServer.dll" target="lib\net45" />
-    <file src="..\Iridium-DB-SqlServer-iOS\bin\iPhone\Release\Iridium.DB.SqlServer.iOS.dll" target="lib\Xamarin.iOS10" />
-    <file src="..\Iridium-DB-SqlServer-iOS\bin\iPhone\Release\Iridium.DB.SqlServer.iOS.dll" target="lib\MonoTouch10" />
-    <file src="..\Iridium-DB-SqlServer-Android\bin\Release\Iridium.DB.SqlServer.Android.dll" target="lib\MonoAndroid10" />
+    <file src="DataProviders\Iridium-DB-SqlServer\bin\Release\Iridium.DB.SqlServer.dll" target="lib\net45" />
+    <file src="DataProviders\Iridium-DB-SqlServer-iOS\bin\iPhone\Release\Iridium.DB.SqlServer.iOS.dll" target="lib\Xamarin.iOS10" />
+    <file src="DataProviders\Iridium-DB-SqlServer-iOS\bin\iPhone\Release\Iridium.DB.SqlServer.iOS.dll" target="lib\MonoTouch10" />
+    <file src="DataProviders\Iridium-DB-SqlServer-Android\bin\Release\Iridium.DB.SqlServer.Android.dll" target="lib\MonoAndroid10" />
   </files>
 </package>

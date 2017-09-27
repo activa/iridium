@@ -2,7 +2,7 @@
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
-// Copyright (c) 2015 Philippe Leybaert
+// Copyright (c) 2015-2017 Philippe Leybaert
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal 
@@ -31,34 +31,34 @@ namespace Iridium.DB
 {
     public class SerializedEntity
     {
-        readonly Dictionary<string, object> _dictionary;
+        private readonly Dictionary<string, object> _dic;
 
         public SerializedEntity(Dictionary<string, object> dictionary)
         {
-            _dictionary = new Dictionary<string, object>(dictionary);
+            _dic = new Dictionary<string, object>(dictionary);
         }
 
         public bool Contains(string field)
         {
-            return _dictionary.ContainsKey(field);
+            return _dic.ContainsKey(field);
         }
 
-        public IEnumerable<string> FieldNames => _dictionary.Keys;
+        public IEnumerable<string> FieldNames => _dic.Keys;
 
         public object this[string fieldName]
         {
-            get { return _dictionary[fieldName]; }
-            set { _dictionary[fieldName] = value; }
+            get => _dic[fieldName];
+            set => _dic[fieldName] = value;
         }
 
         public Dictionary<string, object> AsDictionary()
         {
-            return new Dictionary<string, object>(_dictionary);
+            return new Dictionary<string, object>(_dic);
         }
 
         public T CreateObject<T>() where T : new()
         {
-            return ObjectMapper.Mapper(includeInherited: true).CreateObject<T>(_dictionary);
+            return ObjectMapper.Mapper(includeInherited: true).CreateObject<T>(_dic);
         }
     }
 }
