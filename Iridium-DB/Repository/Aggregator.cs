@@ -19,6 +19,8 @@ namespace Iridium.DB
             {typeof(float?),new NullableFloatAggregator() },
             {typeof(decimal),new DecimalAggregator() },
             {typeof(decimal?),new NullableDecimalAggregator() },
+            {typeof(DateTime),new DateTimeAggregator() },
+            {typeof(DateTime?),new NullableDateTimeAggregator() },
         };
 
         public static T AggregateValues<T>(Aggregate agg, IEnumerable<T> values)
@@ -52,7 +54,6 @@ namespace Iridium.DB
             switch (agg)
             {
                 case Aggregate.Sum: return objects.Sum();
-                case Aggregate.Average: return (int)objects.Average(o => (double)o);
                 case Aggregate.Max: return objects.Max();
                 case Aggregate.Min: return objects.Min();
 
@@ -69,7 +70,6 @@ namespace Iridium.DB
             switch (agg)
             {
                 case Aggregate.Sum: return objects.Sum();
-                case Aggregate.Average: return (int?)objects.Average(o => (double?)o);
                 case Aggregate.Max: return objects.Max();
                 case Aggregate.Min: return objects.Min();
 
@@ -86,7 +86,6 @@ namespace Iridium.DB
             switch (agg)
             {
                 case Aggregate.Sum: return objects.Sum();
-                case Aggregate.Average: return (long)objects.Average(o => (double)o);
                 case Aggregate.Max: return objects.Max();
                 case Aggregate.Min: return objects.Min();
 
@@ -103,7 +102,6 @@ namespace Iridium.DB
             switch (agg)
             {
                 case Aggregate.Sum: return objects.Sum();
-                case Aggregate.Average: return (long?)objects.Average(o => (double?)o);
                 case Aggregate.Max: return objects.Max();
                 case Aggregate.Min: return objects.Min();
 
@@ -154,7 +152,6 @@ namespace Iridium.DB
             switch (agg)
             {
                 case Aggregate.Sum: return objects.Sum();
-                case Aggregate.Average: return objects.Average();
                 case Aggregate.Max: return objects.Max();
                 case Aggregate.Min: return objects.Min();
 
@@ -206,6 +203,36 @@ namespace Iridium.DB
             {
                 case Aggregate.Sum: return objects.Sum();
                 case Aggregate.Average: return objects.Average();
+                case Aggregate.Max: return objects.Max();
+                case Aggregate.Min: return objects.Min();
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
+
+    internal class DateTimeAggregator : Aggregator<DateTime>
+    {
+        public override DateTime Execute(Aggregate agg, IEnumerable<DateTime> objects)
+        {
+            switch (agg)
+            {
+                case Aggregate.Max: return objects.Max();
+                case Aggregate.Min: return objects.Min();
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
+
+    internal class NullableDateTimeAggregator : Aggregator<DateTime?>
+    {
+        public override DateTime? Execute(Aggregate agg, IEnumerable<DateTime?> objects)
+        {
+            switch (agg)
+            {
                 case Aggregate.Max: return objects.Max();
                 case Aggregate.Min: return objects.Min();
 

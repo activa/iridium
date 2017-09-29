@@ -3,23 +3,22 @@ using NUnit.Framework;
 
 namespace Iridium.DB.Test
 {
-    [TestFixture("sqlite")]
-    [TestFixture("sqlserver")]
-    [TestFixture("memory")]
-    [TestFixture("mysql")]
-    [TestFixture("postgres")]
-    [TestFixture("sqlitemem")]
+    [TestFixture("memory", Category = "embedded")]
+    [TestFixture("sqlitemem", Category = "embedded")]
+    [TestFixture("sqlserver", Category = "server")]
+    [TestFixture("sqlite", Category = "file")]
+    [TestFixture("mysql", Category = "server")]
+    [TestFixture("postgres", Category = "server")]
     public class FieldTypeTests : TestFixture
     {
-        [SetUp]
-        public void SetupTest()
-        {
-            DB.PurgeAll();
-        }
-
         public FieldTypeTests(string driver) : base(driver)
         {
-            DB.CreateAllTables();
+        }
+
+        [SetUp]
+        public void DeleteTables()
+        {
+            DB.RecordsWithAllTypes.DeleteAll();
         }
 
         private RecordWithAllTypes SaveAndReload(RecordWithAllTypes rec)

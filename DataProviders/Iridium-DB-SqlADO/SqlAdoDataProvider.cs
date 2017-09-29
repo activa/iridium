@@ -244,7 +244,7 @@ namespace Iridium.DB.Sql
         {
             foreach (var connection in _localConnection.Values)
             {
-                connection.Dispose();
+                connection?.Dispose();
             }
         }
 

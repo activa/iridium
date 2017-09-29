@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.Remoting;
 using Iridium.DB;
 using Iridium.DB.MySql;
 using Iridium.DB.Postgres;
 using Iridium.DB.SqlServer;
+using NUnit.Framework;
 
 /*
 using Iridium.DB.MySql;
@@ -24,6 +26,32 @@ namespace Iridium.DB.Test
         {
         }
     }
+
+    public static class TestConfiguration
+    {
+        public static IEnumerable<TestFixtureData> FixtureSource()
+        {
+            if (!string.IsNullOrEmpty(TestContext.Parameters["db"]))
+            {
+                string[] databases = TestContext.Parameters["db"].Split('/');
+
+                return databases.Select(db => new TestFixtureData(db));
+            }
+
+            return new[]
+            {
+                new TestFixtureData("sqlitemem"),
+                new TestFixtureData("memory"),
+                new TestFixtureData("sqlite"),
+                new TestFixtureData("sqlserver"),
+                new TestFixtureData("mysql"),
+                new TestFixtureData("postgres"),
+
+            };
+        }
+    }
+
+
     public class SERVERS
     {
         public const string SQLSERVER = "192.168.1.100";
@@ -99,7 +127,6 @@ namespace Iridium.DB.Test
         }
 
         private static Dictionary<string, Func<DBContext>> _contextFactories;
-        private static Dictionary<string,DBContext> _contexts = new Dictionary<string, DBContext>();
 
         static DBContext()
         {
@@ -116,40 +143,44 @@ namespace Iridium.DB.Test
 
         }
 
-        public static DBContext Get(string driver)
+        public static Func<DBContext> GetContextFactory(string driver)
         {
-            if (_contexts.ContainsKey(driver))
-                return _contexts[driver];
-
-            _contexts[driver] = _contextFactories[driver]();
-
-            return _contexts[driver];
+            return _contextFactories[driver];
         }
     }
 
     public class MySqlStorage : DBContext
     {
         public MySqlStorage() : base(new MySqlDataProvider($"Server={SERVERS.MYSQL};Database=velox;UID=velox;PWD=velox")) { }
+
+        public override string ToString() => "mysql";
     }
 
     public class PostgresStorage : DBContext
     {
         public PostgresStorage() : base(new PostgresDataProvider($"Host={SERVERS.POSTGRES};Database=velox;Username=velox;Password=velox")) { }
+
+        public override string ToString() => "postgres";
     }
 
     public class SqlServerStorage : DBContext
     {
         public SqlServerStorage() : base(new SqlServerDataProvider($"Server={SERVERS.SQLSERVER};Database=velox;UID=velox;PWD=velox")) { }
+
+        public override string ToString() => "sqlserver";
     }
 
     public class SqliteStorage : DBContext
     {
         public SqliteStorage() : base(new SqliteDataProvider("velox.sqlite")) { }
+        public override string ToString() => "sqlite";
     }
 
     public class SqliteMemStorage : DBContext
     {
         public SqliteMemStorage() : base(new SqliteDataProvider(":memory:")) { }
+        public override string ToString() => "sqlite-memory";
+
     }
 
 
@@ -157,5 +188,7 @@ namespace Iridium.DB.Test
     public class MemoryStorage : DBContext
     {
         public MemoryStorage() : base(new MemoryDataProvider()) { }
+        public override string ToString() => "memory";
+
     }
 }

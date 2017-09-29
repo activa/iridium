@@ -60,12 +60,28 @@ namespace Iridium.DB
         TScalar Max<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter);
         TScalar Min<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter);
         TScalar Sum<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter);
-        TScalar Average<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter);
 
         TScalar Max<TScalar>(Expression<Func<T, TScalar>> expression);
         TScalar Min<TScalar>(Expression<Func<T, TScalar>> expression);
         TScalar Sum<TScalar>(Expression<Func<T, TScalar>> expression);
-        TScalar Average<TScalar>(Expression<Func<T, TScalar>> expression);
+
+        double Average(Expression<Func<T, int>> expression);
+        double? Average(Expression<Func<T, int?>> expression);
+        double Average(Expression<Func<T, double>> expression);
+        double? Average(Expression<Func<T, double?>> expression);
+        double Average(Expression<Func<T, long>> expression);
+        double? Average(Expression<Func<T, long?>> expression);
+        decimal Average(Expression<Func<T, decimal>> expression);
+        decimal? Average(Expression<Func<T, decimal?>> expression);
+
+        double Average(Expression<Func<T, int>> expression, Expression<Func<T, bool>> filter);
+        double? Average(Expression<Func<T, int?>> expression, Expression<Func<T, bool>> filter);
+        double Average(Expression<Func<T, double>> expression, Expression<Func<T, bool>> filter);
+        double? Average(Expression<Func<T, double?>> expression, Expression<Func<T, bool>> filter);
+        double Average(Expression<Func<T, long>> expression, Expression<Func<T, bool>> filter);
+        double? Average(Expression<Func<T, long?>> expression, Expression<Func<T, bool>> filter);
+        decimal Average(Expression<Func<T, decimal>> expression, Expression<Func<T, bool>> filter);
+        decimal? Average(Expression<Func<T, decimal?>> expression, Expression<Func<T, bool>> filter);
 
         T ElementAt(int index);
 

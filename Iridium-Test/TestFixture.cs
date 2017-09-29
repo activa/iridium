@@ -14,19 +14,31 @@ namespace Iridium.DB.Test
             get;
         }
 
+        [OneTimeTearDown]
+        public void CloseContext()
+        {
+            DB.Dispose();
+
+            StorageContext.Instance = null;
+        }
+
         protected TestFixture(string driver)
         {
             Driver = driver;
 
-            StorageContext.Instance = null;
-
-            DB = DBContext.Get(driver);
+            DB = DBContext.GetContextFactory(driver)();
 
             StorageContext.Instance = DB;
+
+            DB.CreateAllTables();
+            DB.PurgeAll();
+            
         }
 
         protected T[] InsertRecords<T>(int n, Action<T, int> action) where T : new()
         {
+            long prevCount = DB.DataSet<T>().Count();
+
             var list = new List<T>(n);
 
             for (int i = 1; i <= n; i++)
@@ -40,7 +52,7 @@ namespace Iridium.DB.Test
                 list.Add(rec);
             }
 
-            Assert.That(DB.DataSet<T>().Count(), Is.EqualTo(n));
+            Assert.That(DB.DataSet<T>().Count(), Is.EqualTo(n+prevCount));
 
             return list.ToArray();
         }
@@ -52,6 +64,7 @@ namespace Iridium.DB.Test
             return rec;
         }
 
+        
 
     }
 }

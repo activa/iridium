@@ -22,7 +22,7 @@ namespace Iridium.DB.Test
         public float FloatField;
         public float? FloatFieldNullable;
         public double DoubleField;
-        public double DoubleFieldNullable;
+        public double? DoubleFieldNullable;
         public string StringField;
         [Column.LargeText]
         public string LongStringField;

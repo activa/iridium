@@ -40,6 +40,8 @@ namespace Iridium.DB
             Trim,
             Sum,
             Average,
+            Min,
+            Max,
             Count
         }
 
@@ -188,6 +190,10 @@ namespace Iridium.DB
                     return $"avg({parameters[0]})";
                 case Function.Count:
                     return $"count({parameters[0]})";
+                case Function.Min:
+                    return $"min({parameters[0]})";
+                case Function.Max:
+                    return $"max({parameters[0]})";
 
                 default:
                     return null;

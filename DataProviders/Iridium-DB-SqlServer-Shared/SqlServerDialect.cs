@@ -127,6 +127,8 @@ namespace Iridium.DB.SqlServer
                     return $"len({parameters[0]})";
                 case Function.BlobLength:
                     return $"datalength({parameters[0]})";
+                case Function.Average:
+                    return $"avg(cast(({parameters[0]}) as float))";
 
                 default:
                     return base.SqlFunction(function, parameters);

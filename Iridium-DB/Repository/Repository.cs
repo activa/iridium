@@ -130,10 +130,20 @@ namespace Iridium.DB
         internal TScalar GetAggregate<TScalar>(Aggregate aggregate, QuerySpec querySpec)
         {
             if (querySpec.Native != null && querySpec.Code == null)
-                return DataProvider.GetScalar(aggregate, querySpec.Native, Schema).Convert<TScalar>();
+            {
+                var result = DataProvider.GetScalar(aggregate, querySpec.Native, Schema).Convert<TScalar>();
+
+                // This awkward hack is needed because the .NET Sum() method will return 0 (zero) on a collection
+                // of nullable numbers. Since Iridium tries to honor the .NET LINQ contract, any null value
+                // returned from the database needs to be converted to zero.
+                if (aggregate == Aggregate.Sum && typeof(TScalar).Inspector().IsNullable && result == null)
+                    result = (TScalar) typeof(TScalar).Inspector().RealType.Inspector().DefaultValue();
+
+                return result;
+            }
 
             if (querySpec.Code == null)
-                return default(TScalar);
+                return default;
 
             var objects = from o in DataProvider.GetObjects(querySpec.Native, Schema)
                           let x = Ir.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance<T>(), o), Schema.DatasetRelations)

@@ -69,9 +69,25 @@ namespace Iridium.DB
         Task<TScalar> Max<TScalar>(Expression<Func<T, TScalar>> expression);
         Task<TScalar> Min<TScalar>(Expression<Func<T, TScalar>> expression);
         Task<TScalar> Sum<TScalar>(Expression<Func<T, TScalar>> expression);
-        Task<TScalar> Average<TScalar>(Expression<Func<T, TScalar>> expression);
+
+        Task<double> Average(Expression<Func<T, int>> expression);
+        Task<double?> Average(Expression<Func<T, int?>> expression);
+        Task<double> Average(Expression<Func<T, double>> expression);
+        Task<double?> Average(Expression<Func<T, double?>> expression);
+        Task<double> Average(Expression<Func<T, long>> expression);
+        Task<double?> Average(Expression<Func<T, long?>> expression);
+        Task<decimal> Average(Expression<Func<T, decimal>> expression);
+        Task<decimal?> Average(Expression<Func<T, decimal?>> expression);
+        Task<double> Average(Expression<Func<T, int>> expression, Expression<Func<T, bool>> filter);
+        Task<double?> Average(Expression<Func<T, int?>> expression, Expression<Func<T, bool>> filter);
+        Task<double?> Average(Expression<Func<T, double?>> expression, Expression<Func<T, bool>> filter);
+        Task<double> Average(Expression<Func<T, double>> expression, Expression<Func<T, bool>> filter);
+        Task<double> Average(Expression<Func<T, long>> expression, Expression<Func<T, bool>> filter);
+        Task<double?> Average(Expression<Func<T, long?>> expression, Expression<Func<T, bool>> filter);
+        Task<decimal> Average(Expression<Func<T, decimal>> expression, Expression<Func<T, bool>> filter);
+        Task<decimal?> Average(Expression<Func<T, decimal?>> expression, Expression<Func<T, bool>> filter);
+
         Task<bool> Any();
-        Task<TScalar> Average<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter);
         Task<bool> Any(Expression<Func<T, bool>> filter);
         Task<T> ElementAt(int index);
 

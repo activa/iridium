@@ -58,19 +58,19 @@ namespace Iridium.DB
             switch (aggregate)
             {
                 case Aggregate.Sum:
-                    expressionSql = "sum(" + querySpec.ExpressionSql + ")";
+                    expressionSql = SqlDialect.SqlFunction(SqlDialect.Function.Sum, querySpec.ExpressionSql);
                     break;
                 case Aggregate.Average:
-                    expressionSql = "avg(" + querySpec.ExpressionSql + ")";
+                    expressionSql = SqlDialect.SqlFunction(SqlDialect.Function.Average, querySpec.ExpressionSql);
                     break;
                 case Aggregate.Max:
-                    expressionSql = "max(" + querySpec.ExpressionSql + ")";
+                    expressionSql = SqlDialect.SqlFunction(SqlDialect.Function.Max, querySpec.ExpressionSql);
                     break;
                 case Aggregate.Min:
-                    expressionSql = "min(" + querySpec.ExpressionSql + ")";
+                    expressionSql = SqlDialect.SqlFunction(SqlDialect.Function.Min, querySpec.ExpressionSql);
                     break;
                 case Aggregate.Count:
-                    expressionSql = "count(*)";
+                    expressionSql = SqlDialect.SqlFunction(SqlDialect.Function.Count, "*");
                     break;
                 case Aggregate.Any:
                     expressionSql = "1";

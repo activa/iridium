@@ -216,20 +216,29 @@ namespace Iridium.DB
             return Task.Run(() => _dataSet.Sum(expression));
         }
 
-        public Task<TScalar> Average<TScalar>(Expression<Func<T, TScalar>> expression)
-        {
-            return Task.Run(() => _dataSet.Average(expression));
-        }
+        public Task<double> Average(Expression<Func<T, int>> expression) => Task.Run(() => _dataSet.Average(expression));
+        public Task<double?> Average(Expression<Func<T, int?>> expression) => Task.Run(() => _dataSet.Average(expression));
+        public Task<double> Average(Expression<Func<T, double>> expression) => Task.Run(() => _dataSet.Average(expression));
+        public Task<double?> Average(Expression<Func<T, double?>> expression) => Task.Run(() => _dataSet.Average(expression));
+        public Task<double> Average(Expression<Func<T, long>> expression) => Task.Run(() => _dataSet.Average(expression));
+        public Task<double?> Average(Expression<Func<T, long?>> expression) => Task.Run(() => _dataSet.Average(expression));
+        public Task<decimal> Average(Expression<Func<T, decimal>> expression) => Task.Run(() => _dataSet.Average(expression));
+        public Task<decimal?> Average(Expression<Func<T, decimal?>> expression) => Task.Run(() => _dataSet.Average(expression));
+        public Task<double> Average(Expression<Func<T, int>> expression, Expression<Func<T, bool>> filter) => Task.Run(() => _dataSet.Average(expression));
+        public Task<double?> Average(Expression<Func<T, int?>> expression, Expression<Func<T, bool>> filter) => Task.Run(() => _dataSet.Average(expression));
+        public Task<double> Average(Expression<Func<T, double>> expression, Expression<Func<T, bool>> filter) => Task.Run(() => _dataSet.Average(expression));
+        public Task<double?> Average(Expression<Func<T, double?>> expression, Expression<Func<T, bool>> filter) => Task.Run(() => _dataSet.Average(expression));
+        public Task<double> Average(Expression<Func<T, long>> expression, Expression<Func<T, bool>> filter) => Task.Run(() => _dataSet.Average(expression));
+        public Task<double?> Average(Expression<Func<T, long?>> expression, Expression<Func<T, bool>> filter) => Task.Run(() => _dataSet.Average(expression));
+        public Task<decimal> Average(Expression<Func<T, decimal>> expression, Expression<Func<T, bool>> filter) => Task.Run(() => _dataSet.Average(expression));
+        public Task<decimal?> Average(Expression<Func<T, decimal?>> expression, Expression<Func<T, bool>> filter) => Task.Run(() => _dataSet.Average(expression));
+
 
         public Task<bool> Any()
         {
             return Task.Run(() => _dataSet.Any());
         }
 
-        public Task<TScalar> Average<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter)
-        {
-            return Task.Run(() => _dataSet.Average(expression, filter));
-        }
 
         public Task<bool> Any(Expression<Func<T, bool>> filter)
         {

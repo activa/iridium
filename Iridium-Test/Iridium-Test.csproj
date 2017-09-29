@@ -59,8 +59,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssertHelper.cs" />
-    <Compile Include="FieldTypeTests.cs" />
-    <Compile Include="LinqTests.cs" />
+    <Compile Include="TestFixtures\DeleteTests.cs" />
+    <Compile Include="TestFixtures\EventsTest.cs" />
+    <Compile Include="TestFixtures\FieldTypeTests.cs" />
+    <Compile Include="TestFixtures\LinqAggregateTests.cs" />
+    <Compile Include="TestFixtures\BasicTests.cs" />
     <Compile Include="Model\OneToOneRec1.cs" />
     <Compile Include="Model\OneToOneRec2.cs" />
     <Compile Include="Model\Orders\Customer.cs" />
@@ -81,9 +84,11 @@
     <Compile Include="Model\RecordWithInterface.cs" />
     <Compile Include="Model\RecordWithSingleKey.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestFixtures\RelationTests.cs" />
     <Compile Include="TestFixture.cs" />
-    <Compile Include="WithEmptyDB.cs" />
-    <Compile Include="WithStandardTestData.cs" />
+    <Compile Include="TestFixtureWithEmptyDB.cs" />
+    <Compile Include="TestFixtures\TransactionsTest.cs" />
+    <Compile Include="TestFixtures\WithStandardTestData.cs" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />

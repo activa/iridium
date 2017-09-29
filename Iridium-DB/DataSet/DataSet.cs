@@ -372,6 +372,34 @@ namespace Iridium.DB
             return _repository.GetAggregate<TScalar>(Aggregate.Sum, _repository.CreateQuerySpec(_filter, new ScalarSpec(expression), skip: _skip, take: _take));
         }
 
+        private TScalar Average<TScalar>(LambdaExpression expression)
+        {
+            return _repository.GetAggregate<TScalar>(Aggregate.Average, _repository.CreateQuerySpec(_filter, new ScalarSpec(expression), skip: _skip, take: _take));
+        }
+
+        private TScalar Average<TScalar>(LambdaExpression expression, Expression<Func<T, bool>> filter)
+        {
+            return _repository.GetAggregate<TScalar>(Aggregate.Average, _repository.CreateQuerySpec(new FilterSpec(filter, _filter), new ScalarSpec(expression), skip: _skip, take: _take));
+        }
+
+        public double Average(Expression<Func<T, int>> expression) => Average<double>(expression);
+        public double? Average(Expression<Func<T, int?>> expression) => Average<double?>(expression);
+        public double Average(Expression<Func<T, double>> expression) => Average<double>(expression);
+        public double? Average(Expression<Func<T, double?>> expression) => Average<double?>(expression);
+        public double Average(Expression<Func<T, long>> expression) => Average<double>(expression);
+        public double? Average(Expression<Func<T, long?>> expression) => Average<double?>(expression);
+        public decimal Average(Expression<Func<T, decimal>> expression) => Average<decimal>(expression);
+        public decimal? Average(Expression<Func<T, decimal?>> expression) => Average<decimal?>(expression);
+
+        public double Average(Expression<Func<T, int>> expression, Expression<Func<T, bool>> filter) => Average<double>(expression, filter);
+        public double? Average(Expression<Func<T, int?>> expression, Expression<Func<T, bool>> filter) => Average<double?>(expression, filter);
+        public double Average(Expression<Func<T, double>> expression, Expression<Func<T, bool>> filter) => Average<double>(expression, filter);
+        public double? Average(Expression<Func<T, double?>> expression, Expression<Func<T, bool>> filter) => Average<double?>(expression, filter);
+        public double Average(Expression<Func<T, long>> expression, Expression<Func<T, bool>> filter) => Average<double>(expression, filter);
+        public double? Average(Expression<Func<T, long?>> expression, Expression<Func<T, bool>> filter) => Average<double?>(expression, filter);
+        public decimal Average(Expression<Func<T, decimal>> expression, Expression<Func<T, bool>> filter) => Average<decimal>(expression, filter);
+        public decimal? Average(Expression<Func<T, decimal?>> expression, Expression<Func<T, bool>> filter) => Average<decimal?>(expression, filter);
+
         public TScalar Average<TScalar>(Expression<Func<T, TScalar>> expression)
         {
             return _repository.GetAggregate<TScalar>(Aggregate.Average, _repository.CreateQuerySpec(_filter, new ScalarSpec(expression), skip: _skip, take: _take));
@@ -382,10 +410,6 @@ namespace Iridium.DB
             return _repository.GetAggregate<bool>(Aggregate.Any, _repository.CreateQuerySpec(_filter, skip: _skip, take: _take));
         }
 
-        public TScalar Average<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter)
-        {
-            return _repository.GetAggregate<TScalar>(Aggregate.Average, _repository.CreateQuerySpec(new FilterSpec(filter, _filter), new ScalarSpec(expression), skip: _skip, take: _take));
-        }
 
         public bool Any(Expression<Func<T, bool>> filter)
         {

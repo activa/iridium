@@ -6,12 +6,12 @@ using NUnit.Framework;
 
 namespace Iridium.DB.Test
 {
-    [TestFixture("sqlite")]
-    [TestFixture("sqlitemem")]
-    [TestFixture("sqlserver")]
-    [TestFixture("memory")]
-    [TestFixture("mysql")]
-    [TestFixture("postgres")]
+    [TestFixture("memory", Category = "embedded")]
+    [TestFixture("sqlitemem", Category = "embedded")]
+    [TestFixture("sqlserver", Category = "server")]
+    [TestFixture("sqlite", Category = "file")]
+    [TestFixture("mysql", Category = "server")]
+    [TestFixture("postgres", Category = "server")]
     public class WithStandardTestData : TestFixture
     {
         private const int NUM_CUSTOMERS = 20;

@@ -204,9 +204,9 @@ namespace Iridium.DB
             return new DataSet<T>(GetRepository<T>());
         }
 
-        public Transaction CreateTransaction(IsolationLevel isolationLevel = IsolationLevel.Serializable)
+        public Transaction CreateTransaction(IsolationLevel isolationLevel = IsolationLevel.Serializable, bool commitOnDispose = false)
         {
-            return new Transaction(this, isolationLevel);
+            return new Transaction(this, isolationLevel, commitOnDispose);
         }
 
         public bool RunTransaction(Func<bool> block, IsolationLevel isolationLevel = IsolationLevel.Serializable)

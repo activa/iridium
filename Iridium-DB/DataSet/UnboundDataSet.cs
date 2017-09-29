@@ -137,10 +137,23 @@ namespace Iridium.DB
             throw new NotSupportedException();
         }
 
-        public TScalar Average<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter)
-        {
-            throw new NotSupportedException();
-        }
+        public double Average(Expression<Func<T, int>> expression) => throw new NotSupportedException();
+        public double? Average(Expression<Func<T, int?>> expression) => throw new NotSupportedException();
+        public double Average(Expression<Func<T, double>> expression) => throw new NotSupportedException();
+        public double? Average(Expression<Func<T, double?>> expression) => throw new NotSupportedException();
+        public double Average(Expression<Func<T, long>> expression) => throw new NotSupportedException();
+        public double? Average(Expression<Func<T, long?>> expression) => throw new NotSupportedException();
+        public decimal Average(Expression<Func<T, decimal>> expression) => throw new NotSupportedException();
+        public decimal? Average(Expression<Func<T, decimal?>> expression) => throw new NotSupportedException();
+
+        public double Average(Expression<Func<T, int>> expression, Expression<Func<T, bool>> filter) => throw new NotSupportedException();
+        public double? Average(Expression<Func<T, int?>> expression, Expression<Func<T, bool>> filter) => throw new NotSupportedException();
+        public double Average(Expression<Func<T, double>> expression, Expression<Func<T, bool>> filter) => throw new NotSupportedException();
+        public double? Average(Expression<Func<T, double?>> expression, Expression<Func<T, bool>> filter) => throw new NotSupportedException();
+        public double Average(Expression<Func<T, long>> expression, Expression<Func<T, bool>> filter) => throw new NotSupportedException();
+        public double? Average(Expression<Func<T, long?>> expression, Expression<Func<T, bool>> filter) => throw new NotSupportedException();
+        public decimal Average(Expression<Func<T, decimal>> expression, Expression<Func<T, bool>> filter) => throw new NotSupportedException();
+        public decimal? Average(Expression<Func<T, decimal?>> expression, Expression<Func<T, bool>> filter) => throw new NotSupportedException();
 
         public TScalar Max<TScalar>(Expression<Func<T, TScalar>> expression)
         {

@@ -1,248 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting;
-using System.Threading;
 using System.Threading.Tasks;
-using Iridium.DB;
-using Iridium.DB.Test;
 using NUnit.Framework;
 
 namespace Iridium.DB.Test
 {
-    [TestFixture("sqlite")]
-    [TestFixture("sqlitemem")]
-    [TestFixture("sqlserver")]
-    [TestFixture("memory")]
-    [TestFixture("mysql")]
-    [TestFixture("postgres")]
-    public class WithEmptyDB : TestFixture
+    [TestFixture("memory", Category = "embedded")]
+    [TestFixture("sqlitemem", Category = "embedded")]
+    [TestFixture("sqlserver", Category = "server")]
+    [TestFixture("sqlite", Category = "file")]
+    [TestFixture("mysql", Category = "server")]
+    [TestFixture("postgres", Category = "server")]
+    public class BasicTests : TestFixtureWithEmptyDB
     {
-        public WithEmptyDB(string driver) : base(driver)
+        public BasicTests(string driver) : base(driver)
         {
-            DB.CreateAllTables();
-        }
-
-        [SetUp]
-        public void SetupTest()
-        {
-            DB.PurgeAll();
-        }
-
-        [Test]
-        public void Events_ObjectCreated()
-        {
-            int counter1 = 0;
-            int counter2 = 0;
-
-            DB.RecordsWithAutonumKey.Events.ObjectCreated += (sender, args) => { counter1++; };
-            DB.RecordsWithAutonumKey.Events.ObjectCreated += (sender, args) => { counter2++; };
-
-            InsertRecord(new RecordWithAutonumKey() {Name = "A"});
-            InsertRecord(new RecordWithAutonumKey() {Name = "A"});
-
-            Assert.That(counter1, Is.EqualTo(2));
-            Assert.That(counter2, Is.EqualTo(2));
-        }
-
-        [Test]
-        public void Events_ObjectCreating()
-        {
-            int counter = 0;
-
-            EventHandler<ObjectWithCancelEventArgs<Customer>> ev1 = (sender, args) => { counter++; };
-            EventHandler<ObjectWithCancelEventArgs<Customer>> ev2 = (sender, args) => { counter++; };
-
-            DB.Customers.Events.ObjectCreating += ev1;
-            DB.Customers.Events.ObjectCreating += ev2;
-
-            try
-            {
-                bool saveResult = DB.Insert(new Customer {Name = "A"});
-
-                Assert.That(saveResult, Is.True);
-                Assert.That(DB.Customers.FirstOrDefault(c => c.Name == "A"), Is.Not.Null);
-                Assert.That(counter, Is.EqualTo(2));
-            }
-            finally
-            {
-                DB.Customers.Events.ObjectCreating -= ev1;
-                DB.Customers.Events.ObjectCreating -= ev2;
-            }
-        }
-
-        [Test]
-        public void Events_ObjectCreatingWithCancel1()
-        {
-            int counter = 0;
-
-            EventHandler<ObjectWithCancelEventArgs<Customer>> ev = (sender, args) => { counter++; };
-            EventHandler<ObjectWithCancelEventArgs<Customer>> evWithCancel = (sender, args) => { counter++; args.Cancel = true; };
-
-            DB.Customers.Events.ObjectCreating += ev;
-            DB.Customers.Events.ObjectCreating += evWithCancel;
-
-            try
-            {
-                bool saveResult = DB.Insert(new Customer() { Name = "A" });
-
-                Assert.That(DB.Customers.FirstOrDefault(c => c.Name == "A"), Is.Null);
-                Assert.That(saveResult, Is.False);
-                Assert.That(counter, Is.EqualTo(2));
-            }
-            finally
-            {
-                DB.Customers.Events.ObjectCreating -= ev;
-                DB.Customers.Events.ObjectCreating -= evWithCancel;
-            }
-        }
-
-        [Test]
-        public void Events_ObjectCreatingWithCancel2()
-        {
-            int counter = 0;
-
-            EventHandler<ObjectWithCancelEventArgs<Customer>> ev = (sender, args) => { counter++; };
-            EventHandler<ObjectWithCancelEventArgs<Customer>> evWithCancel = (sender, args) => { counter++; args.Cancel = true; };
-
-            DB.Customers.Events.ObjectCreating += evWithCancel;
-            DB.Customers.Events.ObjectCreating += ev;
-
-            try
-            {
-                bool saveResult = DB.Insert(new Customer() { Name = "A" });
-
-                Assert.That(saveResult, Is.False);
-                Assert.That(DB.Customers.FirstOrDefault(c => c.Name == "A"), Is.Null);
-                Assert.That(counter, Is.EqualTo(1));
-            }
-            finally
-            {
-                DB.Customers.Events.ObjectCreating -= ev;
-                DB.Customers.Events.ObjectCreating -= evWithCancel;
-            }
-        }
-
-
-        [Test]
-        public void ManyToOne()
-        {
-            var customer = InsertRecord(new Customer { Name = "x" });
-            var salesPerson = InsertRecord(new SalesPerson {Name = "Test"});
-
-            var order = InsertRecord(new Order
-            {
-                SalesPersonID = null,
-                CustomerID = customer.CustomerID
-            });
-
-            int id = order.OrderID;
-
-            order = DB.Orders.Read(id, o => o.Customer);
-
-            Assert.AreEqual(order.Customer.CustomerID, customer.CustomerID);
-
-            order.SalesPersonID = salesPerson.ID;
-            DB.Orders.Update(order);
-
-            order = DB.Orders.Read(id, (o) => o.SalesPerson);
-
-            Assert.AreEqual(salesPerson.ID, order.SalesPerson.ID);
-
-            order.SalesPersonID = null;
-            order.SalesPerson = null;
-            DB.Orders.Update(order);
-
-            order = DB.Orders.Read(id, o => o.SalesPerson);
-
-            Assert.IsNull(order.SalesPerson);
-            Assert.IsNull(order.SalesPersonID);
-        }
-
-        [Test]
-        public void ReverseRelation_Generic()
-        {
-            Order order = new Order
-            {
-                Customer = new Customer {Name = "A"},
-                OrderItems = new UnboundDataSet<OrderItem>
-                {
-                    new OrderItem {Description = "X"},
-                    new OrderItem {Description = "X"},
-                    new OrderItem {Description = "X"},
-                    new OrderItem {Description = "X"},
-                    new OrderItem {Description = "X"},
-                }
-            };
-
-            var originalOrder = order;
-
-            DB.Orders.Insert(order, o => o.Customer, o => o.OrderItems);
-
-            order = DB.Orders.Read(originalOrder.OrderID, o => o.OrderItems);
-
-            Assert.That(order.OrderItems, Has.Exactly(5).Items.And.All.Property(nameof(OrderItem.Order)).SameAs(order));
-        }
-
-        [Test]
-        public void ReverseRelation_DataSet()
-        {
-            Customer customer = new Customer() {Name = "A"};
-
-            DB.Customers.Insert(customer);
-
-            for (int i = 0; i < 5; i++)
-                DB.Orders.Insert(new Order()
-                {
-                    CustomerID = customer.CustomerID
-                });
-
-            customer = DB.Customers.Read(customer.CustomerID);
-
-            Assert.That(customer.Orders, Has.Exactly(5).Items.And.All.Property("Customer").SameAs(customer));
-        }
-
-        [Test]
-        public void ReverseRelation_OneToOne()
-        {
-            OneToOneRec1 rec1 = new OneToOneRec1();
-            OneToOneRec2 rec2 = new OneToOneRec2();
-
-            DB.Insert(rec1);
-            DB.Insert(rec2);
-
-            rec1.OneToOneRec2ID = rec2.OneToOneRec2ID;
-            rec2.OneToOneRec1ID = rec1.OneToOneRec1ID;
-
-            DB.Update(rec1);
-            DB.Update(rec2);
-
-            rec1 = DB.Read<OneToOneRec1>(rec1.OneToOneRec1ID, r=> r.Rec2 );
-
-            Assert.That(rec1.Rec2.Rec1, Is.SameAs(rec1));
-        }
-
-        [Test]
-        public void OneToManyWithOptionalRelation()
-        {
-            var customer = InsertRecord(new Customer { Name = "x" });
-            var salesPerson = InsertRecord(new SalesPerson { Name = "Test" });
-
-            Order[] orders =
-            {
-                new Order { CustomerID = customer.CustomerID, OrderDate = DateTime.Today, SalesPersonID = null},
-                new Order { CustomerID = customer.CustomerID, OrderDate = DateTime.Today, SalesPersonID = salesPerson.ID}
-            };
-
-            foreach (var order in orders)
-            {
-                DB.Insert(order);
-            }
-
-            salesPerson = DB.SalesPeople.First();
-
-            Assert.That(salesPerson.Orders.Count(), Is.EqualTo(1));
-            Assert.That(salesPerson.Orders.First().OrderID, Is.EqualTo(orders[1].OrderID));
         }
 
         [Test]
@@ -427,7 +200,7 @@ namespace Iridium.DB.Test
             sortedProducts = from product in DB.Products orderby product.Price descending select product;
 
             Assert.That(sortedProducts.Select(product => product.Price), Is.Ordered.Descending);
-       }
+        }
 
         [Test]
         public void ManyTransactions()
@@ -626,81 +399,6 @@ namespace Iridium.DB.Test
         }
 
         [Test]
-        public void DeleteSingleObject()
-        {
-            var records = InsertRecords<RecordWithAutonumKey>(10, (c, i) => c.Name = "Customer " + i);
-
-            DB.RecordsWithAutonumKey.Delete(records[5]);
-
-            Assert.IsNull(DB.Customers.Read(records[5].Key));
-
-            Assert.AreEqual(9,DB.RecordsWithAutonumKey.Count());
-        }
-
-        [Test]
-        public void DeleteMultipleObjects()
-        {
-            var customers = InsertRecords<Customer>(10, (customer, i) => { customer.Name = "Customer " + i; });
-
-            DB.Customers.Delete(c => c.Name == "Customer 2" || c.Name == "Customer 4");
-
-            Assert.IsNotNull(DB.Customers.Read(customers[0].CustomerID));
-            Assert.IsNull(DB.Customers.Read(customers[1].CustomerID));
-            Assert.IsNotNull(DB.Customers.Read(customers[2].CustomerID));
-            Assert.IsNull(DB.Customers.Read(customers[3].CustomerID));
-
-            Assert.AreEqual(8, DB.Customers.Count());
-        }
-
-        [Test]
-        public void DeleteWithRelationFilter()
-        {
-            if (Driver.StartsWith("sqlite"))
-                return;
-
-            List<Order> orders = new List<Order>();
-
-            for (int i = 0; i < 10; i++)
-            {
-                Order order = new Order
-                {
-                    Customer = new Customer
-                    {
-                        Name = "Customer " + (i+1)
-                    },
-                    Remark = "Remark" + (i+1)
-                };
-
-                DB.Orders.Insert(order, deferSave:false, relationsToSave: o => o.Customer);
-
-                orders.Add(order);
-            }
-
-            Assert.AreEqual(10, DB.Orders.Count());
-
-            DB.Orders.Delete(o => o.Customer.Name == "Customer 2" || o.Customer.Name == "Customer 4");
-
-            Assert.IsNotNull(DB.Orders.Read(orders[0].OrderID));
-            Assert.IsNull(DB.Orders.Read(orders[1].OrderID));
-            Assert.IsNotNull(DB.Orders.Read(orders[2].OrderID));
-            Assert.IsNull(DB.Orders.Read(orders[3].OrderID));
-
-            Assert.AreEqual(8, DB.Orders.Count());
-        }
-
-        [Test]
-        public void DeleteAllObjects()
-        {
-            InsertRecords<Customer>(10, (customer, i) => { customer.Name = "Customer " + i; });
-
-            Assert.That(DB.Customers.Count(), Is.EqualTo(10));
-
-            DB.Customers.DeleteAll();
-
-            Assert.That(DB.Customers.Count(),Is.Zero);
-        }
-
-        [Test]
         public void CreateOrderWithNewItems()
         {
             Order order = new Order
@@ -818,190 +516,6 @@ namespace Iridium.DB.Test
             Assert.AreEqual("John",rec.Name);
         }
 
-        [Test]
-        public void TransactionRollback()
-        {
-            if (!DB.DataProvider.SupportsTransactions)
-                return;
-
-            Assert.That(DB.Products.Count(), Is.EqualTo(0));
-            //DB.Products.Count().Should().Be(0);
-
-            using (var transaction = new Transaction(DB))
-            {
-                DB.Products.Insert(new Product() {ProductID = "X", Description = "X"});
-
-                transaction.Rollback();
-            }
-
-            Assert.That(DB.Products.Count(), Is.EqualTo(0));
-            //DB.Products.Count().Should().Be(0);
-
-
-        }
-
-        [Test]
-        public void TransactionImplicitRollback()
-        {
-            if (!DB.DataProvider.SupportsTransactions)
-                return;
-
-            Assert.That(DB.Products.Count(), Is.EqualTo(0));
-
-            using (new Transaction(DB))
-            {
-                DB.Products.Insert(new Product() { ProductID = "X", Description = "X" });
-            }
-
-            Assert.That(DB.Products.Count(), Is.EqualTo(0));
-        }
-
-        [Test]
-        public void TransactionCommit()
-        {
-            if (!DB.DataProvider.SupportsTransactions)
-                return;
-
-            Assert.That(DB.Products.Count(), Is.EqualTo(0));
-            //DB.Products.Count().Should().Be(0);
-
-            using (var transaction = new Transaction(DB))
-            {
-                DB.Products.Insert(new Product() { ProductID = "X", Description = "X" });
-
-                transaction.Commit();
-            }
-
-            Assert.That(DB.Products.Count(), Is.EqualTo(1));
-            //DB.Products.Count().Should().Be(1);
-        }
-
-
-        [Test]
-        public void NestedTransactions()
-        {
-            if (!DB.DataProvider.SupportsTransactions)
-                return;
-
-            Assert.That(DB.Products.Count(), Is.EqualTo(0));
-            //DB.Products.Count().Should().Be(0);
-
-            using (var transaction1 = new Transaction(DB))
-            {
-                DB.Products.Insert(new Product() { ProductID = "X", Description = "X" });
-
-                using (var transaction2 = new Transaction(DB))
-                {
-                    DB.Products.Insert(new Product() { ProductID = "Y", Description = "Y" });
-
-                    transaction2.Rollback();
-                }
-
-                transaction1.Commit();
-            }
-
-            Assert.That(DB.Products.Count(), Is.EqualTo(1));
-            Assert.That(DB.Products.First().ProductID, Is.EqualTo("X"));
-        }
-
-        [Test]
-        public void NestedTransactions2()
-        {
-            if (!DB.DataProvider.SupportsTransactions)
-                return;
-
-            Assert.That(DB.Products.Count(), Is.EqualTo(0));
-
-            using (var transaction1 = new Transaction(DB))
-            {
-                DB.Products.Insert(new Product() { ProductID = "X", Description = "X" });
-
-                using (var transaction2 = new Transaction(DB))
-                {
-                    DB.Products.Insert(new Product() { ProductID = "Y", Description = "Y" });
-
-                    using (var transaction3 = new Transaction(DB))
-                    {
-                        DB.Products.Insert(new Product() { ProductID = "Z", Description = "Z" });
-
-                        transaction3.Commit();
-                    }
-
-                    transaction2.Rollback();
-                }
-
-                transaction1.Commit();
-            }
-
-            Assert.That(DB.Products.Count(), Is.EqualTo(1));
-            Assert.That(DB.Products.First().ProductID, Is.EqualTo("X"));
-        }
-
-        [Test]
-        public void NestedTransactions3()
-        {
-            if (!DB.DataProvider.SupportsTransactions)
-                return;
-
-            Assert.That(DB.Products.Count(), Is.EqualTo(0));
-            
-            using (var transaction1 = new Transaction(DB))
-            {
-                DB.Products.Insert(new Product() { ProductID = "X", Description = "X" });
-
-                using (var transaction2 = new Transaction(DB))
-                {
-                    DB.Products.Insert(new Product() { ProductID = "Y", Description = "Y" });
-
-                    using (var transaction3 = new Transaction(DB))
-                    {
-                        DB.Products.Insert(new Product() { ProductID = "Z", Description = "Z" });
-
-                        transaction3.Rollback();
-                    }
-
-                    transaction2.Commit();
-                }
-
-                transaction1.Commit();
-            }
-
-            Assert.That(DB.Products.Count(), Is.EqualTo(2));
-            Assert.That(DB.Products.OrderBy(p => p.ProductID).First().ProductID, Is.EqualTo("X"));
-            Assert.That(DB.Products.OrderBy(p => p.ProductID).Skip(1).First().ProductID, Is.EqualTo("Y"));
-        }
-
-        [Test]
-        public void NestedTransactions4()
-        {
-            if (!DB.DataProvider.SupportsTransactions)
-                return;
-
-            Assert.That(DB.Products.Count(), Is.EqualTo(0));
-
-            using (var transaction1 = new Transaction(DB))
-            {
-                DB.Products.Insert(new Product() { ProductID = "X", Description = "X" });
-
-                using (var transaction2 = new Transaction(DB))
-                {
-                    DB.Products.Insert(new Product() { ProductID = "Y", Description = "Y" });
-
-                    using (var transaction3 = new Transaction(DB))
-                    {
-                        DB.Products.Insert(new Product() { ProductID = "Z", Description = "Z" });
-
-                        transaction3.Commit();
-                    }
-
-                    transaction2.Commit();
-                }
-
-                transaction1.Rollback();
-            }
-
-            Assert.That(DB.Products.Count(), Is.EqualTo(0));
-        }
 
         [Test]
         public void IgnoredFields()
@@ -1086,6 +600,50 @@ namespace Iridium.DB.Test
             Assert.True(success);
 
             rec = DB.RecordsWithSingleKey.Read(101);
+
+            Assert.That(rec, Is.Not.Null);
+            Assert.That(rec.Name, Is.EqualTo("2"));
+        }
+
+        [Test]
+        public void InsertOrUpdate_CompositeKey_Update()
+        {
+            InsertRecords<RecordWithCompositeKey>(10, (r, i) => { r.Key1 = i; r.Key2 = i+100; r.Name = i.ToString(); });
+
+            var rec = DB.RecordsWithCompositeKey.Read(new {Key1=2,Key2=102});
+
+            Assert.That(rec, Is.Not.Null);
+            Assert.That(rec.Name, Is.EqualTo("2"));
+
+            rec.Name = "2A";
+
+            var success = DB.RecordsWithCompositeKey.InsertOrUpdate(rec);
+
+            Assert.True(success);
+
+            rec = DB.RecordsWithCompositeKey.Read(new { Key1 = 2, Key2 = 102 });
+
+            Assert.That(rec, Is.Not.Null);
+            Assert.That(rec.Name, Is.EqualTo("2A"));
+        }
+
+        [Test]
+        public void InsertOrUpdate_CommpositeKey_Insert()
+        {
+            InsertRecords<RecordWithCompositeKey>(10, (r, i) => { r.Key1 = i; r.Key2 = i + 100; r.Name = i.ToString(); });
+
+            var rec = DB.RecordsWithCompositeKey.Read(new { Key1 = 2, Key2 = 102 });
+
+            Assert.That(rec, Is.Not.Null);
+            Assert.That(rec.Name, Is.EqualTo("2"));
+
+            rec.Key1 = 1001;
+
+            var success = DB.RecordsWithCompositeKey.InsertOrUpdate(rec);
+
+            Assert.True(success);
+
+            rec = DB.RecordsWithCompositeKey.Read(new { Key1 = 1001, Key2 = 102 });
 
             Assert.That(rec, Is.Not.Null);
             Assert.That(rec.Name, Is.EqualTo("2"));
