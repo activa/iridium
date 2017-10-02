@@ -76,6 +76,9 @@ namespace Iridium.DB.Test
         public IDataSet<RecordWithAutonumKey> RecordsWithAutonumKey;
         public IDataSet<RecordWithIgnoredFields> RecordsWithIgnoredFields;
         public IDataSet<RecordWithInterface> RecordsWithInterface;
+        public IDataSet<RecordWithRelationToSelf> RecordsWithRelationToSelf;
+        public IDataSet<RecordWithParent> RecordsWithParent;
+        public IDataSet<RecordWithChildren> RecordsWithChildren;
 
         public DBContext(IDataProvider dataProvider) : base(dataProvider)
         {
@@ -105,6 +108,9 @@ namespace Iridium.DB.Test
             RecordsWithSingleKey.Purge();
             RecordsWithAutonumKey.Purge();
             RecordsWithIgnoredFields.Purge();
+            RecordsWithRelationToSelf.Purge();
+            RecordsWithParent.Purge();
+            RecordsWithChildren.Purge();
         }
 
         public void CreateAllTables()
@@ -124,9 +130,12 @@ namespace Iridium.DB.Test
             CreateTable<OneToOneRec2>(recreateTable:true);
             CreateTable<RecordWithIgnoredFields>(recreateTable: true);
             CreateTable<RecordWithInterface>(recreateTable: true);
+            CreateTable<RecordWithRelationToSelf>(recreateTable: true);
+            CreateTable<RecordWithParent>(recreateTable: true);
+            CreateTable<RecordWithChildren>(recreateTable: true);
         }
 
-        private static Dictionary<string, Func<DBContext>> _contextFactories;
+        private static readonly Dictionary<string, Func<DBContext>> _contextFactories;
 
         static DBContext()
         {

@@ -27,6 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Iridium.DB
 {
@@ -41,14 +42,24 @@ namespace Iridium.DB
 
         public override object Evaluate(object target)
         {
-            switch (Expression.Parameters.Count)
+            try
             {
-                case 1:
-                    return Expression.Compile().DynamicInvoke(target);
-                case 0:
-                    return Expression.Compile().DynamicInvoke();
-                default:
-                    throw new Exception("Expression " + Expression + " has too many parameters");
+                switch (Expression.Parameters.Count)
+                {
+                    case 1:
+                        return Expression.Compile().DynamicInvoke(target);
+                    case 0:
+                        return Expression.Compile().DynamicInvoke();
+                    default:
+                        throw new Exception("Expression " + Expression + " has too many parameters");
+                }
+            }
+            catch (TargetInvocationException tiEx)
+            {
+                if (tiEx.InnerException is NullReferenceException)
+                    return null;
+
+                throw;
             }
         }
 

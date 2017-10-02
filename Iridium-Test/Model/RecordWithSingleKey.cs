@@ -6,5 +6,6 @@ namespace Iridium.DB.Test
         public int Key;
 
         public string Name;
+        public int? Value;
     }
 }

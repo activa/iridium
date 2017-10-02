@@ -21,11 +21,13 @@ namespace Iridium.DB.Test
         {
             DB.RecordsWithSingleKey.DeleteAll();
             DB.RecordsWithAllTypes.DeleteAll();
+            DB.RecordsWithParent.DeleteAll();
+            DB.RecordsWithChildren.DeleteAll();
         }
 
 
         [Test]
-        public void Linq_Count()
+        public void Count()
         {
             InsertRecords<RecordWithSingleKey>(10, (r, i) => { r.Key = i; r.Name = i.ToString(); });
 
@@ -35,7 +37,7 @@ namespace Iridium.DB.Test
         }
 
         [Test]
-        public void Linq_Count_Filtered()
+        public void Count_Filtered()
         {
             InsertRecords<RecordWithSingleKey>(10, (r, i) => { r.Key = i; r.Name = i.ToString(); });
 
@@ -45,7 +47,7 @@ namespace Iridium.DB.Test
         }
 
         [Test]
-        public void Linq_Count_Filtered_Where()
+        public void Count_Filtered_Where()
         {
             InsertRecords<RecordWithSingleKey>(10, (r, i) => { r.Key = i; r.Name = i.ToString(); });
 
@@ -57,7 +59,7 @@ namespace Iridium.DB.Test
 
         
         [Test]
-        public void Linq_Count_Filtered_PartialNative()
+        public void Count_Filtered_PartialNative()
         {
             Func<RecordWithSingleKey,bool> filter = rec => rec.Key > 2;
 
@@ -1225,6 +1227,43 @@ namespace Iridium.DB.Test
         {
             Assert.That(DB.RecordsWithAllTypes.Sum(r => r.DecimalFieldNullable), Is.Zero);
         }
+
+        [Test]
+        public void Sum_FieldInRelation()
+        {
+            var parent = InsertRecord(new RecordWithChildren() {Value = 15});
+
+            InsertRecords<RecordWithParent>(10, (rec, i) => { rec.ParentKey = parent.Key; });
+
+            var sum = DB.RecordsWithParent.WithRelations(r => r.Parent).Sum(r => r.Parent.Value);
+
+            Assert.That(sum, Is.EqualTo(10 * 15));
+        }
+
+        [Test]
+        public void Sum_FieldInRelation_SomeNull()
+        {
+            var parent = InsertRecord(new RecordWithChildren() { Value = 15 });
+
+            InsertRecords<RecordWithParent>(10, (rec, i) => { rec.ParentKey = (i%2 == 0) ? parent.Key : (int?)null; });
+
+            var sum = DB.RecordsWithParent.WithRelations(r => r.Parent).Sum(r => r.Parent.Value);
+
+            Assert.That(sum, Is.EqualTo(5 * 15));
+        }
+
+        [Test]
+        public void Sum_FieldInRelation_Filtered()
+        {
+            var parent = InsertRecord(new RecordWithChildren() { Value = 15 });
+
+            InsertRecords<RecordWithParent>(10, (rec, i) => { rec.Value = i; rec.ParentKey = parent.Key; });
+
+            var sum = DB.RecordsWithParent.WithRelations(r => r.Parent).Sum(r => r.Parent.Value, r => r.Value < 5);
+
+            Assert.That(sum, Is.EqualTo(4 * 15));
+        }
+
 
     }
 }

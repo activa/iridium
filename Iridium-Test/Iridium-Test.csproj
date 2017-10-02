@@ -59,6 +59,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssertHelper.cs" />
+    <Compile Include="Model\RecordWithChildren.cs" />
+    <Compile Include="Model\RecordWithParent.cs" />
+    <Compile Include="Model\RecordWithRelationToSelf.cs" />
     <Compile Include="TestFixtures\DeleteTests.cs" />
     <Compile Include="TestFixtures\EventsTest.cs" />
     <Compile Include="TestFixtures\FieldTypeTests.cs" />

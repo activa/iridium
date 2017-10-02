@@ -11,5 +11,6 @@ namespace Iridium.DB.Test
         public int RecordID;
 
         public string Name { get; set; }
+        public int? Value { get; set; }
     }
 }
