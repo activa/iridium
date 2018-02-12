@@ -460,6 +460,17 @@ namespace Iridium.DB.Test
         }
 
         [Test]
+        public void ManyToOneFiltering_Contains_Lambda()
+        {
+            var orders = DB.Orders.Where(o => o.Customer.Name.Contains("Customer 3") || o.Remark == "blabla");
+
+            Assert.That(orders.ToArray().Length, Is.EqualTo(2));
+            Assert.That(orders.Count(), Is.EqualTo(2));
+
+            Assert.That(orders.First().CustomerID, Is.EqualTo(3));
+        }
+
+        [Test]
         public void ManyToOneFiltering_Lambda_Chained()
         {
             var orders = DB.Orders.Where(o => o.Customer.CustomerID == 3).Where(o => o.Customer.Name == "Customer 3");

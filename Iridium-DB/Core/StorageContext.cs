@@ -99,13 +99,16 @@ namespace Iridium.DB
 
         private void GenerateRelations()
         {
-            Repository repository;
+            lock (_repositories)
+            {
+                Repository repository;
 
-            while ((repository = _repositories.Values.FirstOrDefault(rep => rep.Schema.Relations == null)) != null)
-                repository.Schema.UpdateRelations();
- 
-            foreach (var repo in _repositories.Values)
-                repo.Schema.UpdateReverseRelations();
+                while ((repository = _repositories.Values.FirstOrDefault(rep => rep.Schema.Relations == null)) != null)
+                    repository.Schema.UpdateRelations();
+
+                foreach (var repo in _repositories.Values)
+                    repo.Schema.UpdateReverseRelations();
+            }
         }
 
         internal TableSchema GetSchema(Type objectType, bool autoCreate = true)
@@ -117,7 +120,10 @@ namespace Iridium.DB
                 if (!autoCreate)
                     return null;
 
-                _repositories[objectType] = (repository = (Repository) Activator.CreateInstance(typeof (Repository<>).MakeGenericType(objectType), this));
+                lock (_repositories)
+                {
+                    _repositories[objectType] = (repository = (Repository) Activator.CreateInstance(typeof(Repository<>).MakeGenericType(objectType), this));
+                }
 
                 GenerateRelations();
             }
