@@ -113,22 +113,22 @@ namespace Iridium.DB
 
         internal TableSchema GetSchema(Type objectType, bool autoCreate = true)
         {
-            var repository = _repositories[objectType];
-
-            if (repository == null)
+            lock (_repositories)
             {
-                if (!autoCreate)
-                    return null;
+                var repository = _repositories[objectType];
 
-                lock (_repositories)
+                if (repository == null)
                 {
+                    if (!autoCreate)
+                        return null;
+
                     _repositories[objectType] = (repository = (Repository) Activator.CreateInstance(typeof(Repository<>).MakeGenericType(objectType), this));
+
+                    GenerateRelations();
                 }
 
-                GenerateRelations();
+                return repository.Schema;
             }
-
-            return repository.Schema;
         }
 
         private void _LoadRelations(object obj, IEnumerable<LambdaExpression> relationsToLoad/*, TableSchema parentSchema*/)
@@ -193,16 +193,19 @@ namespace Iridium.DB
 
         private Repository<T> GetRepository<T>()
         {
-            var repository = _repositories[typeof(T)];
-
-            if (repository == null)
+            lock (_repositories)
             {
-                _repositories[typeof(T)] = (repository = new Repository<T>(this));
+                var repository = _repositories[typeof(T)];
 
-                GenerateRelations();
+                if (repository == null)
+                {
+                    _repositories[typeof(T)] = (repository = new Repository<T>(this));
+
+                    GenerateRelations();
+                }
+
+                return (Repository<T>) repository;
             }
-
-            return (Repository<T>) repository;
         }
 
         public IDataSet<T> DataSet<T>()
