@@ -106,7 +106,7 @@
       <Name>Iridium-DB-MySql</Name>
     </ProjectReference>
     <ProjectReference Include="..\DataProviders\Iridium-DB-Postgres\Iridium-DB-Postgres.csproj">
-      <Project>{76b89c01-4967-440e-b9d9-ebb279e9632d}</Project>
+      <Project>{79033822-be38-4468-a27d-8d24e601b9e0}</Project>
       <Name>Iridium-DB-Postgres</Name>
     </ProjectReference>
     <ProjectReference Include="..\DataProviders\Iridium-DB-Sqlite-Win32\Iridium-DB-Sqlite-Win32.csproj">
