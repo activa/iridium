@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>iridium.db.postgres</id>
-    <version>2.2.0.313</version>
+    <version>2.2.1.530</version>
     <title>Iridium Postgres Driver</title>
     <authors>Philippe Leybaert</authors>
     <projectUrl>http://github.com/activa/iridium</projectUrl>
@@ -11,17 +11,27 @@
     <tags>iridium orm sql postgres</tags>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>Postgres driver for Iridium ORM</summary>
-    <description>Lightweight multi-platform ORM for mobile, desktop and servers. Support for Sqlite is built in for mobile and UWP platforms. For other database platforms and for Sqlite on Win32, a data provider is required to use this library. Providers for Sqlite (Win32), SQL Server and MySql are available on Nuget.</description>
+    <description>Lightweight multi-platform ORM for mobile, desktop and servers</description>
     <copyright>Copyright 2015-2018 Philippe Leybaert</copyright>
     <dependencies>
+      <group targetFramework=".NETFramework4.5">
+        <dependency id="iridium" version="2.2.1.*" exclude="Build,Analyzers" />
+        <dependency id="Npgsql" version="3.2.7" exclude="Build,Analyzers" />
+      </group>
       <group targetFramework=".NETStandard1.3">
-        <dependency id="iridium" version="2.2.0.221" exclude="Build,Analyzers" />
+        <dependency id="iridium" version="2.2.1.*" exclude="Build,Analyzers" />
         <dependency id="NETStandard.Library" version="1.6.1" exclude="Build,Analyzers" />
+        <dependency id="Npgsql" version="3.2.7" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="iridium" version="2.2.1.*" exclude="Build,Analyzers" />
         <dependency id="Npgsql" version="3.2.7" exclude="Build,Analyzers" />
       </group>
     </dependencies>
   </metadata>
   <files>
     <file src="DataProviders\Iridium-DB-Postgres\bin\Release\netstandard1.3\Iridium.DB.Postgres.dll" target="lib\netstandard1.3" />
+    <file src="DataProviders\Iridium-DB-Postgres\bin\Release\netstandard2.0\Iridium.DB.Postgres.dll" target="lib\netstandard2.0" />
+    <file src="DataProviders\Iridium-DB-Postgres\bin\Release\net45\Iridium.DB.Postgres.dll" target="lib\net45" />
   </files>
 </package>

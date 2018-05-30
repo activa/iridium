@@ -228,6 +228,7 @@ namespace Iridium.DB
         {
             public string Name;
             public Tuple<Field,SortOrder>[] FieldsWithOrder;
+            public bool Unique;
         }
     }
 }

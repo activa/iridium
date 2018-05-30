@@ -236,7 +236,12 @@ namespace Iridium.DB.SqlServer
                         continue;
                 }
 
-                string createIndexSql = $"CREATE INDEX {QuoteTable("IX_" + index.Name)} ON {QuoteTable(schema.MappedName)} (";
+                string createIndexSql = "CREATE ";
+
+                if (index.Unique)
+                    createIndexSql += "UNIQUE ";
+
+                createIndexSql += $"INDEX {QuoteTable("IX_" + index.Name)} ON {QuoteTable(schema.MappedName)} (";
 
                 createIndexSql += string.Join(",", index.FieldsWithOrder.Select(field => QuoteField(field.Item1.MappedName) + " " + (field.Item2 == SortOrder.Ascending ? "ASC" : "DESC")));
 

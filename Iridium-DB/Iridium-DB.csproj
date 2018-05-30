@@ -4,7 +4,7 @@
     <TargetFramework>netstandard1.0</TargetFramework>
     <AssemblyName>Iridium.DB</AssemblyName>
     <RootNamespace>Iridium.DB</RootNamespace>
-    <Version>2.2.0</Version>
+    <Version>2.2.1</Version>
     <Authors>Philippe Leybaert</Authors>
     <Company />
     <Product>Iridium</Product>
@@ -12,18 +12,11 @@
     <Copyright>2015-2017 Philippe Leybaert</Copyright>
     <AssemblyVersion>2.2.0.0</AssemblyVersion>
     <FileVersion>2.2.0.0</FileVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <LangVersion>7.1</LangVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <LangVersion>7.1</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="iridium.core" Version="1.4.3.216" />
+    <PackageReference Include="iridium.core" Version="1.5.0.220" />
   </ItemGroup>
 
 </Project>

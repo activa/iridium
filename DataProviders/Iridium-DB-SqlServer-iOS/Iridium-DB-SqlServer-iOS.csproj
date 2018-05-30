@@ -38,9 +38,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Iridium-Core, Version=1.2.1.36205, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\iridium.core.1.2.1.19\lib\portable-net45+win8+wpa81\Iridium-Core.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Iridium-Core, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\iridium.core.1.5.0.220\lib\netstandard1.0\Iridium-Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -49,13 +48,13 @@
     <Reference Include="Xamarin.iOS" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\Iridium-DB\Iridium-DB.csproj">
       <Project>{dc1df999-b304-4850-9ab6-336e6181e2d6}</Project>
       <Name>Iridium-DB</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="..\Velox.DB.SqlServer.Shared\Velox.DB.SqlServer.Shared.projitems" Label="Shared" Condition="Exists('..\Velox.DB.SqlServer.Shared\Velox.DB.SqlServer.Shared.projitems')" />
   <Import Project="..\Velox.DB.SqlADO\Velox.DB.SqlADO.projitems" Label="Shared" Condition="Exists('..\Velox.DB.SqlADO\Velox.DB.SqlADO.projitems')" />

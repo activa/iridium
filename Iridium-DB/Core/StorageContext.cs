@@ -337,6 +337,15 @@ namespace Iridium.DB
             throw new NotSupportedException();
         }
 
+        public int SqlProcedure(string procName, object parameters = null)
+        {
+            if (DataProvider is ISqlDataProvider sqlProvider)
+                return sqlProvider.SqlProcedure(procName, QueryParameterCollection.FromObject(parameters));
+
+            throw new NotSupportedException();
+
+        }
+
         // Async methods
 
         public IAsyncDataSet<T> AsyncDataSet<T>()

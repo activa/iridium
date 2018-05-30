@@ -32,8 +32,8 @@
     <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Iridium-Core, Version=1.4.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\iridium.core.1.4.3.216\lib\netstandard1.0\Iridium-Core.dll</HintPath>
+    <Reference Include="Iridium-Core, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\iridium.core.1.5.0.220\lib\netstandard1.0\Iridium-Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

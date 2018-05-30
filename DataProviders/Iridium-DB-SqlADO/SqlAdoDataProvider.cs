@@ -100,11 +100,11 @@ namespace Iridium.DB.Sql
 
         public abstract void ClearConnectionPool();
 
-        protected DbCommand CreateCommand(string sqlQuery, QueryParameterCollection parameters)
+        protected DbCommand CreateCommand(string sqlQuery, QueryParameterCollection parameters, CommandType commandType)
         {
             DbCommand dbCommand = Connection.CreateCommand();
 
-            dbCommand.CommandType = CommandType.Text;
+            dbCommand.CommandType = commandType;
             dbCommand.CommandText = sqlQuery;
 
             dbCommand.Transaction = CurrentTransaction;
@@ -192,7 +192,7 @@ namespace Iridium.DB.Sql
 
                 List<Dictionary<string, object>> records = new List<Dictionary<string, object>>();
 
-                using (var cmd = CreateCommand(sql, parameters))
+                using (var cmd = CreateCommand(sql, parameters, CommandType.Text))
                 {
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -229,7 +229,24 @@ namespace Iridium.DB.Sql
             {
                 BeginTransaction(IsolationLevel.None);
 
-                using (var cmd = CreateCommand(sql, parameters))
+                using (var cmd = CreateCommand(sql, parameters, CommandType.Text))
+                {
+                    return cmd.ExecuteNonQuery();
+                }
+            }
+            finally
+            {
+                CommitTransaction();
+            }
+        }
+
+        public override int ExecuteProcedure(string procName, QueryParameterCollection parameters = null)
+        {
+            try
+            {
+                BeginTransaction(IsolationLevel.None);
+
+                using (var cmd = CreateCommand(procName, parameters, CommandType.StoredProcedure))
                 {
                     return cmd.ExecuteNonQuery();
                 }

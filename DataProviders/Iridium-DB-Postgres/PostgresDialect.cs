@@ -66,18 +66,20 @@ namespace Iridium.DB.Postgres
 
         public override string DeleteSql(SqlTableNameWithAlias tableName, string sqlWhere, IEnumerable<SqlJoinDefinition> joins)
         {
-            if (joins != null && joins.Any())
+            var sqlJoins = joins as SqlJoinDefinition[] ?? joins?.ToArray();
+
+            if (joins != null && sqlJoins.Any())
             {
                 string sql = "delete from " + QuoteTable(tableName.TableName) + (tableName.Alias != null ? (" " + tableName.Alias + " ") : "");
 
-                sql += "using " +  string.Join(",", joins.Select(join => QuoteTable(join.Right.Schema.MappedName) + " " + join.Right.Alias));
+                sql += "using " +  string.Join(",", sqlJoins.Select(join => QuoteTable(join.Right.Schema.MappedName) + " " + join.Right.Alias));
 
                 if (sqlWhere != null)
                     sql += $" where ({sqlWhere})";
 
                 sql += " and ";
 
-                sql += string.Join(" and ", joins.Select(join => QuoteField(join.Left.Alias + "." + @join.Left.Field.MappedName) + "=" + QuoteField(join.Right.Alias + "." + @join.Right.Field.MappedName)));
+                sql += string.Join(" and ", sqlJoins.Select(join => QuoteField(join.Left.Alias + "." + @join.Left.Field.MappedName) + "=" + QuoteField(join.Right.Alias + "." + @join.Right.Field.MappedName)));
 
                 return sql;
             }
@@ -120,10 +122,11 @@ namespace Iridium.DB.Postgres
                 new {Flags = TypeFlags.Integer16, ColumnType = "smallint"},
                 new {Flags = TypeFlags.Integer32, ColumnType = "integer"},
                 new {Flags = TypeFlags.Integer64, ColumnType = "bigint"},
-                new {Flags = TypeFlags.Decimal, ColumnType = "decimal({0},{1})"},
+                new {Flags = TypeFlags.Decimal, ColumnType = "numeric"},
                 new {Flags = TypeFlags.Double, ColumnType = "double precision"},
                 new {Flags = TypeFlags.Single, ColumnType = "real"},
-                new {Flags = TypeFlags.String, ColumnType = "varchar({0})"},
+                new {Flags = TypeFlags.String, ColumnType = "text"},
+                new {Flags = TypeFlags.Char, ColumnType = "char(1)"},
                 new {Flags = TypeFlags.DateTime, ColumnType = "timestamp"}
             };
 
@@ -198,6 +201,34 @@ namespace Iridium.DB.Postgres
 
                 dataProvider.ExecuteSql(sql, null);
             }
+
+            var existingIndexes = dataProvider.ExecuteSqlReader("SELECT indexname FROM pg_indexes ind WHERE indexname not like '%_pkey' and tablename=@tableName",
+                QueryParameterCollection.FromObject(new { tableName })).ToLookup(rec => rec["indexname"].ToString());
+
+            foreach (var index in schema.Indexes)
+            {
+                if (existingIndexes["IX_" + index.Name].Any())
+                {
+                    if (recreateIndexes || recreateTable)
+                        dataProvider.ExecuteSql($"DROP INDEX {QuoteTable("IX_" + index.Name)} ON {QuoteTable(schema.MappedName)}", null);
+                    else
+                        continue;
+                }
+
+                string createIndexSql = "CREATE ";
+
+                if (index.Unique)
+                    createIndexSql += "UNIQUE ";
+
+                createIndexSql += $"INDEX {QuoteTable("IX_" + index.Name)} ON {QuoteTable(schema.MappedName)} (";
+
+                createIndexSql += string.Join(",", index.FieldsWithOrder.Select(field => QuoteField(field.Item1.MappedName) + " " + (field.Item2 == SortOrder.Ascending ? "ASC" : "DESC")));
+
+                createIndexSql += ")";
+
+                dataProvider.ExecuteSql(createIndexSql, null);
+            }
+
         }
 
         public override string SqlFunction(Function function, params string[] parameters)

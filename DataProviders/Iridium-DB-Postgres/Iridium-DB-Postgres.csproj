@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFrameworks>netstandard1.3;net45;netstandard2.0</TargetFrameworks>
     <AssemblyName>Iridium.DB.Postgres</AssemblyName>
     <RootNamespace>Iridium.DB.Postgres</RootNamespace>
   </PropertyGroup>

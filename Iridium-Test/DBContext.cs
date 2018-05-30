@@ -56,7 +56,7 @@ namespace Iridium.DB.Test
     {
         public const string SQLSERVER = "192.168.1.100";
         public const string MYSQL = "192.168.1.100";
-        public const string POSTGRES = "192.168.1.32";
+        public const string POSTGRES = "192.168.1.100";
     }
 
 
@@ -126,6 +126,7 @@ namespace Iridium.DB.Test
             CreateTable<RecordWithCompositeKey>(recreateTable: true);
             CreateTable<RecordWithSingleKey>(recreateTable: true);
             CreateTable<RecordWithAutonumKey>(recreateTable: true);
+            CreateTable<RecordWithUniqueIndex>(recreateTable: true);
             CreateTable<OneToOneRec1>(recreateTable:true);
             CreateTable<OneToOneRec2>(recreateTable:true);
             CreateTable<RecordWithIgnoredFields>(recreateTable: true);
@@ -160,7 +161,7 @@ namespace Iridium.DB.Test
 
     public class MySqlStorage : DBContext
     {
-        public MySqlStorage() : base(new MySqlDataProvider($"Server={SERVERS.MYSQL};Database=velox;UID=velox;PWD=velox")) { }
+        public MySqlStorage() : base(new MySqlDataProvider($"Server={SERVERS.MYSQL};Database=velox;UID=velox;PWD=velox;SslMode=None")) { }
 
         public override string ToString() => "mysql";
     }

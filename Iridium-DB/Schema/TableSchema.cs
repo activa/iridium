@@ -71,7 +71,7 @@ namespace Iridium.DB
 
         private void FindFields()
         {
-            var indexedFields = Ir.CreateEmptyList(new {IndexName = "", Position = 0, SortOrder = SortOrder.Ascending, Field = (Field) null});
+            var indexedFields = Ir.CreateEmptyList(new {IndexName = "", Position = 0, SortOrder = SortOrder.Ascending, Field = (Field) null, Unique = false});
 
             var fieldList = new List<Field>();
 
@@ -155,7 +155,8 @@ namespace Iridium.DB
                             IndexName = indexAttribute.IndexName ?? MappedName + schemaField.MappedName,
                             Position = indexAttribute.Position,
                             SortOrder = indexAttribute.Descending ? SortOrder.Descending : SortOrder.Ascending,
-                            Field = schemaField
+                            Field = schemaField,
+                            Unique = indexAttribute.Unique
                         });
                     }
                     else
@@ -165,7 +166,8 @@ namespace Iridium.DB
                             IndexName = MappedName + schemaField.MappedName,
                             Position = 0,
                             SortOrder = SortOrder.Ascending,
-                            Field = schemaField
+                            Field = schemaField,
+                            Unique = false
                         });
                     }
                 }
@@ -181,7 +183,8 @@ namespace Iridium.DB
                 .Select(item => new Index
                 {
                     Name = item.Key,
-                    FieldsWithOrder = item.OrderBy(f => f.Position).Select(f => new Tuple<Field, SortOrder>(f.Field, f.SortOrder)).ToArray()
+                    FieldsWithOrder = item.OrderBy(f => f.Position).Select(f => new Tuple<Field, SortOrder>(f.Field, f.SortOrder)).ToArray(),
+                    Unique = item.All(arg => arg.Unique)
                 })
                 .ToArray();
 

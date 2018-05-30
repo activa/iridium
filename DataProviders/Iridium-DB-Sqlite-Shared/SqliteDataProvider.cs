@@ -111,6 +111,11 @@ namespace Iridium.DB
             }
         }
 
+        public override int ExecuteProcedure(string procName, QueryParameterCollection parameters = null)
+        {
+            throw new NotSupportedException("Stored procedures are not supported in Sqlite");
+        }
+
         private readonly Stack<string> _transactionStack = new Stack<string>();
 
         public override void BeginTransaction(IsolationLevel isolationLevel)

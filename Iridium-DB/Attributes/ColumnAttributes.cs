@@ -52,6 +52,7 @@ namespace Iridium.DB
             public string IndexName { get; }
             public int Position { get; set; }
             public bool Descending { get; set; }
+            public bool Unique { get; set; }
 
             public IndexedAttribute()
             {

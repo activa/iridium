@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>iridium.db.mysql</id>
-    <version>2.2.0.221</version>
+    <version>2.2.1.530</version>
     <title>Iridium MySql Driver</title>
     <authors>Philippe Leybaert</authors>
     <projectUrl>http://github.com/activa/iridium</projectUrl>
@@ -14,8 +14,8 @@
     <description>Lightweight multi-platform ORM for mobile, desktop and servers. Support for Sqlite is built in for mobile and UWP platforms. For other database platforms and for Sqlite on Win32, a data provider is required to use this library. Providers for Sqlite (Win32), SQL Server and MySql are available on Nuget.</description>
     <copyright>Copyright 2015-2017 Philippe Leybaert</copyright>
     <dependencies>
-      <dependency id="iridium" version="2.2.0.221" />
-      <dependency id="MySql.Data" version="6.9.9" />
+      <dependency id="iridium" version="2.2.1.*" />
+      <dependency id="MySql.Data" version="8.0.*" />
     </dependencies>
   </metadata>
   <files>

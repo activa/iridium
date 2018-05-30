@@ -443,11 +443,17 @@ namespace Iridium.DB
             return true;
         }
 
+        public int SqlProcedure(string procName, QueryParameterCollection parameters)
+        {
+            return ExecuteProcedure(procName, parameters);
+        }
+
         public int SqlNonQuery(string sql, QueryParameterCollection parameters = null)
         {
             return ExecuteSql(sql, parameters);
         }
 
+        public abstract int ExecuteProcedure(string procName, QueryParameterCollection parameters = null);
         public abstract int ExecuteSql(string sql, QueryParameterCollection parameters = null);
         public abstract IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, QueryParameterCollection parameters);
 
