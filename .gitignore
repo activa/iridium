@@ -8,8 +8,6 @@ TestResults/
 *.bak
 *.userprefs
 *.pidb
-Velox.DB.*.nupkg
-pushAll.cmd
 
 _ReSharper*/
 *.[Rr]e[Ss]harper

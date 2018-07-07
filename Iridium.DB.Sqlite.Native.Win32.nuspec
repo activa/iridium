@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+    <metadata>
+        <id>iridium.db.sqlite.native.win32</id>
+        <version>2.2.2.7071</version>
+        <authors>Philippe Leybaert</authors>
+        <projectUrl>http://github.com/activa/iridium</projectUrl>
+        <licenseUrl>https://github.com/activa/iridium/blob/master/LICENSE</licenseUrl>
+        <iconUrl>http://www.iridiumdb.com/img/IconPlain64.png</iconUrl>
+        <tags>iridium orm sql sqlite dotnetcore</tags>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Native Sqlite libraries for Windows .NET Core</description>
+        <copyright>Copyright 2015-2018 Philippe Leybaert</copyright>
+    </metadata>
+
+  <files>
+    <file src="src\Native\_._" target="lib/netcoreapp"/>
+    <file src="src\Native\runtimes\win\**\*.*" target="runtimes" />
+  </files>
+  </package>

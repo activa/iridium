@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard1.6;netstandard2.0;net452</TargetFrameworks>
+    <AssemblyName>Iridium.DB.MySql</AssemblyName>
+    <RootNamespace>Iridium.DB</RootNamespace>
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="iridium.reflection" Version="2.0.1.7071" />
+    <PackageReference Include="MySql.Data" Version="8.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Iridium.DB\Iridium.DB.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <Import Project="..\Iridium.DB.SqlADO\Iridium.DB.SqlADO.projitems" Label="Shared" />
+
+</Project>

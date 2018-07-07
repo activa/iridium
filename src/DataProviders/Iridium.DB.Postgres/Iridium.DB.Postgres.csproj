@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net45;net451;netstandard2.0</TargetFrameworks>
+    <AssemblyName>Iridium.DB.Postgres</AssemblyName>
+    <RootNamespace>Iridium.DB</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="iridium.reflection" Version="2.0.1.7071" />
+    <PackageReference Include="Npgsql" Version="4.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Iridium.DB\Iridium.DB.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\Iridium.DB.SqlADO\Iridium.DB.SqlADO.projitems" Label="Shared" />
+
+</Project>

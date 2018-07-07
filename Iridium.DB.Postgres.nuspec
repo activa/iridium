@@ -2,36 +2,24 @@
 <package>
   <metadata>
     <id>iridium.db.postgres</id>
-    <version>2.2.1.530</version>
-    <title>Iridium Postgres Driver</title>
+    <version>2.2.2.7071</version>
     <authors>Philippe Leybaert</authors>
+    <owners>Philippe Leybaert</owners>
     <projectUrl>http://github.com/activa/iridium</projectUrl>
     <licenseUrl>https://github.com/activa/iridium/blob/master/LICENSE</licenseUrl>
-    <iconUrl>http://dstyler.com/vici/32x32/im-_IconPlain100-w32-h32.png</iconUrl>
+    <iconUrl>http://www.iridiumdb.com/img/IconPlain64.png</iconUrl>
     <tags>iridium orm sql postgres</tags>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <summary>Postgres driver for Iridium ORM</summary>
-    <description>Lightweight multi-platform ORM for mobile, desktop and servers</description>
+    <description>Postgres driver for Iridium</description>
     <copyright>Copyright 2015-2018 Philippe Leybaert</copyright>
     <dependencies>
-      <group targetFramework=".NETFramework4.5">
-        <dependency id="iridium" version="2.2.1.*" exclude="Build,Analyzers" />
-        <dependency id="Npgsql" version="3.2.7" exclude="Build,Analyzers" />
-      </group>
-      <group targetFramework=".NETStandard1.3">
-        <dependency id="iridium" version="2.2.1.*" exclude="Build,Analyzers" />
-        <dependency id="NETStandard.Library" version="1.6.1" exclude="Build,Analyzers" />
-        <dependency id="Npgsql" version="3.2.7" exclude="Build,Analyzers" />
-      </group>
-      <group targetFramework=".NETStandard2.0">
-        <dependency id="iridium" version="2.2.1.*" exclude="Build,Analyzers" />
-        <dependency id="Npgsql" version="3.2.7" exclude="Build,Analyzers" />
-      </group>
+      <dependency id="iridium" version="2.2.2.7071" />
+      <dependency id="Npgsql" version="4.0.1" />
     </dependencies>
   </metadata>
   <files>
-    <file src="DataProviders\Iridium-DB-Postgres\bin\Release\netstandard1.3\Iridium.DB.Postgres.dll" target="lib\netstandard1.3" />
-    <file src="DataProviders\Iridium-DB-Postgres\bin\Release\netstandard2.0\Iridium.DB.Postgres.dll" target="lib\netstandard2.0" />
-    <file src="DataProviders\Iridium-DB-Postgres\bin\Release\net45\Iridium.DB.Postgres.dll" target="lib\net45" />
+    <file src="src\DataProviders\Iridium.DB.Postgres\bin\Release\netstandard2.0\Iridium.DB.Postgres.dll" target="lib\netstandard2.0" />
+    <file src="src\DataProviders\Iridium.DB.Postgres\bin\Release\net45\Iridium.DB.Postgres.dll" target="lib\net45" />
+    <file src="src\DataProviders\Iridium.DB.Postgres\bin\Release\net451\Iridium.DB.Postgres.dll" target="lib\net451" />
   </files>
 </package>

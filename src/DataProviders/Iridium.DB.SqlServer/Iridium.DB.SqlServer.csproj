@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+    <AssemblyName>Iridium.DB.SqlServer</AssemblyName>
+    <RootNamespace>Iridium.DB</RootNamespace>
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefineConstants>IRIDIUM_SQLSERVER</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="iridium.reflection" Version="2.0.1.7071" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Iridium.DB\Iridium.DB.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Data.SqlClient">
+      <Version>4.5.1</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <Import Project="..\Iridium.DB.SqlADO\Iridium.DB.SqlADO.projitems" Label="Shared" />
+
+</Project>

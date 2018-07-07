@@ -1,23 +1,20 @@
 <?xml version="1.0"?>
 <package>
   <metadata>
-    <id>iridium</id>
+    <id>iridium.db.sqlite.native.uwp</id>
     <version>2.2.2.7071</version>
-    <title>Iridium</title>
     <authors>Philippe Leybaert</authors>
     <owners>Philippe Leybaert</owners>
     <projectUrl>http://github.com/activa/iridium</projectUrl>
     <licenseUrl>https://github.com/activa/iridium/blob/master/LICENSE</licenseUrl>
     <iconUrl>http://www.iridiumdb.com/img/IconPlain64.png</iconUrl>
-    <tags>iridium orm sql sqlite xamarin ios android uwp linux osx dotnetcore</tags>
+    <tags>iridium orm sqlite uwp uap</tags>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Lightweight multi-platform ORM for mobile, desktop and servers. Data providers for Sqlite, SQL Server, MySql and Postgres are available as separate Nuget packages</description>
+    <description>UWP .NET Core Sqlite runtime libraries for Iridium</description>
     <copyright>Copyright 2015-2018 Philippe Leybaert</copyright>
-    <dependencies>
-      <dependency id="iridium.reflection" version="2.0.1.7071" />
-    </dependencies>
   </metadata>
   <files>
-    <file src="src\Iridium.DB\bin\Release\netstandard1.0\Iridium.DB.dll" target="lib\netstandard1.0"/>
+    <file src="src\Native\_._" target="lib/uap"/>
+    <file src="src\Native\runtimes\uwp\**\*.dll" target="runtimes" />
   </files>
   </package>

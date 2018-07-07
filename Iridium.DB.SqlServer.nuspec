@@ -2,25 +2,28 @@
 <package>
   <metadata>
     <id>iridium.db.sqlserver</id>
-    <version>2.2.1.530</version>
-    <title>Iridium SQL Server Driver</title>
+    <version>2.2.2.7071</version>
     <authors>Philippe Leybaert</authors>
+    <owners>Philippe Leybaert</owners>
     <projectUrl>http://github.com/activa/iridium</projectUrl>
     <licenseUrl>https://github.com/activa/iridium/blob/master/LICENSE</licenseUrl>
-    <iconUrl>http://dstyler.com/vici/32x32/im-_IconPlain100-w32-h32.png</iconUrl>
+    <iconUrl>http://www.iridiumdb.com/img/IconPlain64.png</iconUrl>
     <tags>iridium orm sql sqlserver</tags>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <summary>SQL Server driver for Iridium ORM</summary>
-    <description>SQL Server driver for Iridium, the lightweight multi-platform ORM for mobile, desktop and servers. This driver is compatible with .NET 4.5 (desktop/server), Xamarin.iOS and Xamarin.Android</description>
+    <description>SQL Server driver for Iridium</description>
     <copyright>Copyright 2015-2018 Philippe Leybaert</copyright>
     <dependencies>
-      <dependency id="iridium" version="2.2.1.*" />
+      <group>
+        <dependency id="iridium" version="2.2.2.7071" />
+        <dependency id="iridium.reflection" version="2.0.1.7071" />
+      </group>
+      <group targetFramework="netstandard2.0">
+        <dependency id="System.Data.SqlSClient" version="4.5.1" />
+      </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="DataProviders\Iridium-DB-SqlServer\bin\Release\Iridium.DB.SqlServer.dll" target="lib\net45" />
-    <file src="DataProviders\Iridium-DB-SqlServer-iOS\bin\iPhone\Release\Iridium.DB.SqlServer.iOS.dll" target="lib\Xamarin.iOS10" />
-    <file src="DataProviders\Iridium-DB-SqlServer-iOS\bin\iPhone\Release\Iridium.DB.SqlServer.iOS.dll" target="lib\MonoTouch10" />
-    <file src="DataProviders\Iridium-DB-SqlServer-Android\bin\Release\Iridium.DB.SqlServer.Android.dll" target="lib\MonoAndroid10" />
+    <file src="src\DataProviders\Iridium.DB.SqlServer\bin\Release\net45\Iridium.DB.SqlServer.dll" target="lib\net45" />
+    <file src="src\DataProviders\Iridium.DB.SqlServer\bin\Release\netstandard2.0\Iridium.DB.SqlServer.dll" target="lib\netstandard2.0" />
   </files>
 </package>
