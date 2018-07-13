@@ -98,9 +98,9 @@
       <Project>{79033822-be38-4468-a27d-8d24e601b9e0}</Project>
       <Name>Iridium.DB.Postgres</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DataProviders\Iridium.DB.Sqlite.Win32\Iridium.DB.Sqlite.Win32.csproj">
+    <ProjectReference Include="..\DataProviders\Iridium.DB.Sqlite.Net45\Iridium.DB.Sqlite.Net45.csproj">
       <Project>{fcf8cc49-a5eb-46e4-932d-d4d6d36924a5}</Project>
-      <Name>Iridium.DB.Sqlite.Win32</Name>
+      <Name>Iridium.DB.Sqlite.Net45</Name>
     </ProjectReference>
     <ProjectReference Include="..\DataProviders\Iridium.DB.SqlServer\Iridium.DB.SqlServer.csproj">
       <Project>{680c31ca-c072-4af7-bcfc-8bd270bee7bc}</Project>

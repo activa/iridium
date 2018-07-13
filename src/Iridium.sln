@@ -9,11 +9,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{BAA00DEC-D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataProviders", "DataProviders", "{869B052F-0EAD-4489-89B6-DBADBC8F4F58}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium.DB.Sqlite.Win32", "DataProviders\Iridium.DB.Sqlite.Win32\Iridium.DB.Sqlite.Win32.csproj", "{FCF8CC49-A5EB-46E4-932D-D4D6D36924A5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium.DB.Sqlite.Net45", "DataProviders\Iridium.DB.Sqlite.Net45\Iridium.DB.Sqlite.Net45.csproj", "{FCF8CC49-A5EB-46E4-932D-D4D6D36924A5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Iridium.DB.MySql", "DataProviders\Iridium.DB.MySql\Iridium.DB.MySql.csproj", "{A74D8405-74EE-482D-A03E-92B45C17F9F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium.DB.SqlServer", "DataProviders\Iridium.DB.SqlServer\Iridium.DB.SqlServer.csproj", "{680C31CA-C072-4AF7-BCFC-8BD270BEE7BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Iridium.DB.SqlServer", "DataProviders\Iridium.DB.SqlServer\Iridium.DB.SqlServer.csproj", "{680C31CA-C072-4AF7-BCFC-8BD270BEE7BC}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Iridium.DB.SqlADO", "DataProviders\Iridium.DB.SqlADO\Iridium.DB.SqlADO.shproj", "{C87CA7D9-C64F-4001-86C8-444255165594}"
 EndProject
@@ -27,7 +27,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Iridium.DB", "Iridium.DB\Ir
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Iridium.DB.Postgres", "DataProviders\Iridium.DB.Postgres\Iridium.DB.Postgres.csproj", "{76B89C01-4967-440E-B9D9-EBB279E9632D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iridium.DB.Sqlite.Embedded", "DataProviders\Iridium.DB.Sqlite.Embedded\Iridium.DB.Sqlite.Embedded.csproj", "{92F3D019-3818-46FF-9002-8211A116A36F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Iridium.DB.Sqlite.Embedded", "DataProviders\Iridium.DB.Sqlite.Embedded\Iridium.DB.Sqlite.Embedded.csproj", "{92F3D019-3818-46FF-9002-8211A116A36F}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution

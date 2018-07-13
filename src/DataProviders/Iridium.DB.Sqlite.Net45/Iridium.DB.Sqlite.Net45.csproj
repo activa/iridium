@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Iridium.DB</RootNamespace>
-    <AssemblyName>Iridium.DB.Sqlite.Win32</AssemblyName>
+    <AssemblyName>Iridium.DB.Sqlite.Net45</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
@@ -21,16 +21,15 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;SQLITE_SQLITE3</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;SQLITE_EMBEDDED</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;SQLITE_SQLITE3</DefineConstants>
+    <DefineConstants>TRACE;SQLITE_EMBEDDED</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>7.1</LangVersion>
@@ -50,18 +49,18 @@
     <Compile Include="SqliteDataProvider.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Iridium.DB\Iridium.DB.csproj">
-      <Project>{b29894d4-48fc-4b63-9e53-b1f1520a2757}</Project>
-      <Name>Iridium-DB</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="win32-x64\sqlite3.dll" />
-    <EmbeddedResource Include="win32-x86\sqlite3.dll" />
+    <EmbeddedResource Include="win32-x64\sqlite_emb.dll" />
+    <EmbeddedResource Include="win32-x86\sqlite_emb.dll" />
+    <EmbeddedResource Include="linux32\libsqlite_emb.so" />
+    <EmbeddedResource Include="linux64\libsqlite_emb.so" />
+    <EmbeddedResource Include="macos\libsqlite_emb.dylib" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="iridium.reflection">
       <Version>2.0.1.7071</Version>
+    </PackageReference>
+    <PackageReference Include="iridium">
+      <Version>2.2.2.7071</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="..\Iridium.DB.Sqlite.Shared\Iridium.DB.Sqlite.Shared.projitems" Label="Shared" />
