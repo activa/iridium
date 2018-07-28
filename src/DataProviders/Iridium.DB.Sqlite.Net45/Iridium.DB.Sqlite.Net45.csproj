@@ -59,9 +59,12 @@
     <PackageReference Include="iridium.reflection">
       <Version>2.0.1.7071</Version>
     </PackageReference>
-    <PackageReference Include="iridium">
-      <Version>2.2.2.7071</Version>
-    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Iridium.DB\Iridium.DB.csproj">
+      <Project>{b29894d4-48fc-4b63-9e53-b1f1520a2757}</Project>
+      <Name>Iridium.DB</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="..\Iridium.DB.Sqlite.Shared\Iridium.DB.Sqlite.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
