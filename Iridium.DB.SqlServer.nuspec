@@ -18,7 +18,7 @@
         <dependency id="iridium.reflection" version="2.0.1.7071" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="System.Data.SqlSClient" version="4.5.1" />
+        <dependency id="System.Data.SqlClient" version="4.5.1" />
       </group>
     </dependencies>
   </metadata>
