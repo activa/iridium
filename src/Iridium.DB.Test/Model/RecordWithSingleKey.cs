@@ -8,4 +8,5 @@ namespace Iridium.DB.Test
         public string Name;
         public int? Value;
     }
+
 }

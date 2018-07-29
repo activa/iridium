@@ -57,6 +57,11 @@ namespace Iridium.DB
         public sealed class IgnoreAttribute : Attribute
         {
         }
+
+        [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+        public sealed class PreloadAttribute : Attribute
+        {
+        }
     }
 
 }

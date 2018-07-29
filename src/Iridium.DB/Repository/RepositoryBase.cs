@@ -48,8 +48,10 @@ namespace Iridium.DB
 
         protected internal IEnumerable<object> GetRelationObjects(QuerySpec filter, TableSchema.Relation parentRelation, object parentObject)
         {
-            var objects = from o in DataProvider.GetObjects(filter.Native,Schema)
-                          select Ir.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance(Schema.ObjectType), o),Schema.DatasetRelations) ;
+            var relations = Schema.BuildPreloadRelationSet();
+
+            var objects = from o in DataProvider.GetObjects(filter.Native, Schema)
+                          select Ir.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance(Schema.ObjectType), o), relations);
 
             if (parentRelation?.ReverseRelation != null)
                 objects = from o in objects select parentRelation.ReverseRelation.SetField(o, parentObject);

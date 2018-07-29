@@ -139,6 +139,7 @@ namespace Iridium.DB
 
             public bool ReadOnly; // If true, setting a relation object will not update the key value(s)
             public bool IsDataSet;
+            public bool Preload;
 
             internal Relation(MemberInfo fieldInfo) : base(fieldInfo)
             {

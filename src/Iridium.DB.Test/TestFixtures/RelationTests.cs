@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using NUnit.Framework;
 
 namespace Iridium.DB.Test
@@ -135,6 +136,54 @@ namespace Iridium.DB.Test
             Assert.That(salesPerson.Orders.Count(), Is.EqualTo(1));
             Assert.That(salesPerson.Orders.First().OrderID, Is.EqualTo(orders[1].OrderID));
         }
+
+        [Test]
+        public void ManyToOne_NoPreload()
+        {
+            var parent1 = InsertRecord(new RecordWithChildren() {Name = "A"});
+            var parent2 = InsertRecord(new RecordWithChildren() {Name = "B"});
+
+            InsertRecords<RecordWithParent>(10, (child, i) => { child.Name = "X"; child.ParentKey = parent1.Key; });
+            InsertRecords<RecordWithParent>(10, (child, i) => { child.Name = "Y"; child.ParentKey = parent2.Key; });
+
+            var children1 = DB.RecordsWithParent.ToArray();
+
+            Assert.That(children1[0].Parent, Is.Null);
+
+        }
+
+        [Test]
+        public void ManyToOne_ManualPreload()
+        {
+            var parent1 = InsertRecord(new RecordWithChildren() {Name = "A"});
+            var parent2 = InsertRecord(new RecordWithChildren() {Name = "B"});
+
+            InsertRecords<RecordWithParent>(10, (child, i) => { child.Name = "X"; child.ParentKey = parent1.Key; });
+            InsertRecords<RecordWithParent>(10, (child, i) => { child.Name = "Y"; child.ParentKey = parent2.Key; });
+
+            var children1 = DB.RecordsWithParent.Where(c => c.Name == "X").WithRelations(r => r.Parent).ToArray();
+
+            Assert.That(children1[0].Parent, Is.Not.Null);
+            Assert.That(children1[0].Parent.Name, Is.EqualTo("A"));
+
+        }
+
+        [Test]
+        public void ManyToOne_AttributePreload()
+        {
+            var parent1 = InsertRecord(new RecordWithChildren() {Name = "A"});
+            var parent2 = InsertRecord(new RecordWithChildren() {Name = "B"});
+
+            InsertRecords<RecordWithPreloadParent>(10, (child, i) => { child.Name = "X"; child.ParentKey = parent1.Key; });
+            InsertRecords<RecordWithPreloadParent>(10, (child, i) => { child.Name = "Y"; child.ParentKey = parent2.Key; });
+
+            var children1 = DB.RecordsWithPreloadParent.Where(c => c.Name == "X").ToArray();
+
+            Assert.That(children1[0].Parent, Is.Not.Null);
+            Assert.That(children1[0].Parent.Name, Is.EqualTo("A"));
+
+        }
+
 
     }
 }

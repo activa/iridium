@@ -92,13 +92,7 @@ namespace Iridium.DB
 
             var relations = LambdaRelationFinder.FindRelations(relationsToLoad, Schema);
 
-            if (Schema.DatasetRelations != null)
-            {
-                if (relations == null)
-                    relations = new HashSet<TableSchema.Relation>(Schema.DatasetRelations);
-                else
-                    relations.UnionWith(Schema.DatasetRelations);
-            }
+            relations = Schema.BuildPreloadRelationSet(relations);
 
             return Ir.WithLoadedRelations(obj, relations);
         }
@@ -145,8 +139,10 @@ namespace Iridium.DB
             if (querySpec.Code == null)
                 return default;
 
+            var relations = Schema.BuildPreloadRelationSet();
+
             var objects = from o in DataProvider.GetObjects(querySpec.Native, Schema)
-                          let x = Ir.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance<T>(), o), Schema.DatasetRelations)
+                          let x = Ir.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance<T>(), o), relations)
                           where querySpec.Code == null || querySpec.Code.IsFilterMatch(x)
                           select x;
             
@@ -168,24 +164,14 @@ namespace Iridium.DB
         {
             IEnumerable<T> objects;
 
-            var relations = LambdaRelationFinder.FindRelations(relationLambdas, Schema);
+            var relations = Schema.BuildPreloadRelationSet(LambdaRelationFinder.FindRelations(relationLambdas, Schema));
 
             var prefetchRelations = relations?.Where(r => r.IsToOne && r.LocalSchema == Schema).ToList();
 
-            if (Schema.DatasetRelations != null)
-            {
-                if (relations == null)
-                    relations = new HashSet<TableSchema.Relation>(Schema.DatasetRelations);
-                else
-                    relations.UnionWith(Schema.DatasetRelations);
-            }
-
             if (prefetchRelations != null && prefetchRelations.Count > 0 && DataProvider.SupportsRelationPrefetch)
             {
-                IEnumerable<Dictionary<TableSchema.Relation, SerializedEntity>> relatedEntities;
-
                 objects = DataProvider
-                    .GetObjectsWithPrefetch(filter.Native, Schema, prefetchRelations, out relatedEntities)
+                    .GetObjectsWithPrefetch(filter.Native, Schema, prefetchRelations, out var relatedEntities)
                     .Select(entity => Schema.UpdateObject(Activator.CreateInstance<T>(), entity))
                     .Zip(relatedEntities, (obj, relationEntities) =>
                     {

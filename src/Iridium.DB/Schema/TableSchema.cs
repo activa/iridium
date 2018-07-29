@@ -45,8 +45,8 @@ namespace Iridium.DB
         public Type ObjectType { get; }
         public string MappedName { get; }
         public HashSet<Relation> DatasetRelations { get; private set; }
+        public HashSet<Relation> PreloadRelations { get; private set; }
         public Index[] Indexes { get; private set; }
-
 
         private static readonly List<Func<TypeInspector, bool>> _mappableTypes = new List<Func<TypeInspector, bool>>
             {
@@ -226,6 +226,7 @@ namespace Iridium.DB
                 bool isDataSet = field.Type.IsConstructedGenericType && field.Type.GetGenericTypeDefinition() == typeof(IDataSet<>);
 
                 var relationAttribute = field.GetAttribute<RelationAttribute>();
+                var preloadAttribute = field.GetAttribute<Iridium.DB.Relation.PreloadAttribute>();
 
                 if (!field.Type.Inspector().ImplementsOrInherits<IEntity>() && relationAttribute == null && !isDataSet)
                     continue;
@@ -236,7 +237,8 @@ namespace Iridium.DB
 
                 Relation relation = new Relation(field.MemberInfo)
                 {
-                    LocalSchema = this
+                    LocalSchema = this,
+                    Preload = preloadAttribute != null
                 };
 
                 if (collectionType != null)
@@ -296,12 +298,13 @@ namespace Iridium.DB
             }
 
             var dataSetRelations = new HashSet<Relation>(relations.Values.Where(r => r.IsDataSet));
+            var preloadRelations = new HashSet<Relation>(relations.Values.Where(r => r.Preload));
 
-            DatasetRelations = dataSetRelations.Any() ? new HashSet<Relation>(dataSetRelations) : null;
+            DatasetRelations = dataSetRelations.Any() ? dataSetRelations : null;
+            PreloadRelations = preloadRelations.Any() ? preloadRelations : null;
 
             Relations = relations;
         }
-
 
         internal object UpdateObject(object o, SerializedEntity entity)
         {
@@ -332,6 +335,27 @@ namespace Iridium.DB
                 )
                 .ToDictionary(k => k.Key, k=> k.Value) 
             );
+        }
+
+        internal HashSet<Relation> BuildPreloadRelationSet(HashSet<Relation> relations = null)
+        {
+            if (DatasetRelations != null)
+            {
+                if (relations == null)
+                    relations = new HashSet<TableSchema.Relation>(DatasetRelations);
+                else
+                    relations.UnionWith(DatasetRelations);
+            }
+
+            if (PreloadRelations != null)
+            {
+                if (relations == null)
+                    relations = new HashSet<TableSchema.Relation>(PreloadRelations);
+                else
+                    relations.UnionWith(PreloadRelations);
+            }
+
+            return relations;
         }
 
 #if DEBUG

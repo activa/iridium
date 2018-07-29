@@ -78,6 +78,7 @@ namespace Iridium.DB.Test
         public IDataSet<RecordWithInterface> RecordsWithInterface;
         public IDataSet<RecordWithRelationToSelf> RecordsWithRelationToSelf;
         public IDataSet<RecordWithParent> RecordsWithParent;
+        public IDataSet<RecordWithPreloadParent> RecordsWithPreloadParent;
         public IDataSet<RecordWithChildren> RecordsWithChildren;
 
         public DBContext(IDataProvider dataProvider) : base(dataProvider)
@@ -110,6 +111,7 @@ namespace Iridium.DB.Test
             RecordsWithIgnoredFields.Purge();
             RecordsWithRelationToSelf.Purge();
             RecordsWithParent.Purge();
+            RecordsWithPreloadParent.Purge();
             RecordsWithChildren.Purge();
         }
 
@@ -133,6 +135,7 @@ namespace Iridium.DB.Test
             CreateTable<RecordWithInterface>(recreateTable: true);
             CreateTable<RecordWithRelationToSelf>(recreateTable: true);
             CreateTable<RecordWithParent>(recreateTable: true);
+            CreateTable<RecordWithPreloadParent>(recreateTable: true);
             CreateTable<RecordWithChildren>(recreateTable: true);
         }
 
