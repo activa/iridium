@@ -226,7 +226,11 @@ namespace Iridium.DB
                 bool isDataSet = field.Type.IsConstructedGenericType && field.Type.GetGenericTypeDefinition() == typeof(IDataSet<>);
 
                 var relationAttribute = field.GetAttribute<RelationAttribute>();
+                var ignoreAttribute = field.GetAttribute<Iridium.DB.Relation.IgnoreAttribute>();
                 var preloadAttribute = field.GetAttribute<Iridium.DB.Relation.PreloadAttribute>();
+
+                if (ignoreAttribute != null)
+                    continue;
 
                 if (!field.Type.Inspector().ImplementsOrInherits<IEntity>() && relationAttribute == null && !isDataSet)
                     continue;

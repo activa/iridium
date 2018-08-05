@@ -25,6 +25,7 @@
 #endregion
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -272,6 +273,43 @@ namespace Iridium.DB
                 throw new SqlExpressionTranslatorException(node.ToString());
             }
 
+            if (node.Method.DeclaringType == typeof(QueryExtensions) && node.Arguments.Count > 1)
+            {
+                string arg = Translate(node.Arguments[0]);
+
+                switch (methodName)
+                {
+                    case nameof(QueryExtensions.IsAnyOf):
+                    case nameof(QueryExtensions.IsNotAnyOf):
+                    {                
+                        object argument = node.Arguments.Skip(1).Select(UnQuote).OfType<ConstantExpression>().Select(exp => exp.Value).First();
+
+                        if (!(argument is IEnumerable enumerable))
+                            throw new SqlExpressionTranslatorException(node.ToString());
+
+                        var values = enumerable.Cast<object>().Select(o => CreateParameter(o));
+
+                        if (methodName == nameof(QueryExtensions.IsNotAnyOf))
+                            return $"({arg} not in ({string.Join(",", values)}))";
+                        else
+                            return $"({arg} in ({string.Join(",", values)}))";
+                    }
+                    case nameof(QueryExtensions.IsBetween):
+                    {
+                        object[] args = node.Arguments.Skip(1).Select(UnQuote).OfType<ConstantExpression>().Select(exp => exp.Value).ToArray();
+                        
+                        if (args.Length != 2)
+                            throw new SqlExpressionTranslatorException(node.ToString());
+
+                        var from = CreateParameter(args[0]);
+                        var to = CreateParameter(args[1]);
+
+                        return $"({arg} between {from} and {to})";
+                    }
+
+                }
+            }
+
             if (node.Method.DeclaringType.IsConstructedGenericType && node.Method.DeclaringType.GetGenericTypeDefinition() == typeof(IDataSet<>))
             {
                 leftExpression = node.Object as MemberExpression;
@@ -283,6 +321,7 @@ namespace Iridium.DB
                 leftExpression = node.Arguments[0] as MemberExpression;
                 arguments.AddRange(node.Arguments.Skip(1).Select(UnQuote).OfType<LambdaExpression>());
             }
+
 
             if (leftExpression != null)
             {
@@ -479,7 +518,7 @@ namespace Iridium.DB
             return Expression.Lambda(expression, lambdaParameter);
         }
         
-        private string CreateParameter(object value, Type type)
+        private string CreateParameter(object value, Type type = null)
         {
             var parameterName = SqlNameGenerator.NextParameterName();
 

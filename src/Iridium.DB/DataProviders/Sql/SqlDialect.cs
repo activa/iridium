@@ -102,7 +102,7 @@ namespace Iridium.DB
 
         public virtual string InsertSql(string tableName, StringPair[] columns)
         {
-            var parts = new List<string>
+            var parts = new []
             {
                 "insert into", 
                 QuoteTable(tableName), 
@@ -121,7 +121,7 @@ namespace Iridium.DB
 
         public virtual string InsertOrUpdateSql(string tableName, StringPair[] columns, string[] keyColumns, string sqlWhere)
         {
-            var parts = new List<string>
+            var parts = new []
             {
                 "replace into",
                 QuoteTable(tableName),

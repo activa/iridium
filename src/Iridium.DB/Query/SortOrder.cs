@@ -28,3 +28,4 @@ namespace Iridium.DB
 {
     public enum SortOrder { Ascending, Descending }
 }
+

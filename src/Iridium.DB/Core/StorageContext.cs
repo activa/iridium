@@ -95,8 +95,6 @@ namespace Iridium.DB
             }
         }
 
-
-
         private void GenerateRelations()
         {
             lock (_repositories)

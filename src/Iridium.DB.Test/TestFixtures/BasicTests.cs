@@ -439,6 +439,110 @@ namespace Iridium.DB.Test
         }
 
         [Test]
+        public void BetweenInt()
+        {
+            var customers = InsertRecords<Customer>(100, (customer, i) =>
+            {
+                customer.Name = $"Customer {(char)('A' + 1)}";
+                customer.Age = i + 1;
+            });
+
+            var filtererdCustomers = DB.Customers.Where(c => c.Age.IsBetween(12,20)).OrderBy(c => c.CustomerID).ToArray();
+
+            Assert.That(filtererdCustomers.Length, Is.EqualTo(9));
+
+            Assert.That(filtererdCustomers.Select(c => c.Age.Value), Is.EquivalentTo(new[] {12,13,14,15,16,17,18,19,20}));
+        }
+
+        [Test]
+        public void BetweenStrings()
+        {
+            var customers = InsertRecords<Customer>(20, (customer, i) =>
+            {
+                customer.Name = $"Customer {(char)('A' + i)}";
+                customer.Age = i + 1;
+            });
+
+            var filtererdCustomers = DB.Customers.Where(c => c.Name.IsBetween("Customer D","Customer H")).OrderBy(c => c.CustomerID).ToArray();
+
+            Assert.That(filtererdCustomers.Length, Is.EqualTo(5));
+
+            Assert.That(filtererdCustomers[0].Name, Is.EqualTo("Customer D"));
+            Assert.That(filtererdCustomers[4].Name, Is.EqualTo("Customer H"));
+        }
+
+        [Test]
+        public void IsAnyOfIntArray()
+        {
+            var customers = InsertRecords<Customer>(100, (customer, i) => customer.Name = $"Customer {i + 1}");
+
+            var someCustomerIds = customers.Skip(5).Take(50).Select(c => c.CustomerID).ToArray();
+
+            var filtererdCustomers = DB.Customers.Where(c => c.CustomerID.IsAnyOf(someCustomerIds)).OrderBy(c => c.CustomerID).ToArray();
+
+            Assert.That(filtererdCustomers.Length, Is.EqualTo(50));
+
+            Assert.That(filtererdCustomers.Select(c => c.CustomerID), Is.EquivalentTo(someCustomerIds));
+        }
+
+        [Test]
+        public void IsAnyOfIntParams()
+        {
+            var customers = InsertRecords<Customer>(100, (customer, i) =>
+            {
+                customer.Age = i + 1;
+                customer.Name = $"Customer {i + 1}";
+            });
+
+            var filtererdCustomers = DB.Customers.Where(c => c.Age.IsAnyOf(12,13,14)).OrderBy(c => c.CustomerID).ToArray();
+
+            Assert.That(filtererdCustomers.Length, Is.EqualTo(3));
+
+            Assert.That(filtererdCustomers.Select(c => c.Age.Value), Is.EquivalentTo(new[] {12,13,14}));
+        }
+
+        [Test]
+        public void NotIsAnyOfIntParams()
+        {
+            var customers = InsertRecords<Customer>(100, (customer, i) =>
+            {
+                customer.Age = i + 1;
+                customer.Name = $"Customer {i + 1}";
+            });
+
+            var filtererdCustomers = DB.Customers.Where(c => !c.Age.IsAnyOf(12,13,14)).OrderBy(c => c.CustomerID).ToArray();
+
+            Assert.That(filtererdCustomers.Length, Is.EqualTo(97));
+        }
+
+        [Test]
+        public void IsNotAnyOfIntParams()
+        {
+            var customers = InsertRecords<Customer>(100, (customer, i) =>
+            {
+                customer.Age = i + 1;
+                customer.Name = $"Customer {i + 1}";
+            });
+
+            var filtererdCustomers = DB.Customers.Where(c => c.Age.IsNotAnyOf(12,13,14)).OrderBy(c => c.CustomerID).ToArray();
+
+            Assert.That(filtererdCustomers.Length, Is.EqualTo(97));
+        }
+
+        [Test]
+        public void AnyOfStringParams()
+        {
+            var customers = InsertRecords<Customer>(10, (customer, i) => customer.Name = $"Customer {i + 1}");
+
+            var filtererdCustomers = DB.Customers.Where(c => c.Name.IsAnyOf("Customer 3","Customer 6","Customer 8")).OrderBy(c => c.CustomerID).ToArray();
+
+            Assert.That(filtererdCustomers.Length, Is.EqualTo(3));
+            Assert.That(filtererdCustomers[0].Name, Is.EqualTo("Customer 3"));
+            Assert.That(filtererdCustomers[1].Name, Is.EqualTo("Customer 6"));
+            Assert.That(filtererdCustomers[2].Name, Is.EqualTo("Customer 8"));
+        }
+
+        [Test]
         public void RandomCreation()
         {
             Random rnd = new Random();
