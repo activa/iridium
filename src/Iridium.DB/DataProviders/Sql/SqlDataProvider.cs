@@ -210,7 +210,7 @@ namespace Iridium.DB
 
             var tableName = schema.MappedName;
             var autoIncrementField = schema.IncrementKey;
-            var columnList = (from f in schema.WriteFields where !f.AutoIncrement && !f.ColumnReadOnly select new { Field = f, ParameterName = SqlNameGenerator.NextParameterName()  }).ToArray();
+            var columnList = (from f in schema.WriteFields select new { Field = f, ParameterName = SqlNameGenerator.NextParameterName()  }).ToArray();
             var parameters = new QueryParameterCollection(columnList.Select(c => new QueryParameter(c.ParameterName, o[c.Field.MappedName],c.Field.FieldType)));
 
             if (autoIncrementField != null && create == null) 

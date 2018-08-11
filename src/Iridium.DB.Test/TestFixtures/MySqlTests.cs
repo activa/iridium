@@ -2,7 +2,7 @@ using NUnit.Framework;
 
 namespace Iridium.DB.Test
 {
-    [TestFixture("mysql", Category = "server")]
+    [TestFixture("mysql", Category = "mysql")]
     public class MySqlTests : TestFixtureWithEmptyDB
     {
         public MySqlTests(string driver) : base(driver)

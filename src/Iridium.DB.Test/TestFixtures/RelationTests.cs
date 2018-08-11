@@ -4,12 +4,12 @@ using NUnit.Framework;
 
 namespace Iridium.DB.Test
 {
-    [TestFixture("memory", Category = "embedded")]
-    [TestFixture("sqlitemem", Category = "embedded")]
-    [TestFixture("sqlserver", Category = "server")]
-    [TestFixture("sqlite", Category = "file")]
-    [TestFixture("mysql", Category = "server")]
-    [TestFixture("postgres", Category = "server")]
+    [TestFixture("memory", Category = "memory")]
+    [TestFixture("sqlitemem", Category = "sqlite-mem")]
+    [TestFixture("sqlserver", Category = "sqlserver")]
+    [TestFixture("sqlite", Category = "sqlite")]
+    [TestFixture("mysql", Category = "mysql")]
+    [TestFixture("postgres", Category = "postgres")]
     public class RelationTests : TestFixtureWithEmptyDB
     {
         public RelationTests(string driver) : base(driver)

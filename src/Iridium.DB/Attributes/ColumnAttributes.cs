@@ -65,6 +65,11 @@ namespace Iridium.DB
         }
 
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+        public sealed class NotIndexedAttribute : Attribute
+        {
+        }
+
+        [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
         public sealed class NotNullAttribute : Attribute
         {
         }
@@ -78,6 +83,11 @@ namespace Iridium.DB
         public sealed class PrimaryKeyAttribute : Attribute
         {
             public bool AutoIncrement { get; set; }
+        }
+
+        [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+        public sealed class NoPrimaryKeyAttribute : Attribute
+        {
         }
 
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
@@ -98,13 +108,6 @@ namespace Iridium.DB
         }
 
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-        public sealed class ReadbackAttribute : Attribute
-        {
-            public bool OnInsert { get; set; }
-            public bool OnUpdate { get; set; }
-        }
-
-        [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
         public sealed class ReadOnlyAttribute : Attribute
         {
         }
@@ -117,16 +120,6 @@ namespace Iridium.DB
             public NullValueAttribute(object value)
             {
                 NullValue = value;
-            }
-        }
-
-        public class ForeignKeyAttribute : Attribute
-        {
-            public Type RelatedClass { get; }
-
-            public ForeignKeyAttribute(Type relatedClass)
-            {
-                RelatedClass = relatedClass;
             }
         }
     }

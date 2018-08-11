@@ -6,12 +6,12 @@ using NUnit.Framework;
 
 namespace Iridium.DB.Test
 {
-    [TestFixture("memory", Category = "embedded")]
-    [TestFixture("sqlitemem", Category = "embedded")]
-    [TestFixture("sqlserver", Category = "server")]
-    [TestFixture("sqlite", Category = "file")]
-    [TestFixture("mysql", Category = "server")]
-    [TestFixture("postgres", Category = "server")]
+    [TestFixture("memory", Category = "memory")]
+    [TestFixture("sqlitemem", Category = "sqlite-mem")]
+    [TestFixture("sqlserver", Category = "sqlserver")]
+    [TestFixture("sqlite", Category = "sqlite")]
+    [TestFixture("mysql", Category = "mysql")]
+    [TestFixture("postgres", Category = "postgres")]
     public class WithStandardTestData : TestFixture
     {
         private const int NUM_CUSTOMERS = 20;
@@ -97,15 +97,7 @@ namespace Iridium.DB.Test
             DB.PaymentMethods.Insert(new PaymentMethod() { Name = "Mastercard" });
             DB.PaymentMethods.Insert(new PaymentMethod() { Name = "Amex" });
 
-
-            for (int i = 0; i < NUM_CUSTOMERS; i++)
-            {
-                
-            }
-
             FIRST_CUSTOMERID = customers[0].CustomerID;
-
-
         }
 
         [Test]
@@ -115,8 +107,6 @@ namespace Iridium.DB.Test
 
             Assert.That(selectedCustomers.Count(), Is.EqualTo(9));
             Assert.That(selectedCustomers.First().Name, Has.Length.EqualTo(10));
-//            selectedCustomers.Should().HaveCount(9);
-//            selectedCustomers.FirstOrDefault().Name.Length.Should().Be(10);
         }
 
         [Test]
@@ -126,8 +116,6 @@ namespace Iridium.DB.Test
 
             Assert.That(selectedCustomers, Has.Length.EqualTo(10));
             Assert.That(selectedCustomers[0].CustomerID, Is.EqualTo(6));
-//            selectedCustomers.Length.Should().Be(10);
-//            selectedCustomers[0].CustomerID.Should().Be(6);
         }
 
         [Test]
@@ -138,9 +126,6 @@ namespace Iridium.DB.Test
             Assert.That(selectedCustomers, Has.Length.EqualTo(10));
             Assert.That(selectedCustomers[0].CustomerID, Is.EqualTo(1));
             Assert.That(selectedCustomers[9].CustomerID, Is.EqualTo(10));
-//            selectedCustomers.Length.Should().Be(10);
-//            selectedCustomers[0].CustomerID.Should().Be(1);
-//            selectedCustomers[9].CustomerID.Should().Be(10);
         }
 
         [Test]
@@ -153,10 +138,6 @@ namespace Iridium.DB.Test
             Assert.That(selectedCustomers, Has.Length.EqualTo(5));
             Assert.That(selectedCustomers[0].CustomerID, Is.EqualTo(2));
             Assert.That(selectedCustomers[4].CustomerID, Is.EqualTo(6));
-
-//            selectedCustomers.Length.Should().Be(5);
-//            selectedCustomers[0].CustomerID.Should().Be(2);
-//            selectedCustomers[4].CustomerID.Should().Be(6);
         }
 
         [Test]
@@ -166,9 +147,6 @@ namespace Iridium.DB.Test
 
             Assert.That(selectedCustomers, Has.Length.EqualTo(15));
             Assert.That(selectedCustomers[0].CustomerID, Is.EqualTo(6));
-
-//            selectedCustomers.Length.Should().Be(15);
-//            selectedCustomers[0].CustomerID.Should().Be(6);
         }
 
         [Test]
@@ -178,13 +156,9 @@ namespace Iridium.DB.Test
 
             Assert.That(sortedItems.Select(item => item.Order.Remark), Is.Ordered);
 
-//            sortedItems.Should().BeInAscendingOrder(item => item.Order.Remark);
-
             sortedItems = (from item in DB.OrderItems.WithRelations(item => item.Order) orderby item.Order.Remark select item);
 
             Assert.That(sortedItems.Select(item => item.Order.Remark), Is.Ordered);
-
-//            sortedItems.Should().BeInAscendingOrder(item => item.Order.Remark);
         }
 
         [Test]
@@ -193,7 +167,6 @@ namespace Iridium.DB.Test
             var sortedItems = (from item in DB.OrderItems orderby item.Order.Remark, item.Price descending select item).WithRelations(o => o.Order);
 
             Assert.That(sortedItems.Select(item => item.Order.Remark), Is.Ordered);
- //           AssertHelper.AssertSorting(sortedItems, (prev, current) => (prev.Order.Remark.CompareTo(current.Order.Remark) < 0) || (current.Order.Remark == prev.Order.Remark && (current.Price <= prev.Price)));
         }
 
         [Test]
@@ -202,8 +175,6 @@ namespace Iridium.DB.Test
             var sortedOrders = (from order in DB.Orders where order.OrderItems.Any() orderby order.OrderItems.Sum(item => item.Price) select order).WithRelations(o => o.OrderItems);
 
             Assert.That(sortedOrders.Select(order => order.OrderItems.Sum(item => item.Price)), Is.Ordered);
-
-            //AssertHelper.AssertSorting(sortedOrders, (prev, now) => prev.OrderItems.Sum(item => item.Price) <= now.OrderItems.Sum(item => item.Price));
         }
 
         [Test]
@@ -214,10 +185,6 @@ namespace Iridium.DB.Test
             Assert.That(customers, Has.Length.EqualTo(1));
             Assert.That(customers[0].Orders, Is.Not.Null);
             Assert.That(customers[0].Orders.Count(), Is.EqualTo(9));
-//
-//            customers.Length.Should().Be(1);
-//            customers[0].Orders.Should().NotBeNull();
-//            customers[0].Orders.Count().Should().Be(9);
         }
 
         [Test]
@@ -228,10 +195,6 @@ namespace Iridium.DB.Test
             Assert.That(customer, Is.Not.Null);
             Assert.That(customer.Orders, Is.Not.Null);
             Assert.That(customer.Orders.Count(), Is.EqualTo(1));
-
-//            customer.Should().NotBeNull();
-//            customer.Orders.Should().NotBeNull();
-//            customer.Orders.Count().Should().Be(1);
         }
 
 
@@ -244,15 +207,9 @@ namespace Iridium.DB.Test
             Assert.That(customer.Orders, Is.Not.Null);
             Assert.That(customer.Orders.Count(), Is.EqualTo(1));
 
-//            customer.Should().NotBeNull();
-//            customer.Orders.Should().NotBeNull();
-//            customer.Orders.Count().Should().Be(1);
-
             Order order = DB.Orders.Read(customer.Orders.First().OrderID);
 
             Assert.That(order, Is.Not.Null);
-
-//            order.Should().NotBeNull();
 
             DB.LoadRelations(order, o => o.Customer);
 
@@ -260,11 +217,6 @@ namespace Iridium.DB.Test
             Assert.That(order.Customer.CustomerID, Is.EqualTo(customer.CustomerID));
             Assert.That(order.Customer.Orders, Is.Not.Null);
             Assert.That(order.Customer.Orders.Count(), Is.EqualTo(1));
-
-//            order.Customer.Should().NotBeNull();
-//            order.Customer.CustomerID.Should().Be(customer.CustomerID);
-//            order.Customer.Orders.Should().NotBeNull();
-//            order.Customer.Orders.Count().Should().Be(1);
         }
 
         [Test]
@@ -274,16 +226,10 @@ namespace Iridium.DB.Test
 
             Assert.That(orders, Has.Length.EqualTo(90));
 
-            //orders.Length.Should().Be(90);
-
             DB.LoadRelation(() => orders[0].Customer);
 
             Assert.That(orders[0].Customer, Is.Not.Null);
             Assert.That(orders[0].Customer.CustomerID, Is.EqualTo(orders[0].CustomerID));
-
-//            orders[0].Customer.Should().NotBeNull();
-//
-//            orders[0].Customer.CustomerID.Should().Be(orders[0].CustomerID);
         }
 
         [Test]
@@ -311,12 +257,8 @@ namespace Iridium.DB.Test
             Assert.That(orders, Has.Length.EqualTo(90));
             Assert.That(orders[0].Customer.CustomerID, Is.EqualTo(orders[0].CustomerID));
 
-//            orders.Length.Should().Be(90);
-//            orders[0].Customer.CustomerID.Should().Be(orders[0].CustomerID);
-
             //TODO: check query stats
         }
-
 
         [Test]
         public void PrefetchRelations_ManyToOne_Deep()
@@ -328,12 +270,6 @@ namespace Iridium.DB.Test
             Assert.That(orderItems[0].Product, Is.Null);
             Assert.That(orderItems[2].Product.ProductID, Is.EqualTo(orderItems[2].ProductID));
             Assert.That(orderItems[0].Order.Customer.CustomerID, Is.EqualTo(orderItems[0].Order.CustomerID));
-
-//            orderItems.Length.Should().Be(220);
-//            orderItems[0].Order.OrderID.Should().Be(orderItems[0].OrderID);
-//            orderItems[0].Product.Should().BeNull();
-//            orderItems[2].Product.ProductID.Should().Be(orderItems[2].ProductID);
-//            orderItems[0].Order.Customer.CustomerID.Should().Be(orderItems[0].Order.CustomerID);
 
             //TODO: check query stats
         }
@@ -357,9 +293,6 @@ namespace Iridium.DB.Test
             Assert.That(items, Has.Length.EqualTo(80));
             Assert.That(items, Has.All.Property(nameof(OrderItem.ProductID)).Null);
 
-            //            items.Length.Should().Be(80);
-            //            items[0].ProductID.Should().BeNull();
-
             string nullProductId = null;
 
             items = DB.OrderItems.Where(item => item.ProductID == nullProductId).ToArray();
@@ -367,16 +300,10 @@ namespace Iridium.DB.Test
             Assert.That(items, Has.Length.EqualTo(80));
             Assert.That(items, Has.All.Property(nameof(OrderItem.ProductID)).Null);
 
-            //            items.Length.Should().Be(80);
-            //            items[0].ProductID.Should().BeNull();
-
             items = DB.OrderItems.Where(item => item.ProductID != null).ToArray();
 
             Assert.That(items, Has.Length.EqualTo(140));
             Assert.That(items, Has.All.Property(nameof(OrderItem.ProductID)).Not.Null);
-
-//            items.Length.Should().Be(140);
-//            items[0].ProductID.Should().NotBeNull();
         }
 
         [Test]
@@ -384,9 +311,6 @@ namespace Iridium.DB.Test
         {
             Assert.That(DB.Customers.All(c => c.CustomerID > 0), Is.True);
             Assert.That(DB.Customers.All(c => c.CustomerID > 1), Is.False);
-
-//            DB.Customers.All(c => c.CustomerID > 0).Should().BeTrue();
-//            DB.Customers.All(c => c.CustomerID > 1).Should().BeFalse();
         }
 
         [Test]
@@ -406,8 +330,6 @@ namespace Iridium.DB.Test
 
             Assert.That(DB.Customers.Where(c => c.CustomerID == 0).Any(c => c.CustomerID > 0), Is.False);
             Assert.That(DB.Customers.Where(c => c.CustomerID > 0).Any(c => c.CustomerID > 1), Is.True);
-//            DB.Customers.Where(c => c.CustomerID == 0).Any(c => c.CustomerID > 0).Should().BeFalse();
-//            DB.Customers.Where(c => c.CustomerID > 0).Any(c => c.CustomerID > 1).Should().BeTrue();
         }
 
         [Test]
@@ -431,16 +353,10 @@ namespace Iridium.DB.Test
             Assert.That(orders.ToArray(), Has.Length.EqualTo(2)); // force enumeration
             Assert.That(orders.First().CustomerID, Is.EqualTo(3));
 
-//            orders.Count().Should().Be(2);
-//            orders.ToArray().Length.Should().Be(2); // force enumeration
-//            orders.First().CustomerID.Should().Be(3);
-
             orders = DB.Orders.Where(o => o.Customer.CustomerID == 3 && fn(o.Customer,9));
 
             Assert.AreEqual(0, orders.Count());
             Assert.That(orders.ToArray(), Has.Length.EqualTo(0));
-
-            //orders.ToArray().Length.Should().Be(0); // force enumeration
         }
 
 
@@ -456,7 +372,6 @@ namespace Iridium.DB.Test
             Assert.AreEqual(2, orders.Count());
 
             Assert.That(orders.First().CustomerID, Is.EqualTo(3));
-//            orders.First().CustomerID.Should().Be(3);
         }
 
         [Test]
@@ -616,11 +531,6 @@ namespace Iridium.DB.Test
             Assert.That(maxPrice1, Is.GreaterThan(0m));
             Assert.That(maxPrice1, Is.LessThan(100m));
             Assert.That(maxPrice2, Is.EqualTo(maxPrice2));
-
-//            maxPrice1.Should().BeGreaterThan(0.0m);
-//            maxPrice1.Should().BeLessThan(100.0m);
-//            maxPrice1.Should().Be(maxPrice2);
         }
-
     }
 }

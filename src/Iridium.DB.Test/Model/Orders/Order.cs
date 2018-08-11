@@ -17,7 +17,6 @@ namespace Iridium.DB.Test
         public int OrderID { get; set; }
         public int CustomerID { get; set; }
 
-        [Column.ForeignKey(typeof(SalesPerson))]
         public int? SalesPersonID { get;set; }
 
         [Column.Name("Date")]

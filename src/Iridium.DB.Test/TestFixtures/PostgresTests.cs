@@ -2,7 +2,7 @@ using NUnit.Framework;
 
 namespace Iridium.DB.Test
 {
-    [TestFixture("postgres", Category = "server")]
+    [TestFixture("postgres", Category = "postgres")]
     public class PostgresTests : TestFixtureWithEmptyDB
     {
         public PostgresTests(string driver) : base(driver)

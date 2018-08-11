@@ -116,7 +116,7 @@ namespace Iridium.DB
                     schemaField.UpdateFlags(FieldFlags.PrimaryKey, true);
                     schemaField.UpdateFlags(FieldFlags.AutoIncrement, pkAttribute.AutoIncrement);
                 }
-                else if (fieldPropertiesFromConvention.PrimaryKey ?? false)
+                else if ((fieldPropertiesFromConvention.PrimaryKey ?? false) && !fieldInspector.HasAttribute<Column.NoPrimaryKeyAttribute>())
                 {
                     schemaField.UpdateFlags(FieldFlags.PrimaryKey, true);
                     schemaField.UpdateFlags(FieldFlags.AutoIncrement, fieldPropertiesFromConvention.AutoIncrement);
@@ -136,15 +136,7 @@ namespace Iridium.DB
                 if (schemaField.PrimaryKey)
                     schemaField.UpdateFlags(FieldFlags.Nullable, false);
 
-                if (fieldInspector.HasAttribute<Column.ReadbackAttribute>())
-                {
-                    var readbackAttribute = fieldInspector.GetAttribute<Column.ReadbackAttribute>();
-
-                    schemaField.UpdateFlags(FieldFlags.ReadbackOnInsert,readbackAttribute.OnInsert);
-                    schemaField.UpdateFlags(FieldFlags.ReadbackOnUpdate, readbackAttribute.OnUpdate);
-                }
-
-                if (fieldInspector.HasAttribute<Column.IndexedAttribute>() || (fieldPropertiesFromConvention.Indexed ?? false))
+                if (fieldInspector.HasAttribute<Column.IndexedAttribute>() || ((fieldPropertiesFromConvention.Indexed ?? false) && !fieldInspector.HasAttribute<Column.NotIndexedAttribute>()))
                 {
                     var indexAttribute = fieldInspector.GetAttribute<Column.IndexedAttribute>();
 

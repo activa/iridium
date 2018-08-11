@@ -2,7 +2,7 @@ using NUnit.Framework;
 
 namespace Iridium.DB.Test
 {
-    [TestFixture("sqlserver", Category = "server")]
+    [TestFixture("sqlserver", Category = "sqlserver")]
     public class SqlServerTests : TestFixtureWithEmptyDB
     {
         public SqlServerTests(string driver) : base(driver)

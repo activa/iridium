@@ -44,8 +44,6 @@ namespace Iridium.DB
             AutoIncrement = 1<<2,
             Nullable = 1<<3,
             ReadOnly = 1<<4,
-            ReadbackOnInsert = 1<<5,
-            ReadbackOnUpdate = 1<<6
         }
 
         public class FieldOrRelation
@@ -106,8 +104,6 @@ namespace Iridium.DB
             public bool AutoIncrement => (Flags & FieldFlags.AutoIncrement) != 0;
             public bool ColumnNullable => (Flags & FieldFlags.Nullable) != 0;
             public bool ColumnReadOnly => (Flags & FieldFlags.ReadOnly) != 0;
-            public bool ReadbackOnInsert => (Flags & FieldFlags.ReadbackOnInsert) != 0;
-            public bool ReadbackOnUpdate => (Flags & FieldFlags.ReadbackOnUpdate) != 0;
 
             public void UpdateFlags(FieldFlags flags, bool? state)
             {
