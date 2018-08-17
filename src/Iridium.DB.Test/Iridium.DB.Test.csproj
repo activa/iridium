@@ -47,7 +47,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssertHelper.cs" />
     <Compile Include="Model\RecordWithChildren.cs" />
     <Compile Include="Model\RecordWithParent.cs" />
     <Compile Include="Model\RecordWithRelationToSelf.cs" />

@@ -75,7 +75,12 @@ namespace Iridium.DB
 
             var fieldList = new List<Field>();
 
-            foreach (var field in ObjectType.Inspector().GetFieldsAndProperties(BindingFlags.Instance | BindingFlags.Public).Where(field => _mappableTypes.Any(f => f(field.Type.Inspector()))))
+            var mappableFields = ObjectType.Inspector().GetFieldsAndProperties(BindingFlags.Instance | BindingFlags.Public).Where(field => _mappableTypes.Any(f => f(field.Type.Inspector()))).ToArray();
+
+            bool hasExplicitPrimaryKey = mappableFields.Any(f => f.HasAttribute<Column.PrimaryKeyAttribute>());
+            bool hasExplicitIndexes = mappableFields.Any(f => f.HasAttribute<Column.IndexedAttribute>());
+
+            foreach (var field in mappableFields)
             {
                 var fieldInspector = field;
 
@@ -116,7 +121,7 @@ namespace Iridium.DB
                     schemaField.UpdateFlags(FieldFlags.PrimaryKey, true);
                     schemaField.UpdateFlags(FieldFlags.AutoIncrement, pkAttribute.AutoIncrement);
                 }
-                else if ((fieldPropertiesFromConvention.PrimaryKey ?? false) && !fieldInspector.HasAttribute<Column.NoPrimaryKeyAttribute>())
+                else if (!hasExplicitPrimaryKey && (fieldPropertiesFromConvention.PrimaryKey ?? false) && !fieldInspector.HasAttribute<Column.NoPrimaryKeyAttribute>())
                 {
                     schemaField.UpdateFlags(FieldFlags.PrimaryKey, true);
                     schemaField.UpdateFlags(FieldFlags.AutoIncrement, fieldPropertiesFromConvention.AutoIncrement);
@@ -138,9 +143,12 @@ namespace Iridium.DB
 
                 if (fieldInspector.HasAttribute<Column.IndexedAttribute>() || ((fieldPropertiesFromConvention.Indexed ?? false) && !fieldInspector.HasAttribute<Column.NotIndexedAttribute>()))
                 {
-                    var indexAttribute = fieldInspector.GetAttribute<Column.IndexedAttribute>();
+                    var indexAttributes = fieldInspector.GetAttributes<Column.IndexedAttribute>();
 
-                    if (indexAttribute != null)
+                    if (indexAttributes.Length == 0 && !hasExplicitIndexes)
+                        indexAttributes = new[] {new Column.IndexedAttribute()};
+
+                    foreach (var indexAttribute in indexAttributes)
                     {
                         indexedFields.Add(new
                         {
@@ -149,17 +157,6 @@ namespace Iridium.DB
                             SortOrder = indexAttribute.Descending ? SortOrder.Descending : SortOrder.Ascending,
                             Field = schemaField,
                             Unique = indexAttribute.Unique
-                        });
-                    }
-                    else
-                    {
-                        indexedFields.Add(new
-                        {
-                            IndexName = MappedName + schemaField.MappedName,
-                            Position = 0,
-                            SortOrder = SortOrder.Ascending,
-                            Field = schemaField,
-                            Unique = false
                         });
                     }
                 }
@@ -244,10 +241,7 @@ namespace Iridium.DB
 
                     Type elementType = collectionType.GenericTypeArguments[0];
 
-                    foreignSchema = Repository.Context.GetSchema(elementType);
-
-                    if (foreignSchema == null)
-                        throw new SchemaException($"Could not create relation {ObjectType.Name}.{field.Name}");
+                    foreignSchema = Repository.Context.GetSchema(elementType) ?? throw new SchemaException($"Could not create relation {ObjectType.Name}.{field.Name}");
 
                     relation.RelationType = RelationType.OneToMany;
                     relation.ElementType = elementType;
@@ -261,10 +255,7 @@ namespace Iridium.DB
                 {
                     Type objectType = field.Type;
 
-                    foreignSchema = Repository.Context.GetSchema(objectType);
-
-                    if (foreignSchema == null)
-                        throw new SchemaException($"Could not create relation {ObjectType.Name}.{field.Name}");
+                    foreignSchema = Repository.Context.GetSchema(objectType) ?? throw new SchemaException($"Could not create relation {ObjectType.Name}.{field.Name}");
 
                     relation.RelationType = relationAttribute is DB.Relation.OneToOneAttribute ? RelationType.OneToOne : RelationType.ManyToOne;
                     relation.ReadOnly = relationAttribute != null && relationAttribute.ReadOnly;
