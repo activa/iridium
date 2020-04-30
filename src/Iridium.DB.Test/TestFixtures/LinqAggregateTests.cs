@@ -623,7 +623,7 @@ namespace Iridium.DB.Test
 
         [Test]
         public void Min_Decimal()
-        {
+        {   
             InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DecimalField = i);
 
             Assert.That(DB.RecordsWithAllTypes.Min(r => r.DecimalField), Is.EqualTo(1));

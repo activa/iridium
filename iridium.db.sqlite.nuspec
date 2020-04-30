@@ -2,43 +2,26 @@
 <package>
     <metadata>
         <id>iridium.db.sqlite</id>
-        <version>2.2.2.7131</version>
+        <version>2.4.0.4041</version>
         <authors>Philippe Leybaert</authors>
         <owners>Philippe Leybaert</owners>
         <projectUrl>http://github.com/activa/iridium</projectUrl>
-        <licenseUrl>https://github.com/activa/iridium/blob/master/LICENSE</licenseUrl>
+        <license type="expression">MIT</license>
         <iconUrl>http://www.iridiumdb.com/img/IconPlain64.png</iconUrl>
         <tags>iridium orm sql sqlite xamarin ios android uwp</tags>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <summary>Sqlite Data Provider for Iridium</summary>
         <description>Iridium is a lightweight multi-platform .NET ORM for mobile, desktop and servers</description>
-        <copyright>Copyright 2015-2018 Philippe Leybaert</copyright>
+        <copyright>Copyright 2015-2020 Philippe Leybaert</copyright>
         <dependencies>
-            <group>
+            <group targetFramework="netstandard2.0">
                 <dependency id="iridium" version="2.2.2.7071" />
                 <dependency id="iridium.reflection" version="2.0.1.7071" />
-            </group>
-            <group targetFramework="uap">
-                <dependency id="iridium" version="2.2.2.7071" />
-                <dependency id="iridium.reflection" version="2.0.1.7071" />
-                <dependency id="iridium.db.sqlite.native.uwp" version="2.2.2.7071" />
-            </group>
-            <group targetFramework="netcoreapp">
-                <dependency id="iridium" version="2.2.2.7071" />
-                <dependency id="iridium.reflection" version="2.0.1.7071" />
-                <dependency id="iridium.db.sqlite.native.linux" version="2.2.2.7071" />
-                <dependency id="iridium.db.sqlite.native.osx" version="2.2.2.7071" />
-                <dependency id="iridium.db.sqlite.native.win32" version="2.2.2.7071" />
+                <dependency id="SQLitePCLRaw.bundle_e_sqlite3" version="2.0.2" />
             </group>
         </dependencies>
     </metadata>
     <files>
-        <file src="src\_._" target="lib\netstandard1.0" />
-        <file src="src\DataProviders\Iridium.DB.Sqlite.Embedded\bin\Release\netstandard1.1\Iridium.DB.Sqlite.Embedded.dll" target="lib\netcoreapp" />
-        <file src="src\DataProviders\Iridium.DB.Sqlite.Net45\bin\Release\Iridium.DB.Sqlite.Net45.dll" target="lib\net45" />
-        <file src="src\DataProviders\Iridium.DB.Sqlite.Native\bin\Release\netstandard1.1\Iridium.DB.Sqlite.Native.dll" target="lib\Xamarin.iOS" />
-        <file src="src\DataProviders\Iridium.DB.Sqlite.Embedded\bin\Release\netstandard1.1\Iridium.DB.Sqlite.Embedded.dll" target="lib\MonoAndroid" />
-        <file src="src\DataProviders\Iridium.DB.Sqlite.Android\bin\Release\Iridium.DB.Sqlite.Android.dll" target="lib\MonoAndroid" />
-        <file src="src\DataProviders\Iridium.DB.Sqlite.Embedded\bin\Release\netstandard1.1\Iridium.DB.Sqlite.Embedded.dll" target="lib\uap" />
+        <file src="src\DataProviders\Iridium.DB.Sqlite.Raw\bin\Release\netstandard2.0\Iridium.DB.Sqlite.Raw.dll" target="lib\netstandard2.0" />
     </files>
 </package>

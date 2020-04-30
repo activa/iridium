@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Iridium.DB.Test
 {
@@ -30,6 +31,6 @@ namespace Iridium.DB.Test
         public Customer Customer { get; set; }
 
         [Relation]
-        public IDataSet<OrderItem> OrderItems { get; set; }
+        public List<OrderItem> OrderItems { get; set; }
     }
 }

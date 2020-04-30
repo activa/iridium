@@ -300,5 +300,9 @@ namespace Iridium.DB
             return Task.Run(() => _dataSet.ToLookup(keySelector, valueSelector, comparer));
         }
 
+        public Task<List<TSelect>> Select<TSelect>(Func<T, TSelect> selectClause)
+        {
+            return Task.Run(() => _dataSet.Select(selectClause).ToList());
+        }
     }
 }

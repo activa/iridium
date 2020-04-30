@@ -132,14 +132,13 @@ namespace Iridium.DB.Postgres
 
 
             string[] tableNameParts = schema.MappedName.Split('.');
-            string tableSchemaName = tableNameParts.Length == 1 ? "dbo" : tableNameParts[0];
             string tableName = tableNameParts.Length == 1 ? tableNameParts[0] : tableNameParts[1];
 
             var existingColumns = dataProvider.ExecuteSqlReader("select * from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME=@name",
-                QueryParameterCollection.FromObject(new { schema = tableSchemaName, name = tableName })).ToLookup(rec => rec["column_name"].ToString());
+                QueryParameterCollection.FromObject(new { name = tableName })).ToLookup(rec => rec["column_name"].ToString());
 
             var tableExists = dataProvider.ExecuteSqlReader("select count(*) from INFORMATION_SCHEMA.TABLES where TABLE_NAME=@name",
-                                  QueryParameterCollection.FromObject(new { schema = tableSchemaName, name = tableName })).Select(rec => rec.First().Value.Convert<int>()).First() == 1;
+                                  QueryParameterCollection.FromObject(new { name = tableName })).Select(rec => rec.First().Value.Convert<int>()).First() == 1;
 
             var parts = new List<string>();
 

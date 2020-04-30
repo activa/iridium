@@ -137,6 +137,10 @@ namespace Iridium.DB.Test
             CreateTable<RecordWithParent>(recreateTable: true);
             CreateTable<RecordWithPreloadParent>(recreateTable: true);
             CreateTable<RecordWithChildren>(recreateTable: true);
+
+            CreateTable<A>(recreateTable:true);
+            CreateTable<B>(recreateTable:true);
+
         }
 
         private static readonly Dictionary<string, Func<DBContext>> _contextFactories;

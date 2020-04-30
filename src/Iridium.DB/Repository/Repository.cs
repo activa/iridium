@@ -71,7 +71,7 @@ namespace Iridium.DB
 
             var keyTypeInspector = key.GetType().Inspector();
 
-            if (keyTypeInspector.Is(TypeFlags.Numeric | TypeFlags.Enum | TypeFlags.String))
+            if (keyTypeInspector.Is(TypeFlags.Numeric | TypeFlags.Enum | TypeFlags.String | TypeFlags.Guid))
             {
                 if (Schema.PrimaryKeys.Length != 1)
                     throw new Exception($"Invalid key for {typeof (T)}");
@@ -94,7 +94,11 @@ namespace Iridium.DB
 
             relations = Schema.BuildPreloadRelationSet(relations);
 
-            return Ir.WithLoadedRelations(obj, relations);
+            Ir.LoadRelations(obj, relations);
+
+            Fire_ObjectRead(obj);
+
+            return obj;
         }
 
         internal bool Save(T obj, bool? create = null, HashSet<TableSchema.Relation> relationsToSave = null)
@@ -160,7 +164,7 @@ namespace Iridium.DB
         }
 
 
-        internal IEnumerable<T> List(QuerySpec filter, IEnumerable<Expression<Func<T, object>>> relationLambdas, TableSchema.Relation parentRelation, object parentObject)
+        internal IEnumerable<T> List(QuerySpec filter, IEnumerable<Expression<Func<T, object>>> relationLambdas, TableSchema.Relation parentRelation, object parentObject, IEnumerable<Action<T>> actions)
         {
             IEnumerable<T> objects;
 
@@ -197,10 +201,26 @@ namespace Iridium.DB
 
             if (filter.Code != null)
             {
-                return filter.Code.Range((from o in objects where filter.Code.IsFilterMatch(o) select o).OrderBy(o => o, new CustomComparer(filter.Code)));
+                objects = filter.Code.Range((from o in objects where filter.Code.IsFilterMatch(o) select o).OrderBy(o => o, new CustomComparer(filter.Code)));
             }
 
-            return objects;
+            objects = objects.Select(o =>
+            {
+                Fire_ObjectRead(o);
+
+                return o;
+            });
+
+            if (actions == null || !actions.Any())
+                return objects;
+
+            return objects.Select(o =>
+            {
+                foreach (var action in actions)
+                    action(o);
+
+                return o;
+            });
         }
 
         private class CustomComparer : IComparer<T>

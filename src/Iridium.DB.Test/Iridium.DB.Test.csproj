@@ -4,8 +4,8 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{AA0A0646-FC49-496A-AE0F-7F24DF7675FA}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{BFC4A665-345A-4EC9-B3ED-7F674762E161}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Iridium.DB.Test</RootNamespace>
     <AssemblyName>Iridium.Test</AssemblyName>
@@ -36,6 +36,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -97,9 +100,9 @@
       <Project>{79033822-be38-4468-a27d-8d24e601b9e0}</Project>
       <Name>Iridium.DB.Postgres</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DataProviders\Iridium.DB.Sqlite.Net45\Iridium.DB.Sqlite.Net45.csproj">
-      <Project>{fcf8cc49-a5eb-46e4-932d-d4d6d36924a5}</Project>
-      <Name>Iridium.DB.Sqlite.Net45</Name>
+    <ProjectReference Include="..\DataProviders\Iridium.DB.Sqlite.Raw\Iridium.DB.Sqlite.Raw.csproj">
+      <Project>{719d3cd7-159d-478a-b4fd-1d2bf7e1ba63}</Project>
+      <Name>Iridium.DB.Sqlite.Raw</Name>
     </ProjectReference>
     <ProjectReference Include="..\DataProviders\Iridium.DB.SqlServer\Iridium.DB.SqlServer.csproj">
       <Project>{680c31ca-c072-4af7-bcfc-8bd270bee7bc}</Project>
@@ -113,6 +116,9 @@
   <ItemGroup>
     <PackageReference Include="NUnit">
       <Version>3.10.1</Version>
+    </PackageReference>
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3">
+      <Version>2.0.2</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

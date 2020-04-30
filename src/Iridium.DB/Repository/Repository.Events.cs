@@ -36,6 +36,7 @@ namespace Iridium.DB
         public override void Fire_ObjectSaved(object obj) { _events.Fire_ObjectSaved(Context, (T)obj); }
         public override void Fire_ObjectDeleting(object obj, ref bool cancel) { _events.Fire_ObjectDeleting(Context, (T)obj, ref cancel); }
         public override void Fire_ObjectDeleted(object obj) { _events.Fire_ObjectDeleted(Context, (T)obj); }
+        public override void Fire_ObjectRead(object obj) { _events.Fire_ObjectRead(Context, (T)obj); }
 
         private class EventHandlers : IObjectEvents<T>
         {
@@ -45,6 +46,7 @@ namespace Iridium.DB
             public event EventHandler<ObjectEventArgs<T>> ObjectSaved;
             public event EventHandler<ObjectWithCancelEventArgs<T>> ObjectDeleting;
             public event EventHandler<ObjectEventArgs<T>> ObjectDeleted;
+            public event EventHandler<ObjectEventArgs<T>> ObjectRead;
 
             public void Fire_ObjectCreating(StorageContext context, T obj, ref bool cancel)
             {
@@ -113,6 +115,11 @@ namespace Iridium.DB
             public void Fire_ObjectDeleted(StorageContext context, T obj)
             {
                 ObjectDeleted?.Invoke(context, new ObjectEventArgs<T>(obj));
+            }
+
+            public void Fire_ObjectRead(StorageContext context, T obj)
+            {
+                ObjectRead?.Invoke(context, new ObjectEventArgs<T>(obj));
             }
         }
 

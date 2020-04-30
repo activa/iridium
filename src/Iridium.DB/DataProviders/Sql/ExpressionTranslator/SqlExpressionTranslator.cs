@@ -281,8 +281,9 @@ namespace Iridium.DB
                 {
                     case nameof(QueryExtensions.IsAnyOf):
                     case nameof(QueryExtensions.IsNotAnyOf):
-                    {                
-                        object argument = node.Arguments.Skip(1).Select(UnQuote).OfType<ConstantExpression>().Select(exp => exp.Value).First();
+                    {
+
+                        object argument = ExpressionEvaluator.Evaluate(node.Arguments.Skip(1).Select(UnQuote).First()).Value;
 
                         if (!(argument is IEnumerable enumerable))
                             throw new SqlExpressionTranslatorException(node.ToString());

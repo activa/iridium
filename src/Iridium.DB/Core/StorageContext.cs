@@ -189,7 +189,7 @@ namespace Iridium.DB
             }
         }
 
-        private Repository<T> GetRepository<T>()
+        internal Repository<T> GetRepository<T>()
         {
             lock (_repositories)
             {
@@ -411,7 +411,7 @@ namespace Iridium.DB
             return Task.Run(() => GetRepository<T>().Delete(obj));
         }
 
-        public Task UpdateOrCreatOnlyRecordAsync<T>(T rec)
+        public Task UpdateOrCreateOnlyRecordAsync<T>(T rec)
         {
             return Task.Run(() => UpdateOrCreateOnlyRecord(rec));
         }

@@ -36,6 +36,7 @@ namespace Iridium.DB
         event EventHandler<ObjectEventArgs<T>> ObjectSaved;
         event EventHandler<ObjectWithCancelEventArgs<T>> ObjectDeleting;
         event EventHandler<ObjectEventArgs<T>> ObjectDeleted;
+        event EventHandler<ObjectEventArgs<T>> ObjectRead;
     }
 
     public class ObjectEventArgs<T> : EventArgs

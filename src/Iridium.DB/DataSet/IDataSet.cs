@@ -87,6 +87,8 @@ namespace Iridium.DB
 
         IDataSet<T> Where(QueryExpression filterExpression);
         IDataSet<T> WithRelations(params Expression<Func<T, object>>[] relationsToLoad);
+        IDataSet<T> WithAction(Action<T> action);
+        IDataSet<T> WithActions(params Action<T>[] actions);
 
         void Purge();
 
@@ -98,6 +100,8 @@ namespace Iridium.DB
         bool Update(T obj, params Expression<Func<T, object>>[] relationsToSave);
         bool Insert(T obj, params Expression<Func<T, object>>[] relationsToSave);
         bool Insert(T obj, bool? deferSave, params Expression<Func<T,object>>[] relationsToSave);
+        bool Add(T obj);
+
         bool InsertOrUpdate(T obj, params Expression<Func<T, object>>[] relationsToSave);
         bool Delete(T obj);
 

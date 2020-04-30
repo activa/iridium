@@ -51,7 +51,7 @@ namespace Iridium.DB
         private static readonly List<Func<TypeInspector, bool>> _mappableTypes = new List<Func<TypeInspector, bool>>
             {
                 t => t.Is(TypeFlags.Array | TypeFlags.Byte),
-                t => t.Is(TypeFlags.Numeric | TypeFlags.String | TypeFlags.DateTime | TypeFlags.Boolean) && !t.Is(TypeFlags.Array)
+                t => t.Is(TypeFlags.Numeric | TypeFlags.String | TypeFlags.DateTime | TypeFlags.Boolean | TypeFlags.Guid) && !t.Is(TypeFlags.Array)
             };
 
         internal TableSchema(Type t, Repository repository)

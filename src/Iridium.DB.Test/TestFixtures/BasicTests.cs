@@ -407,7 +407,7 @@ namespace Iridium.DB.Test
                 {
                     Name = "test"
                 },
-                OrderItems = new UnboundDataSet<OrderItem>
+                OrderItems = new List<OrderItem>
                 {
                     new OrderItem {Description = "test", Qty = 5, Price = 200.0},
                     new OrderItem {Description = "test", Qty = 3, Price = 45.0}
@@ -416,23 +416,23 @@ namespace Iridium.DB.Test
 
             Assert.IsTrue(DB.Orders.Insert(order, o => o.Customer, o => o.OrderItems));
 
-            order = DB.Orders.Read(order.OrderID);
+            order = DB.Orders.Read(order.OrderID, o => o.OrderItems);
 
             Assert.AreEqual(2, order.OrderItems.Count(), "Order items not added");
 
-            order.OrderItems.Insert(new OrderItem { Description = "test", Qty = 2, Price = 1000.0 });
+            order.OrderItems.Add(new OrderItem { Description = "test", Qty = 2, Price = 1000.0 });
 
             Assert.IsTrue(DB.Orders.Update(order, o => o.OrderItems));
 
-            order = DB.Orders.Read(order.OrderID);
+            order = DB.Orders.Read(order.OrderID, o => o.OrderItems);
 
             Assert.AreEqual(3, order.OrderItems.Count(), "Order item not added");
 
-            order.OrderItems.Insert(new OrderItem { Description = "test", Qty = 3, Price = 2000.0 }, deferSave:true);
+            order.OrderItems.Add(new OrderItem { Description = "test", Qty = 3, Price = 2000.0 });
 
             Assert.IsTrue(DB.Orders.Update(order, o => o.OrderItems));
 
-            order = DB.Orders.Read(order.OrderID);
+            order = DB.Orders.Read(order.OrderID, o=>o.OrderItems);
 
             Assert.AreEqual(4, order.OrderItems.Count(), "Order item not added");
 
@@ -476,7 +476,21 @@ namespace Iridium.DB.Test
         {
             var customers = InsertRecords<Customer>(100, (customer, i) => customer.Name = $"Customer {i + 1}");
 
-            var someCustomerIds = customers.Skip(5).Take(50).Select(c => c.CustomerID).ToArray();
+            //var someCustomerIds = customers.Skip(5).Take(50).Select(c => c.CustomerID).ToArray();
+
+            var filtererdCustomers = DB.Customers.Where(c => c.CustomerID.IsAnyOf(customers.Skip(5).Take(50).Select(c2 => c2.CustomerID))).OrderBy(c => c.CustomerID).ToArray();
+
+            Assert.That(filtererdCustomers.Length, Is.EqualTo(50));
+
+            Assert.That(filtererdCustomers.Select(c => c.CustomerID), Is.EquivalentTo(customers.Skip(5).Take(50).Select(c => c.CustomerID)));
+        }
+
+        [Test]
+        public void IsAnyOfIntEnumerable()
+        {
+            var customers = InsertRecords<Customer>(100, (customer, i) => customer.Name = $"Customer {i + 1}");
+
+            var someCustomerIds = customers.Skip(5).Take(50).Select(c => c.CustomerID);
 
             var filtererdCustomers = DB.Customers.Where(c => c.CustomerID.IsAnyOf(someCustomerIds)).OrderBy(c => c.CustomerID).ToArray();
 
@@ -585,7 +599,7 @@ namespace Iridium.DB.Test
 
             foreach (Order order in orders)
             {
-                DB.LoadRelations(order, o => o.Customer/*, o => o.OrderItems*/);
+                DB.LoadRelations(order, o => o.Customer, o => o.OrderItems);
 
                 Assert.AreEqual(cust.CustomerID, order.Customer.CustomerID);
                 Assert.AreEqual(20, order.OrderItems.Count());
@@ -753,5 +767,18 @@ namespace Iridium.DB.Test
             Assert.That(rec.Name, Is.EqualTo("2"));
         }
 
+        [Test]
+        public void AfterReadActions()
+        {
+            InsertRecords<Customer>(10, (r, i) => { r.Name = "Customer " + i; });
+
+            var customers = DB.Customers.WithActions(c => c.Age = c.Name.Length, c => c.Name = c.Name.Substring(1));
+
+            foreach (var customer in customers)
+            {
+                Assert.That(customer.Age == customer.Name.Length+1);
+            }
+
+        }
     }
 }

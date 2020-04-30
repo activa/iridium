@@ -59,6 +59,13 @@ namespace Iridium.DB
             if (filter.Code != null)
                 objects = from o in objects where filter.Code.IsFilterMatch(o) select o;
 
+            objects = objects.Select(o =>
+            {
+                Fire_ObjectRead(o);
+
+                return o;
+            });
+
             return objects;
         }
 
@@ -181,5 +188,6 @@ namespace Iridium.DB
         public abstract void Fire_ObjectSaved(object obj);
         public abstract void Fire_ObjectDeleting(object obj, ref bool cancel);
         public abstract void Fire_ObjectDeleted(object obj);
+        public abstract void Fire_ObjectRead(object obj);
     }
 }

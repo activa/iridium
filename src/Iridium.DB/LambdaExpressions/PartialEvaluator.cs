@@ -68,48 +68,9 @@ namespace Iridium.DB
                     return null;
 
                 if (_candidates.Contains(expression))
-                    return Evaluate(expression);
+                    return ExpressionEvaluator.Evaluate(expression);
 
                 return base.Visit(expression);
-            }
-
-            private static Expression Evaluate(Expression expression)
-            {
-                Type type = expression.Type;
-
-                if (expression.NodeType == ExpressionType.Convert)
-                {
-                    // check for unnecessary convert & strip them
-                    var u = (UnaryExpression)expression;
-
-                    if (u.Operand.Type.Inspector().RealType == type.Inspector().RealType)
-                    {
-                        expression = ((UnaryExpression)expression).Operand;
-                    }
-                }
-
-                if (expression.NodeType == ExpressionType.Constant)
-                {
-                    if (expression.Type == type)
-                        return expression;
-                    
-                    if (expression.Type.Inspector().RealType == type.Inspector().RealType)
-                    {
-                        return Expression.Constant(((ConstantExpression)expression).Value, type);
-                    }
-                }
-
-                var memberExpression = expression as MemberExpression;
-
-                if (memberExpression?.Expression is ConstantExpression constantExpression)
-                    return Expression.Constant(memberExpression.Member.Inspector().GetValue(constantExpression.Value), type);
-
-                if (type.Inspector().IsValueType)
-                {
-                    expression = Expression.Convert(expression, typeof(object));
-                }
-
-                return Expression.Constant(Expression.Lambda<Func<object>>(expression).Compile().Invoke(), type);
             }
         }
 
@@ -167,6 +128,48 @@ namespace Iridium.DB
 
                 return expression;
             }
+        }
+    }
+
+    public static class ExpressionEvaluator
+    {
+        public static ConstantExpression Evaluate(Expression expression)
+        {
+            Type type = expression.Type;
+
+            if (expression.NodeType == ExpressionType.Convert)
+            {
+                // check for unnecessary convert & strip them
+                var u = (UnaryExpression)expression;
+
+                if (u.Operand.Type.Inspector().RealType == type.Inspector().RealType)
+                {
+                    expression = ((UnaryExpression)expression).Operand;
+                }
+            }
+
+            if (expression.NodeType == ExpressionType.Constant)
+            {
+                if (expression.Type == type)
+                    return (ConstantExpression) expression;
+                    
+                if (expression.Type.Inspector().RealType == type.Inspector().RealType)
+                {
+                    return Expression.Constant(((ConstantExpression)expression).Value, type);
+                }
+            }
+
+            var memberExpression = expression as MemberExpression;
+
+            if (memberExpression?.Expression is ConstantExpression constantExpression)
+                return Expression.Constant(memberExpression.Member.Inspector().GetValue(constantExpression.Value), type);
+
+            if (type.Inspector().IsValueType)
+            {
+                expression = Expression.Convert(expression, typeof(object));
+            }
+
+            return Expression.Constant(Expression.Lambda<Func<object>>(expression).Compile().Invoke(), type);
         }
     }
 }

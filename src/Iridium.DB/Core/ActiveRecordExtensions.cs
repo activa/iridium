@@ -68,10 +68,5 @@ namespace Iridium.DB
 
             return entity;
         }
-
-        public static IDataSet<T> ToDataSet<T>(this IEnumerable<T> list)
-        {
-            return new UnboundDataSet<T>(list);
-        }
     }
 }

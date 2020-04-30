@@ -324,7 +324,15 @@ namespace Iridium.DB
             if (record == null)
                 return null;
 
-            return new SerializedEntity(columnList.ToDictionary(c => c.Field.MappedName , c => record[c.Alias].Convert(c.Field.FieldType)));
+            return new SerializedEntity(columnList.ToDictionary(c => c.Field.MappedName , c => ConvertValue(record[c.Alias], c.Field.FieldType)));
+        }
+
+        private static object ConvertValue(object value, Type type)
+        {
+            if (type == typeof(Guid) && value is string s)
+                return Guid.ParseExact(s, "N");
+
+            return value.Convert(type);
         }
 
         public bool DeleteObject(SerializedEntity o, TableSchema schema)

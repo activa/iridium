@@ -57,15 +57,16 @@ namespace Iridium.DB.Test
             Order order = new Order
             {
                 Customer = new Customer { Name = "A" },
-                OrderItems = new UnboundDataSet<OrderItem>
-                {
-                    new OrderItem {Description = "X"},
-                    new OrderItem {Description = "X"},
-                    new OrderItem {Description = "X"},
-                    new OrderItem {Description = "X"},
-                    new OrderItem {Description = "X"},
-                }
+            //    OrderItems = DB.DataSet<OrderItem>()
             };
+
+            DB.LoadRelation(() => order.OrderItems);
+
+            order.OrderItems.Add(new OrderItem() {Description = "X"});
+            order.OrderItems.Add(new OrderItem() {Description = "X"});
+            order.OrderItems.Add(new OrderItem() {Description = "X"});
+            order.OrderItems.Add(new OrderItem() {Description = "X"});
+            order.OrderItems.Add(new OrderItem() {Description = "X"});
 
             var originalOrder = order;
 
@@ -112,6 +113,26 @@ namespace Iridium.DB.Test
             rec1 = DB.Read<OneToOneRec1>(rec1.OneToOneRec1ID, r => r.Rec2);
 
             Assert.That(rec1.Rec2.Rec1, Is.SameAs(rec1));
+        }
+
+
+        [Test]
+        public void ReverseRelation_OneToOneAB()
+        {
+            var rec1 = new A();
+            var rec2 = new B();
+
+            rec1.Id = Guid.NewGuid();
+            rec2.Id = rec1.Id;
+
+            DB.Insert(rec1);
+            DB.Insert(rec2);
+
+            rec2 = DB.Read<B>(rec1.Id, r => r.Other);
+
+            Assert.That(rec2.Other.Id, Is.EqualTo(rec2.Id));
+            
+            Assert.That(rec2.Other.Other, Is.SameAs(rec2));
         }
 
         [Test]

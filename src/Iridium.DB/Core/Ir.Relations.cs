@@ -44,6 +44,9 @@ namespace Iridium.DB
 
         internal static void LoadRelations(object obj, IEnumerable<TableSchema.Relation> relationsToLoad)
         {
+            if (relationsToLoad == null)
+                return;
+
             var objectType = obj.GetType();
 
             var splitRelations = relationsToLoad.ToLookup(r => r.LocalSchema.ObjectType == objectType);

@@ -44,6 +44,7 @@ namespace Iridium.DB
         private readonly FilterSpec _filter;
         private readonly SortOrderSpec _sortOrder;
         private readonly List<Expression<Func<T, object>>> _relationsToLoad;
+        private readonly List<Action<T>> _actions;
         private int? _skip;
         private int? _take;
         private readonly TableSchema.Relation _parentRelation;
@@ -53,6 +54,11 @@ namespace Iridium.DB
         public DataSet(Repository repository)
         {
             _repository = (Repository<T>) repository;
+        }
+
+        public DataSet(StorageContext context)
+        {
+            _repository = context.GetRepository<T>();
         }
 
         internal override IList NewObjects => _newObjects;
@@ -74,7 +80,7 @@ namespace Iridium.DB
             _parentObject = parentObject;
         }
 
-        private DataSet(DataSet<T> baseDataSet, FilterSpec newFilterSpec = null, SortOrderSpec newSortSpec = null, IEnumerable<Expression<Func<T,object>>> additionalRelations = null)
+        private DataSet(DataSet<T> baseDataSet, FilterSpec newFilterSpec = null, SortOrderSpec newSortSpec = null, IEnumerable<Expression<Func<T,object>>> additionalRelations = null, IEnumerable<Action<T>> additionalActions = null)
         {
             if (baseDataSet._newObjects != null && baseDataSet._newObjects.Count > 0)
                 throw new Exception("DataSet with added objects can't be chained");
@@ -96,6 +102,14 @@ namespace Iridium.DB
                     _relationsToLoad = new List<Expression<Func<T, object>>>(additionalRelations);
                 else
                     _relationsToLoad.AddRange(additionalRelations);
+            }
+
+            if (additionalActions != null)
+            {
+                if (_actions == null)
+                    _actions = new List<Action<T>>(additionalActions);
+                else
+                    _actions.AddRange(additionalActions);
             }
 
             _parentRelation = baseDataSet._parentRelation;
@@ -142,7 +156,7 @@ namespace Iridium.DB
             if (_newObjects != null && _newObjects.Count > 0)
                 throw new Exception("Trying to enumerate dataset with pending changes");
 
-            return _repository.List(_repository.CreateQuerySpec(_filter, sortSpec: _sortOrder, skip: _skip, take: _take), _relationsToLoad, _parentRelation, _parentObject);
+            return _repository.List(_repository.CreateQuerySpec(_filter, sortSpec: _sortOrder, skip: _skip, take: _take), _relationsToLoad, _parentRelation, _parentObject, _actions);
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -154,6 +168,7 @@ namespace Iridium.DB
         {
             return GetEnumerator();
         }
+
 
 
         public void Purge()
@@ -199,6 +214,11 @@ namespace Iridium.DB
         public bool Insert(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
             return Insert(obj, deferSave: null, relationsToSave: relationsToSave);
+        }
+
+        public bool Add(T obj)
+        {
+            return Insert(obj, deferSave: null);
         }
 
         public bool Insert(T obj, bool? deferSave, params Expression<Func<T,object>>[] relationsToSave)
@@ -295,6 +315,17 @@ namespace Iridium.DB
             return new DataSet<T>(this, newFilterSpec: new FilterSpec(filterExpression));
         }
 
+        public IDataSet<T> WithAction(Action<T> action)
+        {
+            return WithActions(action);
+        }
+
+        public IDataSet<T> WithActions(params Action<T>[] actions)
+        {
+            return new DataSet<T>(this, additionalActions: actions);
+        }
+
+
         public IDataSet<T> Skip(int n)
         {
             n += _skip ?? 0;
@@ -309,22 +340,22 @@ namespace Iridium.DB
 
         public T First()
         {
-            return _repository.List(_repository.CreateQuerySpec(_filter, sortSpec: _sortOrder, skip: _skip, take: 1), _relationsToLoad, _parentRelation, _parentObject).First();
+            return _repository.List(_repository.CreateQuerySpec(_filter, sortSpec: _sortOrder, skip: _skip, take: 1), _relationsToLoad, _parentRelation, _parentObject, _actions).First();
         }
 
         public T First(Expression<Func<T, bool>> filter)
         {
-            return _repository.List(_repository.CreateQuerySpec(new FilterSpec(filter, _filter), sortSpec: _sortOrder, skip: _skip, take: 1), _relationsToLoad, _parentRelation, _parentObject).First();
+            return _repository.List(_repository.CreateQuerySpec(new FilterSpec(filter, _filter), sortSpec: _sortOrder, skip: _skip, take: 1), _relationsToLoad, _parentRelation, _parentObject, _actions).First();
         }
 
         public T FirstOrDefault()
         {
-            return _repository.List(_repository.CreateQuerySpec(_filter, sortSpec: _sortOrder, skip: _skip, take: 1), _relationsToLoad, _parentRelation, _parentObject).FirstOrDefault();
+            return _repository.List(_repository.CreateQuerySpec(_filter, sortSpec: _sortOrder, skip: _skip, take: 1), _relationsToLoad, _parentRelation, _parentObject, _actions).FirstOrDefault();
         }
 
         public T FirstOrDefault(Expression<Func<T, bool>> filter)
         {
-            return _repository.List(_repository.CreateQuerySpec(new FilterSpec(filter, _filter), sortSpec: _sortOrder, skip: _skip, take: 1), _relationsToLoad, _parentRelation, _parentObject).FirstOrDefault();
+            return _repository.List(_repository.CreateQuerySpec(new FilterSpec(filter, _filter), sortSpec: _sortOrder, skip: _skip, take: 1), _relationsToLoad, _parentRelation, _parentObject, _actions).FirstOrDefault();
         }
 
         public long Count()
