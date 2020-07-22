@@ -74,9 +74,7 @@ namespace Iridium.DB.Postgres
                     _transactionStack.Value.Push(savePoint);
                 }
             }
-
         }
-
 
         public override void CommitTransaction()
         {

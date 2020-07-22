@@ -60,7 +60,7 @@ namespace Iridium.DB.Test
                     Name = "Customer " + (customerIndex + 1)
                 };
 
-                customer.Save();
+                DB.Save(customer);
 
                 customers[customerIndex] = customer;
 

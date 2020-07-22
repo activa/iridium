@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Iridium.DB.Test
 {
-    public class Customer : IEntity
+    public class Customer
     {
         public int CustomerID { get; set; }
         public string Name { get; set; }

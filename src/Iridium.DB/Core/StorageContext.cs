@@ -276,6 +276,17 @@ namespace Iridium.DB
             return GetRepository<T>().Delete(obj);
         }
 
+        public bool Delete<T>(IEnumerable<T> objects)
+        {
+            foreach (var obj in objects)
+            {
+                if (!GetRepository<T>().Delete(obj))
+                    return false;
+            }
+
+            return true;
+        }
+
         public bool Delete<T>(Expression<Func<T, bool>> condition)
         {
             return GetRepository<T>().Delete(GetRepository<T>().CreateQuerySpec(new FilterSpec(condition)));
@@ -415,6 +426,60 @@ namespace Iridium.DB
         {
             return Task.Run(() => UpdateOrCreateOnlyRecord(rec));
         }
+
+        private Task _LoadRelationsAsync(object obj, IEnumerable<LambdaExpression> relationsToLoad)
+        {
+            return Task.Run(() =>
+            {
+                TableSchema parentSchema = GetSchema(obj.GetType());
+
+                Ir.LoadRelations(obj, LambdaRelationFinder.FindRelations(relationsToLoad, parentSchema));
+            });
+        }
+
+        public Task LoadRelationsAsync<T>(T obj, params Expression<Func<T, object>>[] relationsToLoad)
+        {
+            return _LoadRelationsAsync(obj, relationsToLoad);
+        }
+
+        public Task LoadRelationsAsync<T>(T obj, IEnumerable<Expression<Func<T, object>>> relationsToLoad)
+        {
+            return _LoadRelationsAsync(obj, relationsToLoad);
+        }
+
+        public async Task LoadRelationsAsync<T>(IEnumerable<T> list, params Expression<Func<T, object>>[] relationsToLoad)
+        {
+            foreach (var obj in list)
+            {
+                await _LoadRelationsAsync(obj, relationsToLoad).ConfigureAwait(false);
+            }
+        }
+
+        public async Task LoadRelationsAsync<T>(IEnumerable<T> list, IEnumerable<Expression<Func<T, object>>> relationsToLoad)
+        {
+            relationsToLoad = relationsToLoad.ToList();
+
+            foreach (var obj in list)
+            {
+                await _LoadRelationsAsync(obj, relationsToLoad).ConfigureAwait(false);
+            }
+        }
+
+        public async Task LoadRelationsAsync(params Expression<Func<object>>[] relationsToLoad)
+        {
+            foreach (var relation in relationsToLoad)
+            {
+                if (relation.Body is MemberExpression memberExpression)
+                {
+                    await _LoadRelationsAsync(Expression.Lambda(memberExpression.Expression).Compile().DynamicInvoke(), new[] { relation }).ConfigureAwait(false);
+                }
+            }
+        }
+
+        // Logging
+
+        public SqlLoggingContext StartSqlLogging(bool replaceParameters = false, Action<TimedSqlLogEntry> onLog = null) => new SqlLoggingContext(DataProvider, replaceParameters, onLog);
+        public void StopSqlLogging(SqlLoggingContext context) => context.Dispose();
 
         // IDisposable
 

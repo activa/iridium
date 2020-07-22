@@ -24,8 +24,11 @@
 //=============================================================================
 #endregion
 
+using System;
+
 namespace Iridium.DB
 {
+    [Obsolete("IEntity will be removed in a future release")]
     public interface IEntity
     {
     }

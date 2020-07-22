@@ -28,6 +28,7 @@ namespace Iridium.DB.Test
         [Relation(LocalKey = "SalesPersonID")]
         public SalesPerson SalesPerson { get; set; }
         
+        [Relation]
         public Customer Customer { get; set; }
 
         [Relation]

@@ -28,6 +28,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Iridium.Reflection;
@@ -184,6 +186,8 @@ namespace Iridium.DB.Sql
 
         public override IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, QueryParameterCollection parameters)
         {
+            var stopwatch = SqlLogger != null ? Stopwatch.StartNew() : null;
+
             try
             {
                 BeginTransaction(IsolationLevel.None);
@@ -218,11 +222,15 @@ namespace Iridium.DB.Sql
             finally
             {
                 CommitTransaction();
+
+                SqlLogger?.LogSql(sql, parameters?.ToDictionary(p => SqlDialect.CreateParameterExpression(p.Name), p => p.Value), stopwatch?.Elapsed ?? TimeSpan.Zero);
             }
         }
 
         public override int ExecuteSql(string sql, QueryParameterCollection parameters)
         {
+            var stopwatch = SqlLogger != null ? Stopwatch.StartNew() : null;
+
             try
             {
                 BeginTransaction(IsolationLevel.None);
@@ -235,11 +243,15 @@ namespace Iridium.DB.Sql
             finally
             {
                 CommitTransaction();
+
+                SqlLogger?.LogSql(sql, parameters?.ToDictionary(p => SqlDialect.CreateParameterExpression(p.Name), p => p.Value), stopwatch?.Elapsed ?? TimeSpan.Zero);
             }
         }
 
         public override int ExecuteProcedure(string procName, QueryParameterCollection parameters = null)
         {
+            var stopwatch = SqlLogger != null ? Stopwatch.StartNew() : null;
+
             try
             {
                 BeginTransaction(IsolationLevel.None);
@@ -252,6 +264,8 @@ namespace Iridium.DB.Sql
             finally
             {
                 CommitTransaction();
+
+                SqlLogger?.LogSql("EXEC " + procName, parameters?.ToDictionary(p => SqlDialect.CreateParameterExpression(p.Name), p => p.Value), stopwatch?.Elapsed ?? TimeSpan.Zero);
             }
         }
 

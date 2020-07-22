@@ -24,12 +24,14 @@
 //=============================================================================
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 namespace Iridium.DB
 {
     public static partial class Ir
     {
+        [Obsolete("Context-less data access will be removed in a future release")]
         public static IDataSet<T> DataSet<T>()
         {
             return StorageContext.Instance.DataSet<T>();

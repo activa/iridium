@@ -115,7 +115,7 @@ namespace Iridium.DB.Test
                     lock (createdCustomers)
                         createdCustomers.Add(customer);
 
-                    var newCustomer = Ir.DataSet<Customer>().Read(customer.CustomerID);
+                    var newCustomer = DB.Customers.Read(customer.CustomerID);
 
                     if (customer.Name != newCustomer.Name)
                         lock (failedList)
@@ -218,7 +218,7 @@ namespace Iridium.DB.Test
                 Assert.NotNull(customer, $"Customer ID {customerId}");
                 Assert.AreEqual("A", customer.Name);
 
-                customer.Delete();
+                DB.Delete(customer);
 
                 Assert.That(DB.Customers.Count(), Is.Zero);
             }
@@ -248,7 +248,8 @@ namespace Iridium.DB.Test
             customer = DB.Customers.Read(customer.CustomerID);
 
             customer.Name = "B";
-            customer.Update();
+
+            DB.Update(customer);
 
             customer = DB.Customers.Read(customer.CustomerID);
 
@@ -363,7 +364,7 @@ namespace Iridium.DB.Test
         {
             Customer cust = new Customer { Name = "A" };
 
-            cust.Insert();
+            DB.Insert(cust);
 
             cust = DB.Customers.Read(cust.CustomerID);
 
@@ -386,7 +387,8 @@ namespace Iridium.DB.Test
             Assert.AreEqual((order.Customer.Orders.First()).CustomerID, cust.CustomerID);
 
             order.Customer.Name = "B";
-            order.Customer.Update();
+
+            DB.Update(order.Customer);
 
 
             order = DB.Orders.Read(order.OrderID);
@@ -780,5 +782,48 @@ namespace Iridium.DB.Test
             }
 
         }
+
+        [Test]
+        public void SqlLogging()
+        {
+            List<TimedSqlLogEntry> sqlStatements = new List<TimedSqlLogEntry>();
+
+            if (DB.DataProvider is ISqlDataProvider sqlProvider)
+            {
+                sqlProvider.SqlLogger = new SqlToTextLogger(entry => sqlStatements.Add(entry));
+
+                DB.Insert(new Customer() {Name = "me"});
+
+                Assert.That(sqlStatements.Count, Is.Not.Zero);
+
+                sqlProvider.SqlLogger = null;
+                sqlStatements.Clear();
+
+                DB.Insert(new Customer() { Name = "me" });
+
+                Assert.That(sqlStatements.Count, Is.Zero);
+            }
+        }
+
+        [Test]
+        public void SqlLoggingContext()
+        {
+            if (DB.DataProvider is ISqlDataProvider sqlProvider)
+            {
+                using (var sqlLogger = DB.StartSqlLogging())
+                {
+                    Assert.That(sqlLogger.LogEntries.Count, Is.Zero);
+                    Assert.That(sqlLogger.TotalTime.TotalMilliseconds, Is.Zero);
+
+                    DB.Insert(new Customer() { Name = "me" });
+
+                    Assert.That(sqlLogger.LogEntries.Count, Is.Not.Zero);
+                    Assert.That(sqlLogger.TotalTime.TotalMilliseconds, Is.GreaterThan(0.0));
+                }
+
+                Assert.That(sqlProvider.SqlLogger, Is.Null);
+            }
+        }
+
     }
 }

@@ -145,6 +145,9 @@ namespace Iridium.DB.Test
 
         private static readonly Dictionary<string, Func<DBContext>> _contextFactories;
 
+        //public static List<(string sql, TimeSpan time)> SqlExecuted = new List<(string sql, TimeSpan time)>();
+
+        
         static DBContext()
         {
             _contextFactories = new Dictionary<string,Func<DBContext>>()
@@ -197,10 +200,7 @@ namespace Iridium.DB.Test
     {
         public SqliteMemStorage() : base(new SqliteDataProvider(":memory:")) { }
         public override string ToString() => "sqlite-memory";
-
     }
-
-
 
     public class MemoryStorage : DBContext
     {

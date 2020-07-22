@@ -41,6 +41,7 @@ namespace Iridium.DB
     public abstract class SqlDataProvider : IDataProvider, ISqlDataProvider
     {
         public SqlDialect SqlDialect { get; }
+        public ISqlLogger SqlLogger { get; set; }
 
         protected SqlDataProvider(SqlDialect sqlDialect)
         {

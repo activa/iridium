@@ -146,10 +146,10 @@ namespace Iridium.DB
             return Task.Run( () => _dataSet.Delete(filter));
         }
 
-        public Task<bool> Delete(QueryExpression filterExpression)
-        {
-            return Task.Run(() => _dataSet.Delete(filterExpression));
-        }
+        // public Task<bool> Delete(QueryExpression filterExpression)
+        // {
+        //     return Task.Run(() => _dataSet.Delete(filterExpression));
+        // }
 
         public Task<T> First()
         {

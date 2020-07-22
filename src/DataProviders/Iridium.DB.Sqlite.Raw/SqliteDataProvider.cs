@@ -40,7 +40,6 @@ namespace Iridium.DB
         private SQLitePCL.sqlite3 _db;
 
         private readonly ThreadLocal<long?> _lastRowId = new ThreadLocal<long?>();
-//        private readonly ISqliteAPI _sqlite3;
 
         static SqliteDataProvider()
         {
@@ -49,7 +48,6 @@ namespace Iridium.DB
 
         public SqliteDataProvider()
         {
-
         }
 
         public SqliteDataProvider(string fileName)
@@ -92,6 +90,8 @@ namespace Iridium.DB
         {
             lock (this) // although sqlite3 is thread-safe, we need to make sure that the last_insert_rowid is correct
             {
+                var stopwatch = SqlLogger != null ? Stopwatch.StartNew() : null;
+
                 var stmt = CreateCommand(sql, parameters);
 
                 try
@@ -111,6 +111,8 @@ namespace Iridium.DB
                 finally
                 {
                     SQLitePCL.raw.sqlite3_finalize(stmt);
+
+                    SqlLogger?.LogSql(sql, parameters?.ToDictionary(p => SqlDialect.CreateParameterExpression(p.Name), p => p.Value), stopwatch?.Elapsed ?? TimeSpan.Zero);
                 }
             }
         }
@@ -224,9 +226,6 @@ namespace Iridium.DB
                                 case SqliteDateFormat.String:
                                     SQLitePCL.raw.sqlite3_bind_text(stmt, paramNumber, ((DateTime) value).ToString("yyyy-MM-dd HH:mm:ss.fff"));
                                     break;
-//                                case SqliteDateFormat.Julian:
-//                                   SQLitePCL.raw.sqlite3_bind_int64(stmt, paramNumber, ((DateTime)value).Ticks);
-//                                    break;
                                 case SqliteDateFormat.Unix:
                                     SQLitePCL.raw.sqlite3_bind_int(stmt, paramNumber, (int) (((DateTime) value) - new DateTime(1970, 1, 1)).TotalSeconds);
                                     break;
@@ -248,6 +247,8 @@ namespace Iridium.DB
 
         public override IEnumerable<Dictionary<string, object>> ExecuteSqlReader(string sql, QueryParameterCollection parameters)
         {
+            var stopwatch = SqlLogger != null ? Stopwatch.StartNew() : null;
+
             var stmt = CreateCommand(sql, parameters);
 
             try
@@ -303,6 +304,8 @@ namespace Iridium.DB
             {
                 SQLitePCL.raw.sqlite3_finalize(stmt);
             }
+
+            SqlLogger?.LogSql(sql, parameters?.ToDictionary(p => SqlDialect.CreateParameterExpression(p.Name), p => p.Value), stopwatch?.Elapsed ?? TimeSpan.Zero);
         }
 
         public override void Purge(TableSchema schema)

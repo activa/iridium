@@ -282,7 +282,6 @@ namespace Iridium.DB
                     case nameof(QueryExtensions.IsAnyOf):
                     case nameof(QueryExtensions.IsNotAnyOf):
                     {
-
                         object argument = ExpressionEvaluator.Evaluate(node.Arguments.Skip(1).Select(UnQuote).First()).Value;
 
                         if (!(argument is IEnumerable enumerable))
@@ -307,7 +306,6 @@ namespace Iridium.DB
 
                         return $"({arg} between {from} and {to})";
                     }
-
                 }
             }
 
@@ -322,7 +320,6 @@ namespace Iridium.DB
                 leftExpression = node.Arguments[0] as MemberExpression;
                 arguments.AddRange(node.Arguments.Skip(1).Select(UnQuote).OfType<LambdaExpression>());
             }
-
 
             if (leftExpression != null)
             {

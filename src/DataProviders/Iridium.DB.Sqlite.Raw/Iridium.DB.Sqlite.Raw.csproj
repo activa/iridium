@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="iridium.reflection" Version="2.0.1.7071" />
-    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.0.2" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.0.3" />
   </ItemGroup>
 
   <ItemGroup>

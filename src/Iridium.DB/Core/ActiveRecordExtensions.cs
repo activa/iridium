@@ -32,36 +32,43 @@ namespace Iridium.DB
 {
     public static class IridiumExtensions
     {
+        [Obsolete("IEntity will be removed in a future release")]
         public static bool InsertOrUpdate<T>(this T entity, params Expression<Func<T, object>>[] relationsToSave) where T:IEntity
         {
             return Ir.DataSet<T>().InsertOrUpdate(entity, relationsToSave);
         }
 
+        [Obsolete("IEntity will be removed in a future release")]
         public static bool Save<T>(this T entity, params Expression<Func<T, object>>[] relationsToSave) where T : IEntity
         {
             return Ir.DataSet<T>().Save(entity, relationsToSave);
         }
 
+        [Obsolete("IEntity will be removed in a future release")]
         public static bool Insert<T>(this T entity, params Expression<Func<T, object>>[] relationsToSave) where T : IEntity
         {
             return Ir.DataSet<T>().Insert(entity, deferSave:null, relationsToSave: relationsToSave);
         }
 
+        [Obsolete("IEntity will be removed in a future release")]
         public static bool Update<T>(this T entity, params Expression<Func<T, object>>[] relationsToSave) where T : IEntity
         {
             return Ir.DataSet<T>().Update(entity, relationsToSave);
         }
 
+        [Obsolete("IEntity will be removed in a future release")]
         public static T Load<T>(this T obj, object key, params Expression<Func<T, object>>[] relationsToLoad) where T : IEntity
         {
             return Ir.DataSet<T>().Load(obj, key, relationsToLoad);
         }
 
+        [Obsolete("IEntity will be removed in a future release")]
         public static bool Delete<T>(this T entity) where T : IEntity
         {
             return Ir.DataSet<T>().Delete(entity);
         }
 
+        [Obsolete("IEntity will be removed in a future release")]
         public static T WithRelations<T>(this T entity, params Expression<Func<T, object>>[] relations) where T : IEntity
         {
             StorageContext.Instance.LoadRelations(entity, relations);

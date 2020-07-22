@@ -113,7 +113,7 @@ namespace Iridium.DB
 
         bool DeleteAll();
         bool Delete(Expression<Func<T, bool>> filter);
-        bool Delete(QueryExpression filterExpression);
+        //bool Delete(QueryExpression filterExpression);
 
         IObjectEvents<T> Events { get; }
     }

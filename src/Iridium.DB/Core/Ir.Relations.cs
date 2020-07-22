@@ -41,7 +41,6 @@ namespace Iridium.DB
             return obj;
         }
 
-
         internal static void LoadRelations(object obj, IEnumerable<TableSchema.Relation> relationsToLoad)
         {
             if (relationsToLoad == null)

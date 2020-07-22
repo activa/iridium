@@ -8,5 +8,7 @@ namespace Iridium.DB
         int SqlNonQuery(string sql, QueryParameterCollection parameters);
         IEnumerable<SerializedEntity> SqlQuery(string sql, QueryParameterCollection parameters);
         IEnumerable<object> SqlQueryScalar(string sql, QueryParameterCollection parameters);
+
+        ISqlLogger SqlLogger { get; set; }
     }
 }

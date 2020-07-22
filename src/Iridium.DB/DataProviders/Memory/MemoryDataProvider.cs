@@ -289,6 +289,12 @@ namespace Iridium.DB
             
         }
 
+        public ISqlLogger SqlLogger
+        {
+            get => null;
+            set { }
+        }
+
         public void Purge(TableSchema schema)
         {
             using (var bucket = GetBucket(schema))

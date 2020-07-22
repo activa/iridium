@@ -55,7 +55,7 @@ namespace Iridium.DB
         Task<bool> Delete(T obj);
         Task<bool> DeleteAll();
         Task<bool> Delete(Expression<Func<T, bool>> filter);
-        Task<bool> Delete(QueryExpression filterExpression);
+        // Task<bool> Delete(QueryExpression filterExpression);
         Task<T> First();
         Task<T> First(Expression<Func<T, bool>> filter);
         Task<T> FirstOrDefault();
