@@ -1,17 +1,25 @@
 namespace Iridium.DB.Test
 {
-    public class RecordWithParent
+    public interface IRecordWithParent
+    {
+        RecordWithChildren Parent { get; set; }
+        int? ParentKey { get; set; }
+        string Name { get; set; }
+        int? Value { get; set; }
+    }
+
+    public class RecordWithParent : IRecordWithParent
     {
         [Column.PrimaryKey(AutoIncrement = true)]
-        public int Key;
+        public int Key { get; set; }
 
         [Relation(LocalKey = nameof(ParentKey))]
-        public RecordWithChildren Parent;
+        public RecordWithChildren Parent { get; set; }
 
-        public int? ParentKey;
+        public int? ParentKey { get; set; }
 
-        public string Name;
-        public int? Value;
+        public string Name { get; set; }
+        public int? Value { get; set; }
     }
 
     public class RecordWithPreloadParent

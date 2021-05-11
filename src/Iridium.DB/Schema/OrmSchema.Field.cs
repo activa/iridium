@@ -201,7 +201,7 @@ namespace Iridium.DB
 
                     if (IsDataSet)
                     {
-                        return Activator.CreateInstance(typeof (DataSet<>).MakeGenericType(ElementType), ForeignSchema.Repository, filter, this, parentObject);
+                        return Activator.CreateInstance(typeof (DataSet<,>).MakeGenericType(ElementType,ElementType), ForeignSchema.Repository, filter, this, parentObject);
                     }
                     else
                     {

@@ -55,14 +55,14 @@ namespace Iridium.DB
             return propInfo?.GetValue(obj);
         }
 
-        internal T Read(object key, params Expression<Func<T, object>>[] relationsToLoad)
+        internal T Read(object key, params LambdaExpression[] relationsToLoad)
         {
             var o = Activator.CreateInstance<T>();
 
             return Load(o, key, relationsToLoad);
         }
 
-        internal T Load(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad)
+        internal T Load(T obj, object key, params LambdaExpression[] relationsToLoad)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
@@ -108,11 +108,7 @@ namespace Iridium.DB
 
         internal bool Delete(T obj)
         {
-            bool cancelDelete = false;
-
-            Fire_ObjectDeleting(obj, ref cancelDelete);
-
-            if (cancelDelete)
+            if (!Fire_ObjectDeleting(obj))
                 return false;
 
             var serializedEntity = Schema.SerializeObject(obj);
@@ -164,7 +160,7 @@ namespace Iridium.DB
         }
 
 
-        internal IEnumerable<T> List(QuerySpec filter, IEnumerable<Expression<Func<T, object>>> relationLambdas, TableSchema.Relation parentRelation, object parentObject, IEnumerable<Action<T>> actions)
+        internal IEnumerable<T> List(QuerySpec filter, IEnumerable<LambdaExpression> relationLambdas, TableSchema.Relation parentRelation, object parentObject, IEnumerable<Action<object>> actions)
         {
             IEnumerable<T> objects;
 

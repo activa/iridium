@@ -89,7 +89,8 @@ namespace Iridium.DB.MySql
                 new {Flags = TypeFlags.Double, ColumnType = "DOUBLE"},
                 new {Flags = TypeFlags.Single, ColumnType = "FLOAT"},
                 new {Flags = TypeFlags.String, ColumnType = "VARCHAR({0})"},
-                new {Flags = TypeFlags.DateTime, ColumnType = "DATETIME"}
+                new {Flags = TypeFlags.DateTime, ColumnType = "DATETIME"},
+                new {Flags = TypeFlags.Guid, ColumnType = "VARCHAR(36)"},
             };
 
             if (recreateTable)

@@ -25,106 +25,145 @@
 #endregion
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Iridium.DB
 {
     internal partial class Repository<T>
     {
-        public override void Fire_ObjectCreating(object obj, ref bool cancel) { _events.Fire_ObjectCreating(Context, (T)obj, ref cancel); }
-        public override void Fire_ObjectCreated(object obj) { _events.Fire_ObjectCreated(Context, (T)obj); }
-        public override void Fire_ObjectSaving(object obj, ref bool cancel) { _events.Fire_ObjectSaving(Context, (T)obj, ref cancel); }
-        public override void Fire_ObjectSaved(object obj) { _events.Fire_ObjectSaved(Context, (T)obj); }
-        public override void Fire_ObjectDeleting(object obj, ref bool cancel) { _events.Fire_ObjectDeleting(Context, (T)obj, ref cancel); }
-        public override void Fire_ObjectDeleted(object obj) { _events.Fire_ObjectDeleted(Context, (T)obj); }
-        public override void Fire_ObjectRead(object obj) { _events.Fire_ObjectRead(Context, (T)obj); }
+        public override bool Fire_ObjectCreating(object obj) => _events.Fire_ObjectCreating(obj);
+        public override void Fire_ObjectCreated(object obj) => _events.Fire_ObjectCreated(obj);
+        public override bool Fire_ObjectSaving(object obj) => _events.Fire_ObjectSaving(obj);
+        public override void Fire_ObjectSaved(object obj) => _events.Fire_ObjectSaved(obj);
+        public override bool Fire_ObjectDeleting(object obj) => _events.Fire_ObjectDeleting(obj);
+        public override void Fire_ObjectDeleted(object obj) => _events.Fire_ObjectDeleted(obj);
+        public override void Fire_ObjectRead(object obj) => _events.Fire_ObjectRead(obj);
 
-        private class EventHandlers : IObjectEvents<T>
+        private readonly EventHandlers<object> _events = new EventHandlers<object>(null);
+
+        private readonly ConcurrentDictionary<Type, object> _typedEventHandlers = new ConcurrentDictionary<Type, object>();
+
+        internal IObjectEvents<T1> Events<T1>()
         {
-            public event EventHandler<ObjectWithCancelEventArgs<T>> ObjectCreating;
-            public event EventHandler<ObjectEventArgs<T>> ObjectCreated;
-            public event EventHandler<ObjectWithCancelEventArgs<T>> ObjectSaving;
-            public event EventHandler<ObjectEventArgs<T>> ObjectSaved;
-            public event EventHandler<ObjectWithCancelEventArgs<T>> ObjectDeleting;
-            public event EventHandler<ObjectEventArgs<T>> ObjectDeleted;
-            public event EventHandler<ObjectEventArgs<T>> ObjectRead;
+            return (IObjectEvents<T1>) _typedEventHandlers.GetOrAdd(typeof(T1), t => new EventHandlers<T1>(_events));
+        }
+    }
 
-            public void Fire_ObjectCreating(StorageContext context, T obj, ref bool cancel)
+    
+    internal class EventHandlers<T> : IObjectEvents<T>
+    {
+        private readonly VoidEventWrapper<T> _created = new VoidEventWrapper<T>();
+        private readonly VoidEventWrapper<T> _saved = new VoidEventWrapper<T>();
+        private readonly VoidEventWrapper<T> _deleted = new VoidEventWrapper<T>();
+        private readonly VoidEventWrapper<T> _read = new VoidEventWrapper<T>();
+
+        private readonly BoolEventWrapper<T> _creating = new BoolEventWrapper<T>();
+        private readonly BoolEventWrapper<T> _saving = new BoolEventWrapper<T>();
+        private readonly BoolEventWrapper<T> _deleting = new BoolEventWrapper<T>();
+
+        public IVoidEventWrapper<T> Created => _created;
+        public IVoidEventWrapper<T> Saved => _saved;
+        public IVoidEventWrapper<T> Deleted => _deleted;
+        public IVoidEventWrapper<T> Read => _read;
+        public IBoolEventWrapper<T> Creating => _creating;
+        public IBoolEventWrapper<T> Saving => _saving;
+        public IBoolEventWrapper<T> Deleting => _deleting;
+
+        public EventHandlers(EventHandlers<object> parent)
+        {
+            if (parent != null)
             {
-                if (ObjectCreating != null)
-                {
-                    var evArgs = new ObjectWithCancelEventArgs<T>(obj);
+                parent._created.Add(o => _created.Fire((T) o));
+                parent._saved.Add(o => _created.Fire((T) o));
+                parent._deleted.Add(o => _created.Fire((T) o));
+                parent._read.Add(o => _created.Fire((T) o));
 
-                    foreach (var @delegate in ObjectCreating.GetInvocationList())
-                    {
-                        var ev = (EventHandler<ObjectWithCancelEventArgs<T>>)@delegate;
-
-                        ev(context, evArgs);
-
-                        if (evArgs.Cancel)
-                        {
-                            cancel = evArgs.Cancel;
-                            return;
-                        }
-                    }
-                }
-            }
-
-            public void Fire_ObjectSaving(StorageContext context, T obj, ref bool cancel)
-            {
-                if (ObjectSaving != null)
-                {
-                    var evArgs = new ObjectWithCancelEventArgs<T>(obj);
-
-                    foreach (var @delegate in ObjectSaving.GetInvocationList())
-                    {
-                        var ev = (EventHandler<ObjectWithCancelEventArgs<T>>)@delegate;
-
-                        ev(context, evArgs);
-
-                        if (evArgs.Cancel)
-                        {
-                            cancel = evArgs.Cancel;
-                            return;
-                        }
-                    }
-                }
-            }
-
-            public void Fire_ObjectCreated(StorageContext context, T obj)
-            {
-                ObjectCreated?.Invoke(context, new ObjectEventArgs<T>(obj));
-            }
-
-            public void Fire_ObjectSaved(StorageContext context, T obj)
-            {
-                ObjectSaved?.Invoke(context, new ObjectEventArgs<T>(obj));
-            }
-
-            public void Fire_ObjectDeleting(StorageContext context, T obj, ref bool cancel)
-            {
-                if (ObjectDeleting != null)
-                {
-                    var evArgs = new ObjectWithCancelEventArgs<T>(obj);
-
-                    ObjectDeleting(context, evArgs);
-
-                    cancel = evArgs.Cancel;
-                }
-            }
-
-            public void Fire_ObjectDeleted(StorageContext context, T obj)
-            {
-                ObjectDeleted?.Invoke(context, new ObjectEventArgs<T>(obj));
-            }
-
-            public void Fire_ObjectRead(StorageContext context, T obj)
-            {
-                ObjectRead?.Invoke(context, new ObjectEventArgs<T>(obj));
+                parent._creating.Add(o => _creating.Fire((T) o));
+                parent._saving.Add(o => _creating.Fire((T) o));
+                parent._deleting.Add(o => _creating.Fire((T) o));
             }
         }
 
-        private readonly EventHandlers _events = new EventHandlers();
-
-        internal IObjectEvents<T> Events => _events;
+        public bool Fire_ObjectCreating(T obj) => _creating.Fire(obj);
+        public bool Fire_ObjectSaving(T obj) => _saving.Fire(obj);
+        public bool Fire_ObjectDeleting(T obj) => _deleting.Fire(obj);
+        public void Fire_ObjectCreated(T obj) => _created.Fire(obj);
+        public void Fire_ObjectSaved(T obj) => _saved.Fire(obj);
+        public void Fire_ObjectDeleted(T obj) => _deleted.Fire(obj);
+        public void Fire_ObjectRead(T obj) => _read.Fire(obj);
     }
+
+    public interface IBoolEventWrapper<T>
+    {
+        void Add(Func<T, bool> handler);
+        void Remove(Func<T, bool> handler);
+    }
+
+    internal class BoolEventWrapper<T> : IBoolEventWrapper<T>
+    {
+        private List<Func<T, bool>> _handlers = null;
+
+        public void Add(Func<T, bool> handler)
+        {
+            if (_handlers == null)
+                _handlers = new List<Func<T, bool>>();
+
+            _handlers.Add(handler);
+        }
+
+        public void Remove(Func<T, bool> handler)
+        {
+            if (_handlers == null)
+                return;
+
+            _handlers.Remove(handler);
+        }
+
+        public bool Fire(T obj)
+        {
+            if (_handlers != null)
+                return _handlers.All(handler => handler(obj));
+
+            return true;
+        }
+    }
+
+    public interface IVoidEventWrapper<T>
+    {
+        void Add(Action<T> handler);
+        void Remove(Action<T> handler);
+    }
+
+    internal class VoidEventWrapper<T> : IVoidEventWrapper<T>
+    {
+        private List<Action<T>> _handlers = null;
+
+        public void Add(Action<T> handler)
+        {
+            if (_handlers == null)
+                _handlers = new List<Action<T>>();
+
+            _handlers.Add(handler);
+        }
+
+        public void Remove(Action<T> handler)
+        {
+            if (_handlers == null)
+                return;
+
+            _handlers.Remove(handler);
+        }
+
+        public void Fire(T obj)
+        {
+            if (_handlers != null)
+                foreach (var function in _handlers)
+                    function(obj);
+        }
+
+
+    }
+
 }

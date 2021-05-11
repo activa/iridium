@@ -1,4 +1,4 @@
-﻿#region License
+#region License
 //=============================================================================
 // Iridium - Porable .NET ORM 
 //
@@ -24,46 +24,12 @@
 //=============================================================================
 #endregion
 
-using System;
+using System.Collections;
 
 namespace Iridium.DB
 {
-    public interface IObjectEvents<T>
+    internal abstract class DataSetWithNewObjects
     {
-        IVoidEventWrapper<T> Created { get; }
-        IVoidEventWrapper<T> Saved { get; }
-        IVoidEventWrapper<T> Deleted { get; }
-        IVoidEventWrapper<T> Read { get; }
-        IBoolEventWrapper<T> Creating { get; }
-        IBoolEventWrapper<T> Saving { get; }
-        IBoolEventWrapper<T> Deleting { get; }
-    }
-
-    public class ObjectEventArgs<T> : EventArgs
-    {
-        public T Value { get; set; }
-
-        public ObjectEventArgs()
-        {
-        }
-
-        public ObjectEventArgs(T value)
-        {
-            Value = value;
-        }
-    }
-
-    public class ObjectWithCancelEventArgs<T> : ObjectEventArgs<T>
-    {
-        public bool Cancel { get; set; }
-
-        public ObjectWithCancelEventArgs()
-        {
-        }
-
-        public ObjectWithCancelEventArgs(T value)
-        {
-            Value = value;
-        }
+        internal virtual IList NewObjects { get; set; }
     }
 }

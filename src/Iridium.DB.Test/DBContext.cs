@@ -55,8 +55,8 @@ namespace Iridium.DB.Test
     public class SERVERS
     {
         public const string SQLSERVER = "192.168.1.100";
-        public const string MYSQL = "192.168.1.100";
-        public const string POSTGRES = "192.168.1.100";
+        public const string MYSQL = "192.168.1.13";
+        public const string POSTGRES = "192.168.1.13";
     }
 
 
@@ -113,6 +113,7 @@ namespace Iridium.DB.Test
             RecordsWithParent.Purge();
             RecordsWithPreloadParent.Purge();
             RecordsWithChildren.Purge();
+            RecordsWithInterface.Purge();
         }
 
         public void CreateAllTables()
@@ -141,6 +142,12 @@ namespace Iridium.DB.Test
             CreateTable<A>(recreateTable:true);
             CreateTable<B>(recreateTable:true);
 
+            CreateTable<Parent>();
+            CreateTable<Child>();
+            CreateTable<GrandChild>();
+
+            IDataSet<IRecordWithInterface> ds = DataSet<RecordWithInterface, IRecordWithInterface>();
+            IDataSet<object> ds2 = DataSet<RecordWithInterface, object>();
         }
 
         private static readonly Dictionary<string, Func<DBContext>> _contextFactories;
@@ -171,14 +178,14 @@ namespace Iridium.DB.Test
 
     public class MySqlStorage : DBContext
     {
-        public MySqlStorage() : base(new MySqlDataProvider($"Server={SERVERS.MYSQL};Database=velox;UID=velox;PWD=velox;SslMode=None")) { }
+        public MySqlStorage() : base(new MySqlDataProvider($"Server={SERVERS.MYSQL};Database=iridiumdb;UID=iridiumdb;PWD=test77;SslMode=None")) { }
 
         public override string ToString() => "mysql";
     }
 
     public class PostgresStorage : DBContext
     {
-        public PostgresStorage() : base(new PostgresDataProvider($"Host={SERVERS.POSTGRES};Database=velox;Username=velox;Password=velox")) { }
+        public PostgresStorage() : base(new PostgresDataProvider($"Host={SERVERS.POSTGRES};Database=iridiumdb;Username=iridiumdb;Password=test77")) { }
 
         public override string ToString() => "postgres";
     }

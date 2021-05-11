@@ -190,6 +190,38 @@ namespace Iridium.DB.Test
         }
 
         [Test]
+        public void ManyToOne_ManualPreload_Interface()
+        {
+            var parent1 = InsertRecord(new RecordWithChildren() { Name = "A" });
+            var parent2 = InsertRecord(new RecordWithChildren() { Name = "B" });
+
+            InsertRecords<RecordWithParent>(10, (child, i) => { child.Name = "X"; child.ParentKey = parent1.Key; });
+            InsertRecords<RecordWithParent>(10, (child, i) => { child.Name = "Y"; child.ParentKey = parent2.Key; });
+
+            var children1 = DB.DataSet<RecordWithParent,IRecordWithParent>().Where(c => c.Name == "X").WithRelations(r => r.Parent).ToArray();
+
+            Assert.That(children1[0].Parent, Is.Not.Null);
+            Assert.That(children1[0].Parent.Name, Is.EqualTo("A"));
+
+        }
+
+        [Test]
+        public void ManyToOne_ManualPreload_Interface_Dynamic()
+        {
+            var parent1 = InsertRecord(new RecordWithChildren() { Name = "A" });
+            var parent2 = InsertRecord(new RecordWithChildren() { Name = "B" });
+
+            InsertRecords<RecordWithParent>(10, (child, i) => { child.Name = "X"; child.ParentKey = parent1.Key; });
+            InsertRecords<RecordWithParent>(10, (child, i) => { child.Name = "Y"; child.ParentKey = parent2.Key; });
+
+            var children1 = DB.DataSet<IRecordWithParent>(typeof(RecordWithParent)).Where(c => c.Name == "X").WithRelations(r => r.Parent).ToArray();
+
+            Assert.That(children1[0].Parent, Is.Not.Null);
+            Assert.That(children1[0].Parent.Name, Is.EqualTo("A"));
+
+        }
+
+        [Test]
         public void ManyToOne_AttributePreload()
         {
             var parent1 = InsertRecord(new RecordWithChildren() {Name = "A"});

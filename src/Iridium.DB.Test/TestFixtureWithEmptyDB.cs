@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.Remoting;
 using System.Threading;
 using Iridium.DB;
@@ -16,6 +17,8 @@ namespace Iridium.DB.Test
         [SetUp]
         public void SetupTest()
         {
+            Debug.WriteLine("PurgeAll");
+
             DB.PurgeAll();
         }
     }

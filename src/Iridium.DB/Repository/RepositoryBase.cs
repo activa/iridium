@@ -76,15 +76,16 @@ namespace Iridium.DB
                 create = Equals(Schema.IncrementKey.GetField(obj), Schema.IncrementKey.FieldInfo.Inspector().Type.Inspector().DefaultValue());
             }
 
-            bool cancelSave = false;
-
             if (create ?? false)
-                Fire_ObjectCreating(obj, ref cancelSave);
+            {
+                if (!Fire_ObjectCreating(obj))
+                    return false;
+            }
             else
-                Fire_ObjectSaving(obj, ref cancelSave);
-
-            if (cancelSave)
-                return false;
+            {
+                if (!Fire_ObjectSaving(obj))
+                    return false;
+            }
 
             var toOneRelations = Schema.Relations.Values.Where(r => r.IsToOne && !r.ReadOnly);
             var toManyRelations = Schema.Relations.Values.Where(r => r.RelationType == TableSchema.RelationType.OneToMany && !r.ReadOnly);
@@ -119,7 +120,7 @@ namespace Iridium.DB
                 {
                     var foreignCollection = (IEnumerable) relation.GetField(obj);
 
-                    if (foreignCollection is DataSet dataSet)
+                    if (foreignCollection is DataSetWithNewObjects dataSet)
                     {
                         foreignCollection = dataSet.NewObjects;
                         dataSet.NewObjects = null;
@@ -182,11 +183,11 @@ namespace Iridium.DB
             return querySpec;
         }
 
-        public abstract void Fire_ObjectCreating(object obj, ref bool cancel);
+        public abstract bool Fire_ObjectCreating(object obj);
         public abstract void Fire_ObjectCreated(object obj);
-        public abstract void Fire_ObjectSaving(object obj, ref bool cancel);
+        public abstract bool Fire_ObjectSaving(object obj);
         public abstract void Fire_ObjectSaved(object obj);
-        public abstract void Fire_ObjectDeleting(object obj, ref bool cancel);
+        public abstract bool Fire_ObjectDeleting(object obj);
         public abstract void Fire_ObjectDeleted(object obj);
         public abstract void Fire_ObjectRead(object obj);
     }

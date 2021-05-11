@@ -21,8 +21,8 @@ namespace Iridium.DB.Test
             int counter1 = 0;
             int counter2 = 0;
 
-            DB.RecordsWithAutonumKey.Events.ObjectCreated += (sender, args) => { counter1++; };
-            DB.RecordsWithAutonumKey.Events.ObjectCreated += (sender, args) => { counter2++; };
+            DB.RecordsWithAutonumKey.Events.Created.Add(_ => counter1++);
+            DB.RecordsWithAutonumKey.Events.Created.Add(_ => counter2++);
 
             InsertRecord(new RecordWithAutonumKey() { Name = "A" });
             InsertRecord(new RecordWithAutonumKey() { Name = "A" });
@@ -32,19 +32,35 @@ namespace Iridium.DB.Test
         }
 
         [Test]
+        public void Events_ObjectCreated_Interface()
+        {
+            int counter1 = 0;
+
+            var dataSet = DB.DataSet<RecordWithInterface, IRecordWithInterface>();
+
+            dataSet.Events.Created.Add(_ => counter1++);
+
+            dataSet.Insert(new RecordWithInterface() {Name = "A"});
+
+            Assert.That(counter1, Is.EqualTo(1));
+        }
+
+        [Test]
         public void Events_ObjectCreating()
         {
             int counter = 0;
 
-            EventHandler<ObjectWithCancelEventArgs<Customer>> ev1 = (sender, args) => { counter++; };
-            EventHandler<ObjectWithCancelEventArgs<Customer>> ev2 = (sender, args) => { counter++; };
+            bool ev1(Customer _) { counter++; return true; }
+            bool ev2(Customer _) { counter++; return true; }
+            
+            DB.Customers.Events.Creating.Add(ev1);
+            DB.Customers.Events.Creating.Add(ev2);
 
-            DB.Customers.Events.ObjectCreating += ev1;
-            DB.Customers.Events.ObjectCreating += ev2;
+            bool saveResult;
 
             try
             {
-                bool saveResult = DB.Insert(new Customer { Name = "A" });
+                saveResult = DB.Insert(new Customer { Name = "A" });
 
                 Assert.That(saveResult, Is.True);
                 Assert.That(DB.Customers.FirstOrDefault(c => c.Name == "A"), Is.Not.Null);
@@ -52,9 +68,18 @@ namespace Iridium.DB.Test
             }
             finally
             {
-                DB.Customers.Events.ObjectCreating -= ev1;
-                DB.Customers.Events.ObjectCreating -= ev2;
+                DB.Customers.Events.Creating.Remove(ev1);
+                DB.Customers.Events.Creating.Remove(ev2);
             }
+
+            counter = 0;
+            saveResult = DB.Insert(new Customer { Name = "B" });
+
+            Assert.That(saveResult, Is.True);
+            Assert.That(DB.Customers.FirstOrDefault(c => c.Name == "B"), Is.Not.Null);
+            Assert.That(counter, Is.EqualTo(0));
+
+
         }
 
         [Test]
@@ -62,11 +87,11 @@ namespace Iridium.DB.Test
         {
             int counter = 0;
 
-            EventHandler<ObjectWithCancelEventArgs<Customer>> ev = (sender, args) => { counter++; };
-            EventHandler<ObjectWithCancelEventArgs<Customer>> evWithCancel = (sender, args) => { counter++; args.Cancel = true; };
+            bool ev(Customer _) { counter++; return true; }
+            bool evWithCancel(Customer _) { counter++; return false; }
 
-            DB.Customers.Events.ObjectCreating += ev;
-            DB.Customers.Events.ObjectCreating += evWithCancel;
+            DB.Customers.Events.Creating.Add(ev);
+            DB.Customers.Events.Creating.Add(evWithCancel);
 
             try
             {
@@ -78,8 +103,8 @@ namespace Iridium.DB.Test
             }
             finally
             {
-                DB.Customers.Events.ObjectCreating -= ev;
-                DB.Customers.Events.ObjectCreating -= evWithCancel;
+                DB.Customers.Events.Creating.Remove(ev);
+                DB.Customers.Events.Creating.Remove(evWithCancel);
             }
         }
 
@@ -88,11 +113,11 @@ namespace Iridium.DB.Test
         {
             int counter = 0;
 
-            EventHandler<ObjectWithCancelEventArgs<Customer>> ev = (sender, args) => { counter++; };
-            EventHandler<ObjectWithCancelEventArgs<Customer>> evWithCancel = (sender, args) => { counter++; args.Cancel = true; };
+            bool ev(Customer _) { counter++; return true; }
+            bool evWithCancel(Customer _) { counter++; return false; }
 
-            DB.Customers.Events.ObjectCreating += evWithCancel;
-            DB.Customers.Events.ObjectCreating += ev;
+            DB.Customers.Events.Creating.Add(evWithCancel);
+            DB.Customers.Events.Creating.Add(ev);
 
             try
             {
@@ -104,8 +129,8 @@ namespace Iridium.DB.Test
             }
             finally
             {
-                DB.Customers.Events.ObjectCreating -= ev;
-                DB.Customers.Events.ObjectCreating -= evWithCancel;
+                DB.Customers.Events.Creating.Remove(ev);
+                DB.Customers.Events.Creating.Remove(evWithCancel);
             }
         }
 

@@ -331,7 +331,14 @@ namespace Iridium.DB
         private static object ConvertValue(object value, Type type)
         {
             if (type == typeof(Guid) && value is string s)
-                return Guid.ParseExact(s, "N");
+            {
+                if (s.Length == 32 && Guid.TryParseExact(s, "N", out var guidValue))
+                    return guidValue;
+                else if (s.Length == 36 && Guid.TryParseExact(s, "D", out guidValue))
+                    return guidValue;
+
+                return null;
+            }
 
             return value.Convert(type);
         }

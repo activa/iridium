@@ -437,7 +437,48 @@ namespace Iridium.DB.Test
             order = DB.Orders.Read(order.OrderID, o=>o.OrderItems);
 
             Assert.AreEqual(4, order.OrderItems.Count(), "Order item not added");
+        }
 
+        [Test]
+        public void TwoLevelToManyCreation()
+        {
+            Parent parent = new Parent()
+            {
+                Name = "Parent 1",
+                Children = new List<Child>()
+                {
+                    new Child()
+                    {
+                        Name = "Child 1A",
+                        Children = new List<GrandChild>()
+                        {
+                            new GrandChild() {Name = "Grandchild 1AX"},
+                            new GrandChild() {Name = "Grandchild 1AY"},
+                            new GrandChild() {Name = "Grandchild 1AZ"},
+                        }
+                    },
+                    new Child()
+                    {
+                        Name = "Child 1B",
+                        Children = new List<GrandChild>()
+                        {
+                            new GrandChild() {Name = "Grandchild 1BX"},
+                            new GrandChild() {Name = "Grandchild 1BY"},
+                            new GrandChild() {Name = "Grandchild 1BZ"},
+                        }
+                    },
+                }
+            };
+
+            DB.DataSet<Parent>().Purge();
+            DB.DataSet<Child>().Purge();
+            DB.DataSet<GrandChild>().Purge();
+
+            DB.Insert(parent, p => p.Children.With(c => c.Children));
+
+            Assert.That(DB.DataSet<Parent>().Count(), Is.EqualTo(1));
+            Assert.That(DB.DataSet<Child>().Count(), Is.EqualTo(2));
+            Assert.That(DB.DataSet<GrandChild>().Count(), Is.EqualTo(6));
         }
 
         [Test]
@@ -665,6 +706,42 @@ namespace Iridium.DB.Test
             GenericFilterOnInterfaceFields<RecordWithInterface>();
         }
 
+        [Test]
+        public void FilterOnInterfaceFields2()
+        {
+            var dataSet = DB.DataSet<RecordWithInterface, IRecordWithInterface>();
+
+            dataSet.Insert(new RecordWithInterface() { Name = "A" });
+            dataSet.Insert(new RecordWithInterface() { Name = "B" });
+            dataSet.Insert(new RecordWithInterface() { Name = "C" });
+
+            long n = dataSet.Count(rec => rec.Name == "B");
+
+            Assert.That(n, Is.EqualTo(1));
+
+            n = dataSet.Count(rec => rec.Name == "D");
+
+            Assert.That(n, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void FilterOnInterfaceFieldsDynamicType()
+        {
+            var dataSet = DB.DataSet<IRecordWithInterface>(typeof(RecordWithInterface));
+
+            dataSet.Insert(new RecordWithInterface() { Name = "A" });
+            dataSet.Insert(new RecordWithInterface() { Name = "B" });
+            dataSet.Insert(new RecordWithInterface() { Name = "C" });
+
+            long n = dataSet.Count(rec => rec.Name == "B");
+
+            Assert.That(n, Is.EqualTo(1));
+
+            n = dataSet.Count(rec => rec.Name == "D");
+
+            Assert.That(n, Is.EqualTo(0));
+        }
+
         private void GenericFilterOnInterfaceFields<T>() where T:IRecordWithInterface
         {
             var dataSet = DB.DataSet<T>();
@@ -826,4 +903,5 @@ namespace Iridium.DB.Test
         }
 
     }
+
 }

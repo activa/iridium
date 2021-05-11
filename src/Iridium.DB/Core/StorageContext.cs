@@ -52,7 +52,7 @@ namespace Iridium.DB
 
                 var objectType = fieldTypeInspector.GetGenericArguments()[0];
                 var repository = (Repository) Activator.CreateInstance(typeof (Repository<>).MakeGenericType(objectType), this);
-                var dataSet = Activator.CreateInstance(typeof (DataSet<>).MakeGenericType(objectType), repository);
+                var dataSet = Activator.CreateInstance(typeof (DataSet<,>).MakeGenericType(objectType, objectType), repository);
 
                 _repositories[objectType] = repository;
 
@@ -191,24 +191,57 @@ namespace Iridium.DB
 
         internal Repository<T> GetRepository<T>()
         {
+            return (Repository<T>) GetRepository(typeof(T));
+            // lock (_repositories)
+            // {
+            //     var repository = _repositories[typeof(T)];
+            //
+            //     if (repository == null)
+            //     {
+            //         _repositories[typeof(T)] = (repository = new Repository<T>(this));
+            //
+            //         GenerateRelations();
+            //     }
+            //
+            //     return (Repository<T>) repository;
+            // }
+        }
+
+        internal Repository GetRepository(Type entityType)
+        {
             lock (_repositories)
             {
-                var repository = _repositories[typeof(T)];
+                var repository = _repositories[entityType];
 
                 if (repository == null)
                 {
-                    _repositories[typeof(T)] = (repository = new Repository<T>(this));
+                    _repositories[entityType] = (repository = (Repository) Activator.CreateInstance(typeof(Repository<>).MakeGenericType(entityType), this));
 
                     GenerateRelations();
                 }
 
-                return (Repository<T>) repository;
+                return repository;
             }
         }
 
         public IDataSet<T> DataSet<T>()
         {
-            return new DataSet<T>(GetRepository<T>());
+            return new DataSet<T,T>(GetRepository<T>());
+        }
+
+        public IDataSet<TBase> DataSet<T, TBase>() where T:TBase
+        {
+            return new DataSet<TBase,T>(GetRepository<T>());
+        }
+
+        public IDataSet<T> DataSet<T>(Type entityType)
+        {
+            return (IDataSet<T>) Activator.CreateInstance(typeof(DataSet<,>).MakeGenericType(typeof(T), entityType), GetRepository(entityType));
+        }
+
+        public object DataSet(Type entityType)
+        {
+            return Activator.CreateInstance(typeof(DataSet<,>).MakeGenericType(entityType, entityType), GetRepository(entityType));
         }
 
         public Transaction CreateTransaction(IsolationLevel isolationLevel = IsolationLevel.Serializable, bool commitOnDispose = false)
@@ -236,9 +269,19 @@ namespace Iridium.DB
             DataProvider.CreateOrUpdateTable(GetRepository<T>().Schema, recreateTable, recreateIndexes);
         }
 
+        public Task CreateTableAsync<T>(bool recreateTable = false, bool recreateIndexes = false)
+        {
+            return Task.Run(() => CreateTable<T>(recreateTable, recreateIndexes));
+        }
+
         public T Read<T>(object key, params Expression<Func<T, object>>[] relationsToLoad)
         {
             return GetRepository<T>().Read(key, relationsToLoad);
+        }
+
+        public Task<T> ReadAsync<T>(object key, params Expression<Func<T, object>>[] relationsToLoad)
+        {
+            return Task.Run(() => Read(key, relationsToLoad));
         }
 
         public T Read<T>(Expression<Func<T,bool>> condition,  params Expression<Func<T, object>>[] relationsToLoad)
@@ -246,9 +289,19 @@ namespace Iridium.DB
             return DataSet<T>().WithRelations(relationsToLoad).FirstOrDefault(condition);
         }
 
+        public Task<T> ReadAsync<T>(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] relationsToLoad)
+        {
+            return AsyncDataSet<T>().WithRelations(relationsToLoad).FirstOrDefault(condition);
+        }
+
         public T Load<T>(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad)
         {
             return DataSet<T>().Load(obj, key, relationsToLoad);
+        }
+
+        public Task<T> LoadAsync<T>(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad)
+        {
+            return Task.Run(() => Load(obj, key, relationsToLoad));
         }
 
         public bool Save<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
@@ -256,9 +309,19 @@ namespace Iridium.DB
             return DataSet<T>().Save(obj, relationsToSave);
         }
 
+        public Task<bool> SaveAsync<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
+        {
+            return Task.Run(() => Save(obj, relationsToSave));
+        }
+
         public bool InsertOrUpdate<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
             return DataSet<T>().Save(obj, relationsToSave);
+        }
+
+        public Task<bool> InsertOrUpdateAsync<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
+        {
+            return Task.Run(() => InsertOrUpdate(obj, relationsToSave));
         }
 
         public bool Update<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
@@ -266,9 +329,24 @@ namespace Iridium.DB
             return DataSet<T>().Update(obj, relationsToSave);
         }
 
+        public Task<bool> UpdateAsync<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
+        {
+            return Task.Run(() => Update(obj, relationsToSave));
+        }
+
         public bool Insert<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
         {
             return DataSet<T>().Insert(obj, relationsToSave);
+        }
+
+        public bool InsertDeep<T,U>(T obj, Expression<Func<T, IEnumerable<U>>> rel1, Expression<Func<U, object>> rel2)
+        {
+            return DataSet<T>().Insert(obj);
+        }
+
+        public Task<bool> InsertAsync<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
+        {
+            return Task.Run(() => DataSet<T>().Insert(obj, relationsToSave));
         }
 
         public bool Delete<T>(T obj)
@@ -276,20 +354,33 @@ namespace Iridium.DB
             return GetRepository<T>().Delete(obj);
         }
 
+        public Task<bool> DeleteAsync<T>(T obj)
+        {
+            return Task.Run(() => Delete(obj));
+        }
+
         public bool Delete<T>(IEnumerable<T> objects)
         {
-            foreach (var obj in objects)
-            {
-                if (!GetRepository<T>().Delete(obj))
-                    return false;
-            }
+            var repository = GetRepository<T>();
 
-            return true;
+            return objects.All(obj => repository.Delete(obj));
+        }
+
+        public Task<bool> DeleteAsync<T>(IEnumerable<T> objects)
+        {
+            return Task.Run(() => Delete(objects));
         }
 
         public bool Delete<T>(Expression<Func<T, bool>> condition)
         {
-            return GetRepository<T>().Delete(GetRepository<T>().CreateQuerySpec(new FilterSpec(condition)));
+            var repository = GetRepository<T>();
+
+            return repository.Delete(repository.CreateQuerySpec(new FilterSpec(condition)));
+        }
+
+        public Task<bool> DeleteAsync<T>(Expression<Func<T, bool>> condition)
+        {
+            return Task.Run(() => Delete(condition));
         }
 
         public void UpdateOrCreateOnlyRecord<T>(T rec)
@@ -304,7 +395,13 @@ namespace Iridium.DB
             }
         }
 
+        public Task UpdateOrCreateOnlyRecordAsync<T>(T rec)
+        {
+            return Task.Run(() => UpdateOrCreateOnlyRecord(rec));
+        }
+
         // Native SQL methods
+
 
         public int SqlNonQuery(string sql, object parameters = null)
         {
@@ -314,12 +411,22 @@ namespace Iridium.DB
             throw new NotSupportedException();
         }
 
+        public Task<int> SqlNonQueryAsync(string sql, object parameters = null)
+        {
+            return Task.Run(() => SqlNonQuery(sql, parameters));
+        }
+
         public IEnumerable<T> SqlQuery<T>(string sql, object parameters = null) where T : new()
         {
             if (DataProvider is ISqlDataProvider sqlProvider)
                 return sqlProvider.SqlQuery(sql, QueryParameterCollection.FromObject(parameters)).Select(entity => entity.CreateObject<T>());
 
             throw new NotSupportedException();
+        }
+
+        public Task<T[]> SqlQueryAsync<T>(string sql, object parameters = null) where T : new()
+        {
+            return Task.Run(() => SqlQuery<T>(sql, parameters).ToArray());
         }
 
         public IEnumerable<Dictionary<string,object>> SqlQuery(string sql, object parameters = null)
@@ -338,6 +445,11 @@ namespace Iridium.DB
             throw new NotSupportedException();
         }
 
+        public Task<T> SqlQueryScalarAsync<T>(string sql, object parameters = null) where T : new()
+        {
+            return Task.Run(() => SqlQueryScalar<T>(sql, parameters));
+        }
+
         public IEnumerable<T> SqlQueryScalars<T>(string sql, object parameters = null) where T : new()
         {
             if (DataProvider is ISqlDataProvider sqlProvider)
@@ -346,85 +458,25 @@ namespace Iridium.DB
             throw new NotSupportedException();
         }
 
+        public Task<T[]> SqlQueryScalarsAsync<T>(string sql, object parameters = null) where T : new()
+        {
+            return Task.Run(() => SqlQueryScalars<T>(sql, parameters).ToArray());
+        }
+
         public int SqlProcedure(string procName, object parameters = null)
         {
             if (DataProvider is ISqlDataProvider sqlProvider)
                 return sqlProvider.SqlProcedure(procName, QueryParameterCollection.FromObject(parameters));
 
             throw new NotSupportedException();
-
         }
 
         // Async methods
 
+
         public IAsyncDataSet<T> AsyncDataSet<T>()
         {
-            return new AsyncDataSet<T>(new DataSet<T>(GetRepository<T>()));
-        }
-
-        public Task CreateTableAsync<T>(bool recreateTable = false, bool recreateIndexes = false)
-        {
-            return Task.Run(() => CreateTable<T>(recreateTable, recreateIndexes));
-        }
-
-        public Task<int> SqlNonQueryAsync(string sql, object parameters = null)
-        {
-            return Task.Run(() => SqlNonQuery(sql, parameters));
-        }
-
-        public Task<T[]> SqlQueryAsync<T>(string sql, object parameters = null) where T : new()
-        {
-            return Task.Run(() => SqlQuery<T>(sql, parameters).ToArray());
-        }
-
-        public Task<T> SqlQueryScalarAsync<T>(string sql, object parameters = null) where T : new()
-        {
-            return Task.Run(() => SqlQueryScalar<T>(sql, parameters));
-        }
-
-        public Task<T[]> SqlQueryScalarsAsync<T>(string sql, object parameters = null) where T : new()
-        {
-            return Task.Run(() => SqlQueryScalars<T>(sql, parameters).ToArray());
-        }
-
-        public Task<T> ReadAsync<T>(object key, params Expression<Func<T, object>>[] relationsToLoad)
-        {
-            return Task.Run(() => GetRepository<T>().Read(key, relationsToLoad));
-        }
-
-        public Task<T> ReadAsync<T>(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] relationsToLoad)
-        {
-            return AsyncDataSet<T>().WithRelations(relationsToLoad).FirstOrDefault(condition);
-        }
-
-        public Task<T> LoadAsync<T>(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad)
-        {
-            return Task.Run(() => GetRepository<T>().Load(obj, key, relationsToLoad));
-        }
-
-        public Task<bool> SaveAsync<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
-        {
-            return Task.Run(() => DataSet<T>().Save(obj, relationsToSave));
-        }
-
-        public Task<bool> InsertAsync<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
-        {
-            return Task.Run(() => DataSet<T>().Insert(obj, relationsToSave));
-        }
-
-        public Task<bool> UpdateAsync<T>(T obj, params Expression<Func<T, object>>[] relationsToSave)
-        {
-            return Task.Run(() => DataSet<T>().Update(obj, relationsToSave));
-        }
-
-        public Task<bool> DeleteAsync<T>(T obj)
-        {
-            return Task.Run(() => GetRepository<T>().Delete(obj));
-        }
-
-        public Task UpdateOrCreateOnlyRecordAsync<T>(T rec)
-        {
-            return Task.Run(() => UpdateOrCreateOnlyRecord(rec));
+            return new AsyncDataSet<T>(new DataSet<T,T>(GetRepository<T>()));
         }
 
         private Task _LoadRelationsAsync(object obj, IEnumerable<LambdaExpression> relationsToLoad)
@@ -490,4 +542,10 @@ namespace Iridium.DB
             DataProvider = null;
         }
     }
+
+    public static class RelationChainExtensions
+    {
+        public static U With<T, U>(this IEnumerable<T> self, Func<T, U> r) => throw new NotSupportedException();
+    }
+
 }

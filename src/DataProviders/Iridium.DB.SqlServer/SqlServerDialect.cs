@@ -154,7 +154,8 @@ namespace Iridium.DB.SqlServer
                 new {Flags = TypeFlags.Double, ColumnType = "FLOAT"},
                 new {Flags = TypeFlags.Single, ColumnType = "REAL"},
                 new {Flags = TypeFlags.String, ColumnType = "VARCHAR({0})"},
-                new {Flags = TypeFlags.DateTime, ColumnType = "DATETIME"}
+                new {Flags = TypeFlags.DateTime, ColumnType = "DATETIME"},
+                new {Flags = TypeFlags.Guid, ColumnType = "UNIQUEIDENTIFIER"},
             };
 
 

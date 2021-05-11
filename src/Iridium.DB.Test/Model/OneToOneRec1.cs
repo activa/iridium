@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Iridium.DB.Test
 {
@@ -35,4 +36,42 @@ namespace Iridium.DB.Test
         [Relation.OneToOne(LocalKey ="Id", ForeignKey ="Id")]
         public B Other { get; set; }
     }
+
+    public class Parent
+    {
+        [Column.PrimaryKey(AutoIncrement = true)]
+        public int ParentId { get; set; }
+
+        public string Name { get; set; }
+
+        [Relation]
+        public ICollection<Child> Children { get; set; }
+
+        public ICollection<GrandChild> Children2 { get; set; }
+    }
+
+    public class Child
+    {
+        [Column.PrimaryKey(AutoIncrement = true)]
+        public int ChildId { get; set; }
+
+        public string Name { get; set; }
+        public int ParentId { get; set; }
+
+        [Relation]
+        public ICollection<GrandChild> Children { get; set; }
+
+        public ICollection<GrandChild> Children2 { get; set; }
+    }
+
+    public class GrandChild
+    {
+        [Column.PrimaryKey(AutoIncrement = true)]
+        public int GrandChildId { get; set; }
+
+        public int ChildId { get; set; }
+
+        public string Name { get; set; }
+    }
+
 }
