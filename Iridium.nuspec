@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>iridium</id>
-    <version>2.5.1.7220</version>
+    <version>2.5.4.4131</version>
     <title>Iridium</title>
     <authors>Philippe Leybaert</authors>
     <owners>Philippe Leybaert</owners>
@@ -12,7 +12,7 @@
     <tags>iridium orm sql sqlite xamarin ios android uwp linux osx dotnetcore</tags>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Lightweight multi-platform ORM for mobile, desktop and servers. Data providers for Sqlite, SQL Server, MySql and Postgres are available as separate Nuget packages</description>
-    <copyright>Copyright 2015-2020 Philippe Leybaert</copyright>
+    <copyright>Copyright 2015-2022 Philippe Leybaert</copyright>
     <dependencies>
       <group targetFramework="netstandard2.0">
         <dependency id="iridium.reflection" version="2.0.1.7071" />

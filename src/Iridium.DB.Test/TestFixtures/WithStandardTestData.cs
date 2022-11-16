@@ -70,7 +70,7 @@ namespace Iridium.DB.Test
                     {
                         CustomerID = customers[customerIndex].CustomerID,
                         Remark = new string((char) ('A' + rnd.Next(0, 26)), 1),
-                        OrderDate = DateTime.Now
+                        OrderDate = DateTime.UtcNow
                     };
 
                     DB.Orders.Save(order);

@@ -46,7 +46,7 @@ namespace Iridium.DB.Sql
     {
         public string ConnectionString { get; set; }
 
-        private readonly ThreadLocal<DbConnection> _localConnection = new ThreadLocal<DbConnection>(true);
+        private readonly ThreadLocal<TConnection> _localConnection = new ThreadLocal<TConnection>(true);
 
         protected SqlAdoDataProvider()
         {
@@ -57,7 +57,7 @@ namespace Iridium.DB.Sql
             ConnectionString = connectionString;
         }
 
-        protected DbConnection Connection
+        protected TConnection Connection
         {
             get
             {
@@ -79,7 +79,7 @@ namespace Iridium.DB.Sql
             }
         }
 
-        protected virtual DbConnection CreateAndOpenConnection()
+        protected virtual TConnection CreateAndOpenConnection()
         {
             var connection = new TConnection() { ConnectionString = ConnectionString };
 
@@ -227,7 +227,7 @@ namespace Iridium.DB.Sql
             }
         }
 
-        public override int ExecuteSql(string sql, QueryParameterCollection parameters)
+        public override int ExecuteSql(string sql, QueryParameterCollection parameters = null)
         {
             var stopwatch = SqlLogger != null ? Stopwatch.StartNew() : null;
 

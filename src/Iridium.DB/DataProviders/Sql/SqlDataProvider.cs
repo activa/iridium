@@ -169,8 +169,11 @@ namespace Iridium.DB
                         joins.Add(sqlJoin);
                     }
 
-                    fieldsByRelation[prefetchRelation] = prefetchRelation.ForeignSchema.Fields.Select(f => new PrefetchFieldDefinition {Field = f, FieldAlias = SqlNameGenerator.NextFieldAlias(), TableAlias = sqlJoin.Right.Alias}).ToArray();
-                    foreignKeyAliases[prefetchRelation] = fieldList.First(f => f.Field == prefetchRelation.LocalField).Alias;
+
+                    var relationFields = prefetchRelation.ForeignSchema.Fields.Select(f => new PrefetchFieldDefinition {Field = f, FieldAlias = SqlNameGenerator.NextFieldAlias(), TableAlias = sqlJoin.Right.Alias}).ToArray();
+
+                    fieldsByRelation[prefetchRelation] = relationFields;
+                    foreignKeyAliases[prefetchRelation] = relationFields.First(f => f.Field == prefetchRelation.ForeignField).FieldAlias;
                 }
 
                 string sql = SqlDialect.SelectSql(
@@ -193,7 +196,7 @@ namespace Iridium.DB
                 relatedEntities  = records.Select(
                     rec => prefetchRelations.ToDictionary(
                                 relation => relation, 
-                                relation => rec[foreignKeyAliases[relation]] == null ? (SerializedEntity)null : new SerializedEntity(fieldsByRelation[relation].ToDictionary(f => f.Field.MappedName, f => rec[f.FieldAlias].Convert(f.Field.FieldType)))
+                                relation => (rec[foreignKeyAliases[relation]] == null)  ? (SerializedEntity)null : new SerializedEntity(fieldsByRelation[relation].ToDictionary(f => f.Field.MappedName, f => rec[f.FieldAlias].Convert(f.Field.FieldType)))
                             )
                         );
 

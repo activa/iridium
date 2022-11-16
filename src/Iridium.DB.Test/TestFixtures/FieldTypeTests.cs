@@ -163,8 +163,8 @@ namespace Iridium.DB.Test
         {
             RecordWithAllTypes rec;
 
-            DateTime now = DateTime.Now;
-            DateTime defaultDate = new DateTime(1970, 1, 1);
+            DateTime now = DateTime.UtcNow;
+            DateTime defaultDate = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
             rec = SaveAndReload(new RecordWithAllTypes { DateTimeField = now});
 

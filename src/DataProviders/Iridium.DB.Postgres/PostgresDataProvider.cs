@@ -62,7 +62,7 @@ namespace Iridium.DB.Postgres
             {
                 if (_transaction.Value == null)
                 {
-                    _transaction.Value = ((NpgsqlConnection)Connection).BeginTransaction(AdoIsolationLevel(isolationLevel));
+                    _transaction.Value = Connection.BeginTransaction(AdoIsolationLevel(isolationLevel));
 
                     _transactionStack.Value.Push("");
                 }

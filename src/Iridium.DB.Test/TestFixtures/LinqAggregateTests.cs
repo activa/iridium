@@ -37,6 +37,27 @@ namespace Iridium.DB.Test
         }
 
         [Test]
+        public void First()
+        {
+            InsertRecords<RecordWithSingleKey>(10, (r, i) => { r.Key = i; r.Name = i.ToString(); });
+
+            var first = DB.RecordsWithSingleKey.OrderBy(r => r.Key).First();
+            
+            Assert.That(first.Key, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Last()
+        {
+            InsertRecords<RecordWithSingleKey>(10, (r, i) => { r.Key = i; r.Name = i.ToString(); });
+
+            var last = DB.RecordsWithSingleKey.OrderBy(r => r.Key).Last();
+
+            Assert.That(last.Key, Is.EqualTo(10));
+        }
+
+
+        [Test]
         public void Count_Filtered()
         {
             InsertRecords<RecordWithSingleKey>(10, (r, i) => { r.Key = i; r.Name = i.ToString(); });
@@ -348,33 +369,33 @@ namespace Iridium.DB.Test
         [Test]
         public void Max_DateTime()
         {
-            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeField = new DateTime(2000,1,i));
+            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeField = new DateTime(2000,1,i, 0, 0, 0, DateTimeKind.Utc));
 
-            Assert.That(DB.RecordsWithAllTypes.Max(r => r.DateTimeField), Is.EqualTo(new DateTime(2000, 1, 10)));
+            Assert.That(DB.RecordsWithAllTypes.Max(r => r.DateTimeField), Is.EqualTo(new DateTime(2000, 1, 10, 0, 0, 0, DateTimeKind.Utc)));
         }
 
         [Test]
         public void Max_DateTime_Filtered()
         {
-            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeField = new DateTime(2000, 1, i));
+            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeField = new DateTime(2000, 1, i, 0, 0, 0, DateTimeKind.Utc));
 
-            Assert.That(DB.RecordsWithAllTypes.Max(r => r.DateTimeField, r => r.DateTimeField < new DateTime(2000, 1, 5)), Is.EqualTo(new DateTime(2000, 1, 4)));
+            Assert.That(DB.RecordsWithAllTypes.Max(r => r.DateTimeField, r => r.DateTimeField < new DateTime(2000, 1, 5, 0, 0, 0, DateTimeKind.Utc)), Is.EqualTo(new DateTime(2000, 1, 4, 0, 0, 0, DateTimeKind.Utc)));
         }
 
         [Test]
         public void Max_DateTime_Filtered_Where()
         {
-            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeField = new DateTime(2000, 1, i));
+            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeField = new DateTime(2000, 1, i, 0, 0, 0, DateTimeKind.Utc));
 
-            Assert.That(DB.RecordsWithAllTypes.Where(r => r.DateTimeField < new DateTime(2000, 1, 5)).Max(r => r.DateTimeField), Is.EqualTo(new DateTime(2000, 1, 4)));
+            Assert.That(DB.RecordsWithAllTypes.Where(r => r.DateTimeField < new DateTime(2000, 1, 5, 0, 0, 0, DateTimeKind.Utc)).Max(r => r.DateTimeField), Is.EqualTo(new DateTime(2000, 1, 4, 0, 0, 0, DateTimeKind.Utc)));
         }
 
         [Test]
         public void Max_DateTimeNullable()
         {
-            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeFieldNullable = new DateTime(2000, 1, i));
+            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeFieldNullable = new DateTime(2000, 1, i, 0, 0, 0, DateTimeKind.Utc));
 
-            Assert.That(DB.RecordsWithAllTypes.Max(r => r.DateTimeFieldNullable), Is.EqualTo(new DateTime(2000, 1, 10)));
+            Assert.That(DB.RecordsWithAllTypes.Max(r => r.DateTimeFieldNullable), Is.EqualTo(new DateTime(2000, 1, 10, 0, 0, 0, DateTimeKind.Utc)));
         }
 
         [Test]
@@ -389,9 +410,9 @@ namespace Iridium.DB.Test
         public void Max_DateTimeNullable_SomeNull()
         {
             InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeFieldNullable = null);
-            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeFieldNullable = new DateTime(2000, 1, i));
+            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeFieldNullable = new DateTime(2000, 1, i, 0, 0, 0, DateTimeKind.Utc));
 
-            Assert.That(DB.RecordsWithAllTypes.Max(r => r.DateTimeFieldNullable), Is.EqualTo(new DateTime(2000, 1, 10)));
+            Assert.That(DB.RecordsWithAllTypes.Max(r => r.DateTimeFieldNullable), Is.EqualTo(new DateTime(2000, 1, 10, 0, 0, 0, DateTimeKind.Utc)));
         }
 
         [Test]
@@ -681,33 +702,33 @@ namespace Iridium.DB.Test
         [Test]
         public void Min_DateTime()
         {
-            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeField = new DateTime(2000, 1, i));
+            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeField = new DateTime(2000, 1, i, 0, 0, 0, DateTimeKind.Utc));
 
-            Assert.That(DB.RecordsWithAllTypes.Min(r => r.DateTimeField), Is.EqualTo(new DateTime(2000, 1, 1)));
+            Assert.That(DB.RecordsWithAllTypes.Min(r => r.DateTimeField), Is.EqualTo(new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc)));
         }
 
         [Test]
         public void Min_DateTime_Filtered()
         {
-            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeField = new DateTime(2000, 1, i));
+            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeField = new DateTime(2000, 1, i, 0, 0, 0, DateTimeKind.Utc));
 
-            Assert.That(DB.RecordsWithAllTypes.Min(r => r.DateTimeField, r => r.DateTimeField > new DateTime(2000, 1, 5)), Is.EqualTo(new DateTime(2000, 1, 6)));
+            Assert.That(DB.RecordsWithAllTypes.Min(r => r.DateTimeField, r => r.DateTimeField > new DateTime(2000, 1, 5, 0, 0, 0, DateTimeKind.Utc)), Is.EqualTo(new DateTime(2000, 1, 6, 0, 0, 0, DateTimeKind.Utc)));
         }
 
         [Test]
         public void Min_DateTime_Filtered_Where()
         {
-            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeField = new DateTime(2000, 1, i));
+            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeField = new DateTime(2000, 1, i, 0, 0, 0, DateTimeKind.Utc));
 
-            Assert.That(DB.RecordsWithAllTypes.Where(r => r.DateTimeField > new DateTime(2000, 1, 5)).Min(r => r.DateTimeField), Is.EqualTo(new DateTime(2000, 1, 6)));
+            Assert.That(DB.RecordsWithAllTypes.Where(r => r.DateTimeField > new DateTime(2000, 1, 5, 0, 0, 0, DateTimeKind.Utc)).Min(r => r.DateTimeField), Is.EqualTo(new DateTime(2000, 1, 6, 0, 0, 0, DateTimeKind.Utc)));
         }
 
         [Test]
         public void Min_DateTimeNullable()
         {
-            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeFieldNullable = new DateTime(2000, 1, i));
+            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeFieldNullable = new DateTime(2000, 1, i, 0, 0, 0, DateTimeKind.Utc));
 
-            Assert.That(DB.RecordsWithAllTypes.Min(r => r.DateTimeFieldNullable), Is.EqualTo(new DateTime(2000, 1, 1)));
+            Assert.That(DB.RecordsWithAllTypes.Min(r => r.DateTimeFieldNullable), Is.EqualTo(new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc)));
         }
 
         [Test]
@@ -722,9 +743,9 @@ namespace Iridium.DB.Test
         public void Min_DateTimeNullable_SomeNull()
         {
             InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeFieldNullable = null);
-            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeFieldNullable = new DateTime(2000, 1, i));
+            InsertRecords<RecordWithAllTypes>(10, (r, i) => r.DateTimeFieldNullable = new DateTime(2000, 1, i, 0, 0, 0, DateTimeKind.Utc));
 
-            Assert.That(DB.RecordsWithAllTypes.Min(r => r.DateTimeFieldNullable), Is.EqualTo(new DateTime(2000, 1, 1)));
+            Assert.That(DB.RecordsWithAllTypes.Min(r => r.DateTimeFieldNullable), Is.EqualTo(new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc)));
         }
 
         [Test]

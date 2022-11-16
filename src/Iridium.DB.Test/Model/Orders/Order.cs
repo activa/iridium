@@ -12,7 +12,7 @@ namespace Iridium.DB.Test
     {
         public Order()
         {
-            OrderDate = DateTime.Now;
+            OrderDate = DateTime.UtcNow;
         }
 
         public int OrderID { get; set; }

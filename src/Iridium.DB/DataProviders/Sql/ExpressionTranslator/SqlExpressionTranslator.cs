@@ -287,12 +287,27 @@ namespace Iridium.DB
                         if (!(argument is IEnumerable enumerable))
                             throw new SqlExpressionTranslatorException(node.ToString());
 
-                        var values = enumerable.Cast<object>().Select(o => CreateParameter(o));
+                        var values = enumerable.Cast<object>().ToList();
+                        var paramNames = values.Where(o => o != null).Select(o => CreateParameter(o)).ToList();
+
+                        var inExpr = "";
 
                         if (methodName == nameof(QueryExtensions.IsNotAnyOf))
-                            return $"({arg} not in ({string.Join(",", values)}))";
+                        {
+                            if (values.Any(v => v == null))
+                                inExpr += $"{arg} is not null and ";
+
+                            inExpr += $"{arg} not in ({string.Join(",", paramNames)})";
+                        }
                         else
-                            return $"({arg} in ({string.Join(",", values)}))";
+                        {
+                            if (values.Any(v => v == null))
+                                inExpr += $"{arg} is null or ";
+
+                            inExpr += $"{arg} in ({string.Join(",", paramNames)})";
+                        }
+
+                        return $"({inExpr})";
                     }
                     case nameof(QueryExtensions.IsBetween):
                     {

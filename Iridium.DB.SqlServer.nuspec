@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>iridium.db.sqlserver</id>
-    <version>2.5.1.7220</version>
+    <version>2.5.3.11211</version>
     <authors>Philippe Leybaert</authors>
     <owners>Philippe Leybaert</owners>
     <projectUrl>http://github.com/activa/iridium</projectUrl>
@@ -14,14 +14,14 @@
     <copyright>Copyright 2015-2020 Philippe Leybaert</copyright>
     <dependencies>
       <group targetFramework="net461">
-        <dependency id="iridium" version="2.5.0.7210" />
+        <dependency id="iridium" version="2.5.3.11211" />
         <dependency id="iridium.reflection" version="2.0.1.7071" />
-        <dependency id="System.Data.SqlClient" version="4.8.1" />
+        <dependency id="System.Data.SqlClient" version="4.8.3" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="iridium" version="2.5.0.7210" />
+        <dependency id="iridium" version="2.5.3.11211" />
         <dependency id="iridium.reflection" version="2.0.1.7071" />
-        <dependency id="System.Data.SqlClient" version="4.8.1" />
+        <dependency id="System.Data.SqlClient" version="4.8.3" />
       </group>
     </dependencies>
   </metadata>

@@ -127,7 +127,8 @@ namespace Iridium.DB.Postgres
                 new {Flags = TypeFlags.Single, ColumnType = "real"},
                 new {Flags = TypeFlags.String, ColumnType = "text"},
                 new {Flags = TypeFlags.Char, ColumnType = "char(1)"},
-                new {Flags = TypeFlags.DateTime, ColumnType = "timestamp"},
+                new {Flags = TypeFlags.DateTime, ColumnType = "timestamptz"},
+                new {Flags = TypeFlags.TimeSpan, ColumnType = "interval"},
                 new {Flags = TypeFlags.Guid, ColumnType = "uuid"}
             };
 

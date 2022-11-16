@@ -18,10 +18,18 @@ namespace Iridium.DB.Test
         {
         }
 
+        // [Test]
+        // public void CheckVersion()
+        // {
+        //
+        //      var result = DB.SqlQuery("select sqlite_version() as v");
+        //      var sqliteVersion = result.First()["v"] as string;
+        // }
+
         [Test]
         public void AsyncInsert()
         {
-            const int numThreads = 100;
+            const int numThreads = 50;
 
             var failedList = new List<string>();
             var saveTasks = new Task[numThreads];
@@ -41,9 +49,21 @@ namespace Iridium.DB.Test
 
                 saveTasks[i] = task.ContinueWith(t =>
                 {
-                    if (customer.CustomerID == 0)
+                    if (!t.Result)
+                    {
                         lock (failedList)
-                            failedList.Add("CustomerID == 0");
+                            failedList.Add($"Save() failed for custumer {customer.Name}");
+
+                        return;
+                    }
+
+                    if (customer.CustomerID == 0)
+                    {
+                        lock (failedList)
+                            failedList.Add($"CustomerID == 0 for customer {customer.Name}");
+
+                        return;
+                    }
 
                     lock (ids)
                     {
@@ -82,7 +102,7 @@ namespace Iridium.DB.Test
         [Test]
         public void ParallelTest1()
         {
-            const int numThreads = 100;
+            const int numThreads = 50;
 
             Task[] tasks = new Task[numThreads];
 
@@ -529,6 +549,59 @@ namespace Iridium.DB.Test
         }
 
         [Test]
+        public void IsAnyOfIntArrayWithNull()
+        {
+            var customers = InsertRecords<Customer>(100, (customer, i) =>
+            {
+                customer.Name = $"Customer {i + 1}";
+
+                if (i % 2 == 0)
+                    customer.Age = i;
+                else
+                    customer.Age = null;
+            });
+
+            int?[] ages = new[] { 4, 6, (int?)null };
+
+            var filtererdCustomers = DB.Customers.Where(c => c.Age.IsAnyOf(ages)).OrderBy(c => c.CustomerID).ToArray();
+
+            Assert.That(filtererdCustomers.Length, Is.EqualTo(52));
+
+            Assert.That(filtererdCustomers[0].Age, Is.Null);
+            Assert.That(filtererdCustomers[1].Age, Is.Null);
+            Assert.That(filtererdCustomers[2].Age, Is.EqualTo(4));
+            Assert.That(filtererdCustomers[3].Age, Is.Null);
+            Assert.That(filtererdCustomers[4].Age, Is.EqualTo(6));
+            Assert.That(filtererdCustomers[5].Age, Is.Null);
+            Assert.That(filtererdCustomers[6].Age, Is.Null);
+        }
+
+        [Test]
+        public void IsNotAnyOfIntArrayWithNull()
+        {
+            var customers = InsertRecords<Customer>(100, (customer, i) =>
+            {
+                customer.Name = $"Customer {i + 1}";
+
+                if (i % 2 == 0)
+                    customer.Age = i;
+                else
+                    customer.Age = null;
+            });
+
+            int?[] ages = new[] { 4, 6, (int?)null };
+
+            var filtererdCustomers = DB.Customers.Where(c => c.Age.IsNotAnyOf(ages)).OrderBy(c => c.CustomerID).ToArray();
+
+            Assert.That(filtererdCustomers.Length, Is.EqualTo(48));
+
+            Assert.That(filtererdCustomers[0].Age, Is.EqualTo(2));
+            Assert.That(filtererdCustomers[1].Age, Is.EqualTo(8));
+            Assert.That(filtererdCustomers[2].Age, Is.EqualTo(10));
+        }
+
+
+        [Test]
         public void IsAnyOfIntEnumerable()
         {
             var customers = InsertRecords<Customer>(100, (customer, i) => customer.Name = $"Customer {i + 1}");
@@ -901,7 +974,44 @@ namespace Iridium.DB.Test
                 Assert.That(sqlProvider.SqlLogger, Is.Null);
             }
         }
-
     }
 
+
+    [TestFixture("memory", Category = "memory")]
+    [TestFixture("sqlitemem", Category = "sqlite-mem")]
+    [TestFixture("sqlserver", Category = "sqlserver")]
+    [TestFixture("sqlite", Category = "sqlite")]
+    [TestFixture("mysql", Category = "mysql")]
+    [TestFixture("postgres", Category = "postgres")]
+    public class ProjectionTests : TestFixtureWithEmptyDB
+    {
+        public ProjectionTests(string driver) : base(driver)
+        {
+        }
+
+        [Test]
+        public void Test1()
+        {
+            var customers = InsertRecords<Customer>(100, (customer, i) =>
+            {
+                customer.Name = $"Customer {(char)('A' + 1)}";
+                customer.Age = i + 1;
+            });
+
+            string s = "";
+
+            var loggingContext = DB.StartSqlLogging();
+
+            var filtererdCustomers = DB.Customers.Where(c => c.Age.IsBetween(12, 20)).OrderByDescending(c => c.CustomerID);
+
+            var ids = filtererdCustomers.Select(c => c.Age).ToList();
+
+            
+            DB.StopSqlLogging(loggingContext);
+
+
+
+
+        }
+    }
 }

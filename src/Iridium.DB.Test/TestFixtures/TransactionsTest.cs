@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace Iridium.DB.Test
@@ -13,6 +14,22 @@ namespace Iridium.DB.Test
     {
         public TransactionsTest(string driver) : base(driver)
         {
+        }
+
+        [Test]
+        public async Task MultiThreadedTransactionRollback()
+        {
+            int numThreads = 10;
+
+            var tasks = new Task[numThreads];
+
+            for (int i = 0; i < numThreads; i++)
+            {
+                tasks[i] = Task.Factory.StartNew(TransactionRollback);
+            }
+
+            await Task.WhenAll(tasks);
+
         }
 
         [Test]

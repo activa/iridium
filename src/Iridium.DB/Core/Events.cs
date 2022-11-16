@@ -38,32 +38,4 @@ namespace Iridium.DB
         IBoolEventWrapper<T> Saving { get; }
         IBoolEventWrapper<T> Deleting { get; }
     }
-
-    public class ObjectEventArgs<T> : EventArgs
-    {
-        public T Value { get; set; }
-
-        public ObjectEventArgs()
-        {
-        }
-
-        public ObjectEventArgs(T value)
-        {
-            Value = value;
-        }
-    }
-
-    public class ObjectWithCancelEventArgs<T> : ObjectEventArgs<T>
-    {
-        public bool Cancel { get; set; }
-
-        public ObjectWithCancelEventArgs()
-        {
-        }
-
-        public ObjectWithCancelEventArgs(T value)
-        {
-            Value = value;
-        }
-    }
 }

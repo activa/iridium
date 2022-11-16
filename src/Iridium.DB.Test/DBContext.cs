@@ -192,8 +192,8 @@ namespace Iridium.DB.Test
 
     public class SqlServerStorage : DBContext
     {
-        public SqlServerStorage() : base(new SqlServerDataProvider($"Server={SERVERS.SQLSERVER};Database=velox;UID=velox;PWD=velox")) { }
-
+//        public SqlServerStorage() : base(new SqlServerDataProvider($"Server={SERVERS.SQLSERVER};Database=velox;UID=velox;PWD=velox")) { }
+        public SqlServerStorage() : base(new SqlServerDataProvider($"Server=tcp:elem77.database.windows.net,1433;Initial Catalog=aviation;Persist Security Info=False;User ID=master77;Password=ugDnrFeXb4wDBGf4JPH;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;")) { }
         public override string ToString() => "sqlserver";
     }
 

@@ -56,7 +56,7 @@ namespace Iridium.DB.SqlServer
             {
                 if (_transaction.Value == null)
                 {
-                    _transaction.Value = ((SqlConnection) Connection).BeginTransaction(AdoIsolationLevel(isolationLevel));
+                    _transaction.Value = Connection.BeginTransaction(AdoIsolationLevel(isolationLevel));
 
                     _transactionStack.Value.Push("");
                 }

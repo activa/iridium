@@ -221,7 +221,7 @@ namespace Iridium.DB
                 if (ignoreAttribute != null)
                     continue;
 
-                if (!field.Type.Inspector().ImplementsOrInherits<IEntity>() && relationAttribute == null && !isDataSet)
+                if (relationAttribute == null && !isDataSet)
                     continue;
 
                 Field foreignField;
@@ -254,6 +254,9 @@ namespace Iridium.DB
                 else
                 {
                     Type objectType = field.Type;
+
+                    if (objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof(Lazy<>))
+                        objectType = objectType.GenericTypeArguments[0];
 
                     foreignSchema = Repository.Context.GetSchema(objectType) ?? throw new SchemaException($"Could not create relation {ObjectType.Name}.{field.Name}");
 

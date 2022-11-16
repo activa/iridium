@@ -60,7 +60,7 @@ namespace Iridium.DB.MySql
             {
                 if (_transaction.Value == null)
                 {
-                    _transaction.Value = ((MySqlConnection)Connection).BeginTransaction(AdoIsolationLevel(isolationLevel));
+                    _transaction.Value = Connection.BeginTransaction(AdoIsolationLevel(isolationLevel));
 
                     _transactionStack.Value.Push("");
                 }

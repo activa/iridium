@@ -31,12 +31,6 @@ namespace Iridium.DB
 {
     public static partial class Ir
     {
-        [Obsolete("Context-less data access will be removed in a future release")]
-        public static IDataSet<T> DataSet<T>()
-        {
-            return StorageContext.Instance.DataSet<T>();
-        }
-
         // TODO: move this somewhere else
 
         public static List<T> CreateEmptyList<T>(T templateValue) { return new List<T>(); } // TODO: move to Core

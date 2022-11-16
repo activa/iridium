@@ -18,8 +18,6 @@ namespace Iridium.DB.Test
         public void CloseContext()
         {
             DB.Dispose();
-
-            StorageContext.Instance = null;
         }
 
         protected TestFixture(string driver)
@@ -27,8 +25,6 @@ namespace Iridium.DB.Test
             Driver = driver;
 
             DB = DBContext.GetContextFactory(driver)();
-
-            StorageContext.Instance = DB;
 
             DB.CreateAllTables();
             DB.PurgeAll();

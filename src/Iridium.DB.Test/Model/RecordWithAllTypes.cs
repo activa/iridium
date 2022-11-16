@@ -29,7 +29,7 @@ namespace Iridium.DB.Test
 
         public byte[] BlobField;
 
-        public DateTime DateTimeField = new DateTime(1970,1,1);
+        public DateTime DateTimeField = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         public DateTime? DateTimeFieldNullable;
 
         public TestEnum EnumField;

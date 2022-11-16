@@ -33,7 +33,7 @@ using Iridium.Reflection;
 
 namespace Iridium.DB
 {
-    public class StorageContext : IDisposable
+    public class StorageContext : IStorageContext, ISqlStorageContext
     {
         private readonly SafeDictionary<Type, Repository> _repositories = new SafeDictionary<Type, Repository>();
 
@@ -60,39 +60,6 @@ namespace Iridium.DB
             }
 
             GenerateRelations();
-
-            Instance = this;
-        }
-
-        private static StorageContext _globalInstance;
-        private static int _instanceCount;
-        private static readonly object _staticLock = new object();
-
-        public static StorageContext Instance
-        {
-            get
-            {
-                lock (_staticLock)
-                {
-                    if (_instanceCount > 1)
-                        throw new Exception("Can't use global context when multiple contexts are used");
-
-                    return _globalInstance;
-                }
-            }
-            set
-            {
-                lock (_staticLock)
-                {
-                    if (_globalInstance != value)
-                        if (value != null)
-                            _instanceCount++;
-                        else
-                            _instanceCount--;
-
-                    _globalInstance = value;
-                }
-            }
         }
 
         private void GenerateRelations()
@@ -192,19 +159,6 @@ namespace Iridium.DB
         internal Repository<T> GetRepository<T>()
         {
             return (Repository<T>) GetRepository(typeof(T));
-            // lock (_repositories)
-            // {
-            //     var repository = _repositories[typeof(T)];
-            //
-            //     if (repository == null)
-            //     {
-            //         _repositories[typeof(T)] = (repository = new Repository<T>(this));
-            //
-            //         GenerateRelations();
-            //     }
-            //
-            //     return (Repository<T>) repository;
-            // }
         }
 
         internal Repository GetRepository(Type entityType)
@@ -435,6 +389,11 @@ namespace Iridium.DB
                 return sqlProvider.SqlQuery(sql, QueryParameterCollection.FromObject(parameters)).Select(entity => entity.AsDictionary());
 
             throw new NotSupportedException();
+        }
+
+        public Task<List<Dictionary<string, object>>> SqlQueryAsync(string sql, object parameters = null)
+        {
+            return Task.Run(() => SqlQuery(sql, parameters).ToList());
         }
 
         public T SqlQueryScalar<T>(string sql, object parameters = null) where T : new()

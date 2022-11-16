@@ -25,8 +25,11 @@
 #endregion
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace Iridium.DB
 {
@@ -44,6 +47,8 @@ namespace Iridium.DB
         IDataSet<T> OrderBy(QueryExpression expression, SortOrder sortOrder = SortOrder.Ascending);
         IDataSet<T> Skip(int n);
         IDataSet<T> Take(int n);
+
+        IProjectedDataSet<TResult,T> Select<TResult>(Expression<Func<T, TResult>> selector);
 
         T First();
         T First(Expression<Func<T, bool>> filter);
@@ -113,8 +118,101 @@ namespace Iridium.DB
 
         bool DeleteAll();
         bool Delete(Expression<Func<T, bool>> filter);
-        //bool Delete(QueryExpression filterExpression);
 
         IObjectEvents<T> Events { get; }
+
+        // Async methods
+
+        Task<T> FirstAsync();
+        Task<T> FirstAsync(Expression<Func<T, bool>> filter);
+        Task<T> FirstOrDefaultAsync();
+        Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> filter);
+
+        Task<bool> AnyAsync(Expression<Func<T, bool>> filter);
+        Task<bool> AllAsync(Expression<Func<T, bool>> filter);
+        Task<bool> AnyAsync();
+
+        Task<long> CountAsync();
+        Task<long> CountAsync(Expression<Func<T, bool>> filter);
+
+        Task<TScalar> MaxAsync<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter);
+        Task<TScalar> MinAsync<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter);
+        Task<TScalar> SumAsync<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter);
+
+        Task<TScalar> MaxAsync<TScalar>(Expression<Func<T, TScalar>> expression);
+        Task<TScalar> MinAsync<TScalar>(Expression<Func<T, TScalar>> expression);
+        Task<TScalar> SumAsync<TScalar>(Expression<Func<T, TScalar>> expression);
+
+        Task<double> AverageAsync(Expression<Func<T, int>> expression);
+        Task<double?> AverageAsync(Expression<Func<T, int?>> expression);
+        Task<double> AverageAsync(Expression<Func<T, double>> expression);
+        Task<double?> AverageAsync(Expression<Func<T, double?>> expression);
+        Task<double> AverageAsync(Expression<Func<T, long>> expression);
+        Task<double?> AverageAsync(Expression<Func<T, long?>> expression);
+        Task<decimal> AverageAsync(Expression<Func<T, decimal>> expression);
+        Task<decimal?> AverageAsync(Expression<Func<T, decimal?>> expression);
+
+        Task<double> AverageAsync(Expression<Func<T, int>> expression, Expression<Func<T, bool>> filter);
+        Task<double?> AverageAsync(Expression<Func<T, int?>> expression, Expression<Func<T, bool>> filter);
+        Task<double> AverageAsync(Expression<Func<T, double>> expression, Expression<Func<T, bool>> filter);
+        Task<double?> AverageAsync(Expression<Func<T, double?>> expression, Expression<Func<T, bool>> filter);
+        Task<double> AverageAsync(Expression<Func<T, long>> expression, Expression<Func<T, bool>> filter);
+        Task<double?> AverageAsync(Expression<Func<T, long?>> expression, Expression<Func<T, bool>> filter);
+        Task<decimal> AverageAsync(Expression<Func<T, decimal>> expression, Expression<Func<T, bool>> filter);
+        Task<decimal?> AverageAsync(Expression<Func<T, decimal?>> expression, Expression<Func<T, bool>> filter);
+
+        Task PurgeAsync();
+
+        Task<T> ReadAsync(object key, params Expression<Func<T, object>>[] relationsToLoad);
+        Task<T> ReadAsync(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] relationsToLoad);
+        Task<T> LoadAsync(T obj, object key, params Expression<Func<T, object>>[] relationsToLoad);
+
+        Task<bool> SaveAsync(T obj, params Expression<Func<T, object>>[] relationsToSave);
+        Task<bool> UpdateAsync(T obj, params Expression<Func<T, object>>[] relationsToSave);
+        Task<bool> InsertAsync(T obj, params Expression<Func<T, object>>[] relationsToSave);
+        Task<bool> InsertAsync(T obj, bool? deferSave, params Expression<Func<T, object>>[] relationsToSave);
+        Task<bool> AddAsync(T obj);
+
+        Task<bool> InsertOrUpdateAsync(T obj, params Expression<Func<T, object>>[] relationsToSave);
+        Task<bool> DeleteAsync(T obj);
+
+        Task<bool> SaveAsync(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave);
+        Task<bool> InsertOrUpdateAsync(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave);
+        Task<bool> InsertAsync(IEnumerable<T> objects, bool? deferSave, params Expression<Func<T, object>>[] relationsToSave);
+        Task<bool> UpdateAsync(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave);
+        Task<bool> DeleteAsync(IEnumerable<T> objects);
+
+        Task<bool> DeleteAllAsync();
+        Task<bool> DeleteAsync(Expression<Func<T, bool>> filter);
+
+
+
+    }
+
+    public interface IProjectedDataSet<T, TSource> : IEnumerable<T>
+    {
+    }
+
+    public class ProjectedDataSet<T,TSource> : IProjectedDataSet<T, TSource>
+    {
+        private IDataSet<TSource> _dataSet;
+        private Expression<Func<TSource, T>> _selector;
+
+        public ProjectedDataSet(IDataSet<TSource> dataSet, Expression<Func<TSource, T>> selector)
+        {
+            _dataSet = dataSet;
+            _selector = selector;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return Enumerable.Select(_dataSet, _selector.Compile()).GetEnumerator();
+
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

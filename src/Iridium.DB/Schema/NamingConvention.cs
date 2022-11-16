@@ -74,9 +74,6 @@ namespace Iridium.DB
 
         public virtual TableSchema.Field GetRelationField(TableSchema.Relation relation)
         {
-            //if (relation.LocalSchema.PrimaryKeys.Length < 1 || relation.ForeignSchema.PrimaryKeys.Length < 1)
-            //    return null;
-
             string relationKeyName = (relation.IsToOne ? ManyToOneLocalKeyName : OneToManyForeignKeyName)
                 .Replace(RELATION_CLASS_PRIMARYKEY, relation.ForeignSchema.PrimaryKeys.Length > 0 ? relation.ForeignSchema.PrimaryKeys[0].FieldName : "?")
                 .Replace(RELATION_CLASS_NAME, relation.ForeignSchema.ObjectType.Name)
