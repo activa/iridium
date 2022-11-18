@@ -28,12 +28,14 @@ namespace Iridium.DB
 {
     public class QuerySpec
     {
-        public QuerySpec(ICodeQuerySpec code, INativeQuerySpec native)
+        public QuerySpec(ICodeQuerySpec code, INativeQuerySpec native, ProjectionInfo projection)
         {
             Code = code;
             Native = native;
+            Projection = projection;
         }
 
+        public ProjectionInfo Projection { get; private set; }
         public ICodeQuerySpec Code { get; private set; }
         public INativeQuerySpec Native { get; private set; }
     }

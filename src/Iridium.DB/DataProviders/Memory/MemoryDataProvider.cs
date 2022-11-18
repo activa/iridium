@@ -32,6 +32,7 @@ using Iridium.Reflection;
 
 namespace Iridium.DB
 {
+    /*
     public class MemoryDataProvider : IDataProvider
     {
         private class CompositeKey
@@ -240,7 +241,7 @@ namespace Iridium.DB
             throw new NotSupportedException();
         }
 
-        public QuerySpec CreateQuerySpec(FilterSpec filter, ScalarSpec expression, SortOrderSpec sortOrder, int? skip, int? take, TableSchema schema)
+        public QuerySpec CreateQuerySpec(FilterSpec filter, ScalarSpec expression, SortOrderSpec sortOrder, ProjectionSpec projection, int? skip, int? take, TableSchema schema)
         {
             throw new NotSupportedException();
         }
@@ -308,4 +309,5 @@ namespace Iridium.DB
             _buckets.Clear();
         }
     }
+    */
 }

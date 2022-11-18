@@ -43,7 +43,7 @@ namespace Iridium.DB
 
         public bool Equals(SqlJoinPart other)
         {
-            return Schema == other.Schema && Field == other.Field;
+            return other != null && Schema == other.Schema && Field == other.Field;
         }
 
         public override int GetHashCode()

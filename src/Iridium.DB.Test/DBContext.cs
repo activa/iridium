@@ -165,7 +165,7 @@ namespace Iridium.DB.Test
                 { "sqlserver", () => new SqlServerStorage() },
                 { "mysql", () => new MySqlStorage() },
                 { "postgres", () => new PostgresStorage() },
-                { "memory", () => new MemoryStorage() }
+                // { "memory", () => new MemoryStorage() }
             };
 
         }
@@ -209,10 +209,10 @@ namespace Iridium.DB.Test
         public override string ToString() => "sqlite-memory";
     }
 
-    public class MemoryStorage : DBContext
-    {
-        public MemoryStorage() : base(new MemoryDataProvider()) { }
-        public override string ToString() => "memory";
-
-    }
+    // public class MemoryStorage : DBContext
+    // {
+    //     public MemoryStorage() : base(new MemoryDataProvider()) { }
+    //     public override string ToString() => "memory";
+    //
+    // }
 }

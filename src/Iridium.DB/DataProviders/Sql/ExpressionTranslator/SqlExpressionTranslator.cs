@@ -78,7 +78,6 @@ namespace Iridium.DB
 
         public HashSet<SqlJoinDefinition> Joins => CurrentQuery.Joins;
 
-
         private void PrepareForNewExpression(ParameterExpression rootIterator, string tableAlias, TableSchema schema)
         {
             if (_rootIterator == null)
@@ -145,6 +144,49 @@ namespace Iridium.DB
             return null;
         }
 
+        // public void TranslateProjection(QueryExpression queryExpression)
+        // {
+        //     var lambda = ((LambdaQueryExpression)queryExpression).Expression;
+        //
+        //     PrepareForNewExpression(lambda.Parameters[0], _tableAlias, _schema);
+        //
+        //     try
+        //     {
+        //         Translate(lambda);
+        //     }
+        //     catch (SqlExpressionTranslatorException)
+        //     {
+        //         return null; // we couldn't translate the given expression
+        //     }
+        //
+        //     Expression expression = lambda;
+        //
+        //     List<string> fields = new List<string>();
+        //
+        //     for (;;)
+        //     {
+        //         expression = PartialEvaluator.Eval(expression);
+        //
+        //         if (expression.NodeType == ExpressionType.MemberAccess)
+        //         {
+        //             fields.Add(TranslateMember((MemberExpression)expression));
+        //         }
+        //         else
+        //         {
+        //             
+        //         }
+        //     }
+        //
+        //     try
+        //     {
+        //         return Translate(lambda);
+        //     }
+        //     catch (SqlExpressionTranslatorException)
+        //     {
+        //         return null; // we couldn't translate the given expression
+        //     }
+        // }
+        //
 
         public string Translate(QueryExpression queryExpression)
         {
@@ -249,10 +291,12 @@ namespace Iridium.DB
         private string TranslateMethodCall(MethodCallExpression node)
         {
             var methodName = node.Method.Name;
+            var methodDeclaringType = node.Method.DeclaringType;
             MemberExpression leftExpression = null;
             var arguments = new List<LambdaExpression>();
 
-            if (node.Method.DeclaringType == typeof(string))
+
+            if (methodDeclaringType == typeof(string))
             {
                 string arg = Translate(node.Object);
                 
@@ -273,7 +317,7 @@ namespace Iridium.DB
                 throw new SqlExpressionTranslatorException(node.ToString());
             }
 
-            if (node.Method.DeclaringType == typeof(QueryExtensions) && node.Arguments.Count > 1)
+            if (methodDeclaringType == typeof(QueryExtensions) && node.Arguments.Count > 1)
             {
                 string arg = Translate(node.Arguments[0]);
 
@@ -324,13 +368,13 @@ namespace Iridium.DB
                 }
             }
 
-            if (node.Method.DeclaringType.IsConstructedGenericType && node.Method.DeclaringType.GetGenericTypeDefinition() == typeof(IDataSet<>))
+            if (methodDeclaringType.IsConstructedGenericType && methodDeclaringType.GetGenericTypeDefinition() == typeof(IDataSet<>))
             {
                 leftExpression = node.Object as MemberExpression;
                 arguments.AddRange(node.Arguments.Select(UnQuote).OfType<LambdaExpression>());
             }
 
-            if (node.Method.DeclaringType == typeof(Enumerable) && node.Arguments.Count > 0)
+            if (methodDeclaringType == typeof(Enumerable) && node.Arguments.Count > 0)
             {
                 leftExpression = node.Arguments[0] as MemberExpression;
                 arguments.AddRange(node.Arguments.Skip(1).Select(UnQuote).OfType<LambdaExpression>());
@@ -385,12 +429,16 @@ namespace Iridium.DB
 
             if (sql != null)
             {
+                var sqlField = _sqlDialect.QuoteField(sql);
+
                 if (node.Type == typeof (bool))
                 {
-                    return TranslateTrue(_sqlDialect.QuoteField(sql));
+                    return TranslateTrue(sqlField);
                 }
                 else
-                    return _sqlDialect.QuoteField(sql);
+                {
+                    return sqlField;
+                }
             }
 
             return null;

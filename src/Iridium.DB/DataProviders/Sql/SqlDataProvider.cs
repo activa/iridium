@@ -103,17 +103,19 @@ namespace Iridium.DB
             return record[valueAlias];
         }
 
-        public IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec filter, TableSchema schema)
+        public IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec filter, TableSchema schema, ProjectionInfo projection)
         {
             try
             {
                 SqlQuerySpec sqlQuerySpec = ((SqlQuerySpec) filter) ?? new SqlQuerySpec {FilterSql = null, TableAlias = SqlNameGenerator.NextTableAlias()};
 
-                var fieldList = (from f in schema.FieldsByFieldName.Values select new {Field = f, Alias = SqlNameGenerator.NextFieldAlias()}).ToArray();
+                var fieldList = (from f in projection.Fields(schema) select new { Field = f, Alias = SqlNameGenerator.NextFieldAlias() }).ToArray();
+
+                var columns = fieldList.Select(field => new SqlColumnNameWithAlias(sqlQuerySpec.TableAlias + "." + field.Field.MappedName, field.Alias)).ToArray();
 
                 string sql = SqlDialect.SelectSql(
                     new SqlTableNameWithAlias(schema.MappedName, sqlQuerySpec.TableAlias),
-                    fieldList.Select(field => new SqlColumnNameWithAlias(sqlQuerySpec.TableAlias + "." + field.Field.MappedName, field.Alias)).ToArray(),
+                    columns,
                     sqlQuerySpec.FilterSql,
                     sqlQuerySpec.Joins,
                     sqlQuerySpec.SortExpressionSql,
@@ -137,13 +139,17 @@ namespace Iridium.DB
             public TableSchema.Field Field;
         }
         
-        public IEnumerable<SerializedEntity> GetObjectsWithPrefetch(INativeQuerySpec filter, TableSchema schema, IEnumerable<TableSchema.Relation> prefetchRelations, out IEnumerable<Dictionary<TableSchema.Relation, SerializedEntity>> relatedEntities)
+        public IEnumerable<SerializedEntity> GetObjectsWithPrefetch(INativeQuerySpec filter, TableSchema schema, ProjectionInfo projection, IEnumerable<TableSchema.Relation> prefetchRelations, out IEnumerable<Dictionary<TableSchema.Relation, SerializedEntity>> relatedEntities)
         {
             try
             {
                 SqlQuerySpec sqlQuerySpec = ((SqlQuerySpec)filter) ?? new SqlQuerySpec { FilterSql = null, TableAlias = SqlNameGenerator.NextTableAlias() };
 
-                var fieldList = (from f in schema.FieldsByFieldName.Values select new { Field = f, Alias = SqlNameGenerator.NextFieldAlias() }).ToList();
+                var fields = new HashSet<TableSchema.Field>(projection.Fields(schema));
+                var rootFields = new HashSet<TableSchema.Field>(fields);
+                rootFields.IntersectWith(schema.Fields);
+
+                var fieldList = (from f in rootFields select new { Field = f, Alias = SqlNameGenerator.NextFieldAlias() }).ToList();
 
                 var joins = new HashSet<SqlJoinDefinition>(sqlQuerySpec.Joins);
                 var fieldsByRelation = new Dictionary<TableSchema.Relation, PrefetchFieldDefinition[]>();
@@ -169,8 +175,15 @@ namespace Iridium.DB
                         joins.Add(sqlJoin);
                     }
 
+                    var foreignFields = new HashSet<TableSchema.Field>(prefetchRelation.ForeignSchema.Fields);
 
-                    var relationFields = prefetchRelation.ForeignSchema.Fields.Select(f => new PrefetchFieldDefinition {Field = f, FieldAlias = SqlNameGenerator.NextFieldAlias(), TableAlias = sqlJoin.Right.Alias}).ToArray();
+                    if (projection != null)
+                    {
+                        foreignFields.IntersectWith(fields);
+                        foreignFields.Add(prefetchRelation.ForeignField);
+                    }
+
+                    var relationFields = foreignFields.Select(f => new PrefetchFieldDefinition {Field = f, FieldAlias = SqlNameGenerator.NextFieldAlias(), TableAlias = sqlJoin.Right.Alias}).ToArray();
 
                     fieldsByRelation[prefetchRelation] = relationFields;
                     foreignKeyAliases[prefetchRelation] = relationFields.First(f => f.Field == prefetchRelation.ForeignField).FieldAlias;
@@ -380,7 +393,7 @@ namespace Iridium.DB
         }
 
         
-        public QuerySpec CreateQuerySpec(FilterSpec filterSpec, ScalarSpec scalarSpec, SortOrderSpec sortSpec, int? skip, int? take, TableSchema schema)
+        public QuerySpec CreateQuerySpec(FilterSpec filterSpec, ScalarSpec scalarSpec, SortOrderSpec sortSpec, ProjectionSpec projectionSpec, int? skip, int? take, TableSchema schema)
         {
             var tableAlias = SqlNameGenerator.NextTableAlias();
 
@@ -407,10 +420,18 @@ namespace Iridium.DB
             }
             
             string expressionSql = null;
+            ProjectionInfo projectionInfo = null;
 
             if (scalarSpec != null)
             {
                 expressionSql = sqlTranslator.Translate(scalarSpec.Expression);
+            }
+
+            if (projectionSpec != null)
+            {
+                var projectionFinder = new ProjectionExpressionParser(schema);
+
+                projectionInfo = projectionFinder.FindFields(((LambdaQueryExpression)projectionSpec.Expression).Expression);
             }
 
             string sortSql = null;
@@ -443,7 +464,7 @@ namespace Iridium.DB
                 sqlQuery.Take = null;
             }
 
-            return new QuerySpec(codeQuerySpec, sqlQuery);
+            return new QuerySpec(codeQuerySpec, sqlQuery, projectionInfo);
         }
         
         public bool SupportsQueryTranslation(QueryExpression expression)

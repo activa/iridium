@@ -7,18 +7,16 @@ namespace Iridium.DB
 {
     public class ProjectionSpec
     {
-        public readonly List<QueryExpression> Expressions = new List<QueryExpression>();
+        public readonly QueryExpression Expression;
 
         public ProjectionSpec(LambdaExpression lambda)
         {
-            if (lambda != null)
-                Expressions.Add(new LambdaQueryExpression(lambda));
+            Expression = new LambdaQueryExpression(lambda);
         }
 
         public ProjectionSpec(QueryExpression queryExpression)
         {
-            if (queryExpression != null)
-                Expressions.Add(queryExpression);
+            Expression = queryExpression;
         }
     }
 }

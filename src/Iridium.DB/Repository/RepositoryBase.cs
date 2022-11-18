@@ -50,7 +50,7 @@ namespace Iridium.DB
         {
             var relations = Schema.BuildPreloadRelationSet();
 
-            var objects = from o in DataProvider.GetObjects(filter.Native, Schema)
+            var objects = from o in DataProvider.GetObjects(filter.Native, Schema, filter.Projection)
                           select Ir.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance(Schema.ObjectType), o), relations);
 
             if (parentRelation?.ReverseRelation != null)
@@ -157,12 +157,21 @@ namespace Iridium.DB
             DataProvider.Purge(Schema);
         }
 
-        internal QuerySpec CreateQuerySpec(FilterSpec filter, ScalarSpec scalarSpec = null, int? skip = null, int? take = null, SortOrderSpec sortSpec = null)
+        internal QuerySpec CreateQuerySpec(FilterSpec filter, ScalarSpec scalarSpec = null, int? skip = null, int? take = null, SortOrderSpec sortSpec = null, ProjectionSpec projectionSpec = null)
         {
             if (DataProvider.SupportsQueryTranslation())
-                return DataProvider.CreateQuerySpec(filter, scalarSpec, sortSpec, skip, take, Schema);
+                return DataProvider.CreateQuerySpec(filter, scalarSpec, sortSpec, projectionSpec, skip, take, Schema);
 
-            var querySpec = new QuerySpec(new CodeQuerySpec(), null);
+            ProjectionInfo projectionInfo = null;
+
+            if (projectionSpec != null)
+            {
+                var projectionFinder = new ProjectionExpressionParser(Schema);
+                
+                projectionInfo = projectionFinder.FindFields(((LambdaQueryExpression)projectionSpec.Expression).Expression);
+            }
+
+            var querySpec = new QuerySpec(new CodeQuerySpec(), null, projectionInfo);
 
             var codeQuerySpec = (CodeQuerySpec) querySpec.Code;
 

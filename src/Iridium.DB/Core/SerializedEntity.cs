@@ -33,7 +33,7 @@ namespace Iridium.DB
 {
     public class SerializedEntity
     {
-        private static ThreadLocal<Dictionary<Type,MemberInspector[]>> _membersCache = new ThreadLocal<Dictionary<Type, MemberInspector[]>>(() => new Dictionary<Type, MemberInspector[]>());
+        private static readonly ThreadLocal<Dictionary<Type,MemberInspector[]>> _membersCache = new(() => new Dictionary<Type, MemberInspector[]>());
 
         private readonly Dictionary<string, object> _dic;
 

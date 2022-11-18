@@ -32,13 +32,13 @@ namespace Iridium.DB
     public interface IDataProvider : IDisposable
     {
         object GetScalar(Aggregate aggregate, INativeQuerySpec nativeQuerySpec, TableSchema schema);
-        IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec filter, TableSchema schema);
-        IEnumerable<SerializedEntity> GetObjectsWithPrefetch(INativeQuerySpec filter, TableSchema schema, IEnumerable<TableSchema.Relation> prefetchRelations, out IEnumerable<Dictionary<TableSchema.Relation, SerializedEntity>> relatedEntities);
+        IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec filter, TableSchema schema, ProjectionInfo projection);
+        IEnumerable<SerializedEntity> GetObjectsWithPrefetch(INativeQuerySpec filter, TableSchema schema, ProjectionInfo projection, IEnumerable<TableSchema.Relation> prefetchRelations, out IEnumerable<Dictionary<TableSchema.Relation, SerializedEntity>> relatedEntities);
         ObjectWriteResult WriteObject(SerializedEntity o, bool? createNew, TableSchema schema);
         SerializedEntity ReadObject(Dictionary<string,object> keys, TableSchema schema);
         bool DeleteObject(SerializedEntity o, TableSchema schema);
         bool DeleteObjects(INativeQuerySpec filter, TableSchema schema);
-        QuerySpec CreateQuerySpec(FilterSpec filter, ScalarSpec scalarEpression, SortOrderSpec sortOrder, int? skip, int? take, TableSchema schema);
+        QuerySpec CreateQuerySpec(FilterSpec filter, ScalarSpec scalarEpression, SortOrderSpec sortOrder, ProjectionSpec projectionSpec, int? skip, int? take, TableSchema schema);
         void Purge(TableSchema schema);
 
         bool SupportsQueryTranslation(QueryExpression expression = null);

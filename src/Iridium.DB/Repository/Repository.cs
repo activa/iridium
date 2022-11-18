@@ -141,7 +141,7 @@ namespace Iridium.DB
 
             var relations = Schema.BuildPreloadRelationSet();
 
-            var objects = from o in DataProvider.GetObjects(querySpec.Native, Schema)
+            var objects = from o in DataProvider.GetObjects(querySpec.Native, Schema, null)
                           let x = Ir.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance<T>(), o), relations)
                           where querySpec.Code == null || querySpec.Code.IsFilterMatch(x)
                           select x;
@@ -166,12 +166,20 @@ namespace Iridium.DB
 
             var relations = Schema.BuildPreloadRelationSet(LambdaRelationFinder.FindRelations(relationLambdas, Schema));
 
+            if (filter.Projection is { RelationsReferenced: { } })
+            {
+                if (relations != null) 
+                    relations.UnionWith(filter.Projection.RelationsReferenced);
+                else
+                    relations = filter.Projection.RelationsReferenced;
+            }
+
             var prefetchRelations = relations?.Where(r => r.IsToOne && r.LocalSchema == Schema).ToList();
 
-            if (prefetchRelations != null && prefetchRelations.Count > 0 && DataProvider.SupportsRelationPrefetch)
+            if (prefetchRelations is { Count: > 0 } && DataProvider.SupportsRelationPrefetch)
             {
                 objects = DataProvider
-                    .GetObjectsWithPrefetch(filter.Native, Schema, prefetchRelations, out var relatedEntities)
+                    .GetObjectsWithPrefetch(filter.Native, Schema, filter.Projection, prefetchRelations, out var relatedEntities)
                     .Select(entity => Schema.UpdateObject(Activator.CreateInstance<T>(), entity))
                     .Zip(relatedEntities, (obj, relationEntities) =>
                     {
@@ -189,7 +197,7 @@ namespace Iridium.DB
             }
             else
             {
-                objects = from o in DataProvider.GetObjects(filter.Native, Schema) select Ir.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance<T>(), o), relations);
+                objects = from o in DataProvider.GetObjects(filter.Native, Schema, filter.Projection) select Ir.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance<T>(), o), relations);
             }
 
             if (parentRelation?.ReverseRelation != null)
@@ -239,7 +247,7 @@ namespace Iridium.DB
             if (filter.Native != null)
                 return DataProvider.DeleteObjects(filter.Native, Schema);
 
-            var objects = from o in DataProvider.GetObjects(null, Schema)
+            var objects = from o in DataProvider.GetObjects(null, Schema, null)
                           let x = Schema.UpdateObject(Activator.CreateInstance<T>(), o)
                           where filter.Code.IsFilterMatch(x)
                           select x;

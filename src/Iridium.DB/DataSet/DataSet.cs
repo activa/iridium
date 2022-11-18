@@ -51,7 +51,7 @@ namespace Iridium.DB
             _parentObject = parentObject;
         }
 
-        private DataSet(DataSet<T,TImpl> baseDataSet, FilterSpec newFilterSpec = null, SortOrderSpec newSortSpec = null, IEnumerable<Expression<Func<T,object>>> additionalRelations = null, IEnumerable<Action<object>> additionalActions = null)
+        private DataSet(DataSet<T,TImpl> baseDataSet, FilterSpec newFilterSpec = null, SortOrderSpec newSortSpec = null, IEnumerable<Expression<Func<T,object>>> additionalRelations = null, IEnumerable<Action<object>> additionalActions = null, ProjectionSpec projectionSpec = null)
         {
             if (baseDataSet._newObjects != null && baseDataSet._newObjects.Count > 0)
                 throw new Exception("DataSet with added objects can't be chained");
@@ -63,6 +63,7 @@ namespace Iridium.DB
 
             _filter = newFilterSpec ?? baseDataSet._filter;
             _sortOrder = newSortSpec ?? baseDataSet._sortOrder;
+            _projection = projectionSpec ?? baseDataSet._projection;
 
             if (baseDataSet._relationsToLoad != null)
                 _relationsToLoad = new List<Expression<Func<T, object>>>(baseDataSet._relationsToLoad);
@@ -124,10 +125,21 @@ namespace Iridium.DB
 
         private IEnumerable<T> Enumerate()
         {
-            if (_newObjects != null && _newObjects.Count > 0)
+            if (_newObjects is { Count: > 0 })
                 throw new Exception("Trying to enumerate dataset with pending changes");
 
-            return _repository.List(_repository.CreateQuerySpec(_filter, sortSpec: _sortOrder, skip: _skip, take: _take), _relationsToLoad, _parentRelation, _parentObject, _actions).Cast<T>();
+            return _repository.List(
+                _repository.CreateQuerySpec(
+                    _filter, 
+                    sortSpec: _sortOrder,
+                    projectionSpec: _projection,
+                    skip: _skip, 
+                    take: _take), 
+                _relationsToLoad, 
+                _parentRelation, 
+                _parentObject, 
+                _actions)
+                .Cast<T>();
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -310,7 +322,7 @@ namespace Iridium.DB
 
         public IProjectedDataSet<TResult,T> Select<TResult>(Expression<Func<T, TResult>> selector)
         {
-            return new ProjectedDataSet<TResult, T>(this, selector);
+            return new ProjectedDataSet<TResult, T>(new DataSet<T, TImpl>(this, projectionSpec: new ProjectionSpec(selector)), selector);
         }
 
         public T First()
