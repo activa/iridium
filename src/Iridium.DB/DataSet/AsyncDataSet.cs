@@ -91,6 +91,11 @@ namespace Iridium.DB
             return new AsyncDataSet<T>(_dataSet.Take(n));
         }
 
+        public IAsyncDataSet<T> Distinct()
+        {
+            throw new NotImplementedException();
+        }
+
         public IDataSet<T> Sync()
         {
             return _dataSet;
@@ -233,12 +238,10 @@ namespace Iridium.DB
         public Task<decimal> Average(Expression<Func<T, decimal>> expression, Expression<Func<T, bool>> filter) => Task.Run(() => _dataSet.Average(expression));
         public Task<decimal?> Average(Expression<Func<T, decimal?>> expression, Expression<Func<T, bool>> filter) => Task.Run(() => _dataSet.Average(expression));
 
-
         public Task<bool> Any()
         {
             return Task.Run(() => _dataSet.Any());
         }
-
 
         public Task<bool> Any(Expression<Func<T, bool>> filter)
         {
@@ -298,6 +301,11 @@ namespace Iridium.DB
         public Task<ILookup<TKey, TValue>> ToLookup<TKey, TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector, IEqualityComparer<TKey> comparer)
         {
             return Task.Run(() => _dataSet.ToLookup(keySelector, valueSelector, comparer));
+        }
+
+        public IAsyncProjectedDataSet<TResult, T> Select<TResult>(Expression<Func<T, TResult>> selector)
+        {
+            return new AsyncProjectedDataSet<TResult,T>((ProjectedDataSet<TResult, T>)_dataSet.Select(selector));
         }
 
         public Task<List<TSelect>> Select<TSelect>(Func<T, TSelect> selectClause)

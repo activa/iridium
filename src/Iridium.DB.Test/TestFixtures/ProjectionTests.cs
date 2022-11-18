@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace Iridium.DB.Test
@@ -87,18 +88,19 @@ namespace Iridium.DB.Test
 
             using (var loggingContext = DB.StartSqlLogging())
             {
-                var recs = filtererdCustomers.Select(c => new { orders = c.Orders.ToList(), age = c.Age * 2, name=c.Name }).ToList();
+                var recs = filtererdCustomers.Select(c => new { orders = c.Orders, age = c.Age * 2, name=c.Name }).ToList();
+
+                string sql = loggingContext.LogEntries.Last().Sql;
 
                 Assert.That(recs[0].orders.Count, Is.EqualTo(1));
 
-                string sql = loggingContext.LogEntries.Last().Sql;
 
                 Assert.That(NumFieldsQueried(sql), Is.EqualTo(3));
             }
 
             using (var loggingContext = DB.StartSqlLogging())
             {
-                var recs = filtererdCustomers.Select(c => new Wrapper<Customer>(c)).ToList();
+                var recs = filtererdCustomers.OrderBy(c => c.CustomerID).Select(c => new Wrapper<Customer>(c)).ToList();
 
                 Assert.That(recs[0].Obj.CustomerID, Is.EqualTo(1));
                 Assert.That(recs[0].Obj.Name, Is.EqualTo("Customer A"));
@@ -148,7 +150,6 @@ namespace Iridium.DB.Test
             InsertRecord(new Customer() { Name = "Customer C", Age = 23 });
             InsertRecord(new Customer() { Name = "Customer C", Age = 23 });
 
-
             var customers = DB.Customers;
 
             using (var loggingContext = DB.StartSqlLogging())
@@ -165,6 +166,33 @@ namespace Iridium.DB.Test
 
                 Assert.That(combos.Count, Is.EqualTo(4));
 
+            }
+        }
+
+        [Test]
+        public async Task TestDistinctAsync()
+        {
+            InsertRecord(new Customer() { Name = "Customer A", Age = 20 });
+            InsertRecord(new Customer() { Name = "Customer B", Age = 21 });
+            InsertRecord(new Customer() { Name = "Customer B", Age = 22 });
+            InsertRecord(new Customer() { Name = "Customer C", Age = 23 });
+            InsertRecord(new Customer() { Name = "Customer C", Age = 23 });
+
+            var customers = DB.Customers;
+
+            using (var loggingContext = DB.StartSqlLogging())
+            {
+                var names = await customers.Async().Select(c => c.Name).Distinct().ToList();
+
+                Assert.That(names.Count, Is.EqualTo(3));
+
+                var ages = await customers.Async().Select(c => c.Age).Distinct().ToList();
+
+                Assert.That(ages.Count, Is.EqualTo(4));
+
+                var combos = await customers.Async().Select(c => new { name = c.Name, age = c.Age }).Distinct().ToList();
+
+                Assert.That(combos.Count, Is.EqualTo(4));
             }
         }
 

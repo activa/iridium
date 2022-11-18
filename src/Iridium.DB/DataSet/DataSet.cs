@@ -457,18 +457,20 @@ namespace Iridium.DB
 
         public IObjectEvents<T> Events => _repository.Events<T>();
 
+        public Task<List<T>> ToListAsync() => Task.Run(this.ToList);
+        public Task<T[]> ToArrayAsync() => Task.Run(this.ToArray);
 
-        public Task<T> FirstAsync() => Task.Run(() => First());
+        public Task<T> FirstAsync() => Task.Run(First);
         public Task<T> FirstAsync(Expression<Func<T, bool>> filter) => Task.Run(() => First(filter));
 
-        public Task<T> FirstOrDefaultAsync() => Task.Run(() => FirstOrDefault());
+        public Task<T> FirstOrDefaultAsync() => Task.Run(FirstOrDefault);
         public Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> filter) => Task.Run(() => FirstOrDefault(filter));
         
         public Task<bool> AnyAsync(Expression<Func<T, bool>> filter) => Task.Run(() => Any(filter));
         public Task<bool> AllAsync(Expression<Func<T, bool>> filter) => Task.Run(() => All(filter));
-        public Task<bool> AnyAsync() => Task.Run(() => Any());
+        public Task<bool> AnyAsync() => Task.Run(Any);
         
-        public Task<long> CountAsync() => Task.Run(() => Count());
+        public Task<long> CountAsync() => Task.Run(Count);
         public Task<long> CountAsync(Expression<Func<T, bool>> filter) => Task.Run(() => Count(filter));
         
         public Task<TScalar> MaxAsync<TScalar>(Expression<Func<T, TScalar>> expression, Expression<Func<T, bool>> filter) => Task.Run(() => Max(expression, filter));
@@ -497,7 +499,7 @@ namespace Iridium.DB
         public Task<decimal> AverageAsync(Expression<Func<T, decimal>> expression, Expression<Func<T, bool>> filter) => Task.Run(() => Average(expression, filter));
         public Task<decimal?> AverageAsync(Expression<Func<T, decimal?>> expression, Expression<Func<T, bool>> filter) => Task.Run(() => Average(expression, filter));
 
-        public Task PurgeAsync() => Task.Run(() => Purge());
+        public Task PurgeAsync() => Task.Run(Purge);
 
         public Task<T> ReadAsync(object key, params Expression<Func<T, object>>[] relationsToLoad) => Task.Run(() => Read(key, relationsToLoad));
         public Task<T> ReadAsync(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] relationsToLoad) => Task.Run(() => Read(condition, relationsToLoad));
@@ -515,7 +517,7 @@ namespace Iridium.DB
         public Task<bool> InsertAsync(IEnumerable<T> objects, bool? deferSave, params Expression<Func<T, object>>[] relationsToSave) => Task.Run(() => Insert(objects, deferSave, relationsToSave));
         public Task<bool> UpdateAsync(IEnumerable<T> objects, params Expression<Func<T, object>>[] relationsToSave) => Task.Run(() => Update(objects, relationsToSave));
         public Task<bool> DeleteAsync(IEnumerable<T> objects) => Task.Run(() => Delete(objects));
-        public Task<bool> DeleteAllAsync() => Task.Run(() => DeleteAll());
+        public Task<bool> DeleteAllAsync() => Task.Run(DeleteAll);
         public Task<bool> DeleteAsync(Expression<Func<T, bool>> filter) => Task.Run(() => Delete(filter));
     }
 }

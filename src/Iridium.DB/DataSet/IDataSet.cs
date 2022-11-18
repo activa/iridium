@@ -123,6 +123,9 @@ namespace Iridium.DB
 
         // Async methods
 
+        Task<List<T>> ToListAsync();
+        Task<T[]> ToArrayAsync();
+
         Task<T> FirstAsync();
         Task<T> FirstAsync(Expression<Func<T, bool>> filter);
         Task<T> FirstOrDefaultAsync();
@@ -184,8 +187,5 @@ namespace Iridium.DB
 
         Task<bool> DeleteAllAsync();
         Task<bool> DeleteAsync(Expression<Func<T, bool>> filter);
-
-
-
     }
 }

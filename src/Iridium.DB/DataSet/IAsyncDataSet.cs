@@ -102,6 +102,9 @@ namespace Iridium.DB
         Task<ILookup<TKey, TValue>> ToLookup<TKey,TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector);
         Task<ILookup<TKey, TValue>> ToLookup<TKey, TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector, IEqualityComparer<TKey> comparer);
 
+        IAsyncProjectedDataSet<TResult, T> Select<TResult>(Expression<Func<T, TResult>> selector);
+        IAsyncDataSet<T> Distinct();
+
         IDataSet<T> Sync();
     }
 }
