@@ -4,7 +4,6 @@ using NUnit.Framework;
 
 namespace Iridium.DB.Test
 {
-    [TestFixture("memory", Category = "memory")]
     [TestFixture("sqlitemem", Category = "sqlite-mem")]
     [TestFixture("sqlserver", Category = "sqlserver")]
     [TestFixture("sqlite", Category = "sqlite")]
@@ -19,6 +18,9 @@ namespace Iridium.DB.Test
         [Test]
         public async Task MultiThreadedTransactionRollback()
         {
+            if (DB.DataProvider is SqliteDataProvider)
+                return;
+            
             int numThreads = 10;
 
             var tasks = new Task[numThreads];
@@ -29,7 +31,6 @@ namespace Iridium.DB.Test
             }
 
             await Task.WhenAll(tasks);
-
         }
 
         [Test]

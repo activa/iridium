@@ -50,7 +50,7 @@ namespace Iridium.DB
         {
             var relations = Schema.BuildPreloadRelationSet();
 
-            var objects = from o in DataProvider.GetObjects(filter.Native, Schema, filter.Projection)
+            var objects = from o in DataProvider.GetObjects(filter.Native, Schema, filter.Projection, null, out _)
                           select Ir.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance(Schema.ObjectType), o), relations);
 
             if (parentRelation?.ReverseRelation != null)

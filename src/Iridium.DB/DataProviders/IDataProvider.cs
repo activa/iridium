@@ -32,8 +32,8 @@ namespace Iridium.DB
     public interface IDataProvider : IDisposable
     {
         object GetScalar(Aggregate aggregate, INativeQuerySpec nativeQuerySpec, TableSchema schema);
-        IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec filter, TableSchema schema, ProjectionInfo projection);
-        IEnumerable<SerializedEntity> GetObjectsWithPrefetch(INativeQuerySpec filter, TableSchema schema, ProjectionInfo projection, IEnumerable<TableSchema.Relation> prefetchRelations, out IEnumerable<Dictionary<TableSchema.Relation, SerializedEntity>> relatedEntities);
+        //IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec filter, TableSchema schema, ProjectionInfo projection);
+        IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec filter, TableSchema schema, ProjectionInfo projection, IEnumerable<TableSchema.Relation> prefetchRelations, out IEnumerable<Dictionary<TableSchema.Relation, SerializedEntity>> relatedEntities);
         ObjectWriteResult WriteObject(SerializedEntity o, bool? createNew, TableSchema schema);
         SerializedEntity ReadObject(Dictionary<string,object> keys, TableSchema schema);
         bool DeleteObject(SerializedEntity o, TableSchema schema);

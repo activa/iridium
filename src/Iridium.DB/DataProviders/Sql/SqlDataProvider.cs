@@ -103,35 +103,35 @@ namespace Iridium.DB
             return record[valueAlias];
         }
 
-        public IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec filter, TableSchema schema, ProjectionInfo projection)
-        {
-            try
-            {
-                SqlQuerySpec sqlQuerySpec = ((SqlQuerySpec) filter) ?? new SqlQuerySpec {FilterSql = null, TableAlias = SqlNameGenerator.NextTableAlias()};
-
-                var fieldList = (from f in projection.Fields(schema) select new { Field = f, Alias = SqlNameGenerator.NextFieldAlias() }).ToArray();
-
-                var columns = fieldList.Select(field => new SqlColumnNameWithAlias(sqlQuerySpec.TableAlias + "." + field.Field.MappedName, field.Alias)).ToArray();
-
-                string sql = SqlDialect.SelectSql(
-                    new SqlTableNameWithAlias(schema.MappedName, sqlQuerySpec.TableAlias),
-                    columns,
-                    sqlQuerySpec.FilterSql,
-                    sqlQuerySpec.Joins,
-                    sqlQuerySpec.SortExpressionSql,
-                    sqlQuerySpec.Skip + 1,
-                    sqlQuerySpec.Take,
-                    distinct: projection?.Distinct ?? false
-                    );
-
-                return from record in ExecuteSqlReader(sql, sqlQuerySpec.SqlParameters)
-                    select new SerializedEntity(fieldList.ToDictionary(c => c.Field.MappedName, c => record[c.Alias].Convert(c.Field.FieldType)));
-            }
-            finally
-            {
-                SqlNameGenerator.Reset();
-            }
-        }
+        // public IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec filter, TableSchema schema, ProjectionInfo projection)
+        // {
+        //     try
+        //     {
+        //         SqlQuerySpec sqlQuerySpec = ((SqlQuerySpec) filter) ?? new SqlQuerySpec {FilterSql = null, TableAlias = SqlNameGenerator.NextTableAlias()};
+        //
+        //         var fieldList = (from f in projection.Fields(schema) select new { Field = f, Alias = SqlNameGenerator.NextFieldAlias() }).ToArray();
+        //
+        //         var columns = fieldList.Select(field => new SqlColumnNameWithAlias(sqlQuerySpec.TableAlias + "." + field.Field.MappedName, field.Alias)).ToArray();
+        //
+        //         string sql = SqlDialect.SelectSql(
+        //             new SqlTableNameWithAlias(schema.MappedName, sqlQuerySpec.TableAlias),
+        //             columns,
+        //             sqlQuerySpec.FilterSql,
+        //             sqlQuerySpec.Joins,
+        //             sqlQuerySpec.SortExpressionSql,
+        //             sqlQuerySpec.Skip + 1,
+        //             sqlQuerySpec.Take,
+        //             distinct: projection?.Distinct ?? false
+        //             );
+        //
+        //         return from record in ExecuteSqlReader(sql, sqlQuerySpec.SqlParameters)
+        //             select new SerializedEntity(fieldList.ToDictionary(c => c.Field.MappedName, c => record[c.Alias].Convert(c.Field.FieldType)));
+        //     }
+        //     finally
+        //     {
+        //         SqlNameGenerator.Reset();
+        //     }
+        // }
 
         private class PrefetchFieldDefinition
         {
@@ -140,15 +140,20 @@ namespace Iridium.DB
             public TableSchema.Field Field;
         }
         
-        public IEnumerable<SerializedEntity> GetObjectsWithPrefetch(INativeQuerySpec filter, TableSchema schema, ProjectionInfo projection, IEnumerable<TableSchema.Relation> prefetchRelations, out IEnumerable<Dictionary<TableSchema.Relation, SerializedEntity>> relatedEntities)
+        public IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec filter, TableSchema schema, ProjectionInfo projection, IEnumerable<TableSchema.Relation> prefetchRelations, out IEnumerable<Dictionary<TableSchema.Relation, SerializedEntity>> relatedEntities)
         {
             try
             {
                 SqlQuerySpec sqlQuerySpec = ((SqlQuerySpec)filter) ?? new SqlQuerySpec { FilterSql = null, TableAlias = SqlNameGenerator.NextTableAlias() };
 
-                var fields = new HashSet<TableSchema.Field>(projection.Fields(schema));
-                var rootFields = new HashSet<TableSchema.Field>(fields);
-                rootFields.IntersectWith(schema.Fields);
+                var projectionRelations = new ReadOnlySet<TableSchema.Relation>(projection?.RelationsReferenced);
+                var toOneRelations = new ReadOnlySet<TableSchema.Relation>(prefetchRelations?.Where(r => r.IsToOne && r.LocalSchema == schema));
+                var toManyRelations = new ReadOnlySet<TableSchema.Relation>(prefetchRelations?.Where(r => !r.IsToOne && r.LocalSchema == schema));
+
+                var joinRelations = projectionRelations.Union(toOneRelations);
+
+                var projectionFields = new HashSet<TableSchema.Field>(projection.Fields(schema));
+                var rootFields = new ReadOnlySet<TableSchema.Field>(projectionFields).Intersection(schema.Fields);
 
                 var fieldList = (from f in rootFields select new { Field = f, Alias = SqlNameGenerator.NextFieldAlias() }).ToList();
 
@@ -156,12 +161,12 @@ namespace Iridium.DB
                 var fieldsByRelation = new Dictionary<TableSchema.Relation, PrefetchFieldDefinition[]>();
                 var foreignKeyAliases = new Dictionary<TableSchema.Relation, string>();
 
-                foreach (var prefetchRelation in prefetchRelations)
+                foreach (var joinRelation in joinRelations)
                 {
                     var sqlJoin = new SqlJoinDefinition
                     (
-                        new SqlJoinPart(schema, prefetchRelation.LocalField, sqlQuerySpec.TableAlias),
-                        new SqlJoinPart(prefetchRelation.ForeignSchema, prefetchRelation.ForeignField, SqlNameGenerator.NextTableAlias()),
+                        new SqlJoinPart(schema, joinRelation.LocalField, sqlQuerySpec.TableAlias),
+                        new SqlJoinPart(joinRelation.ForeignSchema, joinRelation.ForeignField, SqlNameGenerator.NextTableAlias()),
                         SqlJoinType.LeftOuter
                     );
 
@@ -176,46 +181,55 @@ namespace Iridium.DB
                         joins.Add(sqlJoin);
                     }
 
-                    var foreignFields = new HashSet<TableSchema.Field>(prefetchRelation.ForeignSchema.Fields);
+                    var foreignFields = new HashSet<TableSchema.Field>(joinRelation.ForeignSchema.Fields);
 
-                    if (projection != null)
+                    if (projection != null && !toOneRelations.Contains(joinRelation))
                     {
-                        foreignFields.IntersectWith(fields);
-                        foreignFields.Add(prefetchRelation.ForeignField);
+                        foreignFields.IntersectWith(projectionFields);
+                        foreignFields.Add(joinRelation.ForeignField);
                     }
 
                     var relationFields = foreignFields.Select(f => new PrefetchFieldDefinition {Field = f, FieldAlias = SqlNameGenerator.NextFieldAlias(), TableAlias = sqlJoin.Right.Alias}).ToArray();
 
-                    fieldsByRelation[prefetchRelation] = relationFields;
-                    foreignKeyAliases[prefetchRelation] = relationFields.First(f => f.Field == prefetchRelation.ForeignField).FieldAlias;
+                    fieldsByRelation[joinRelation] = relationFields;
+                    foreignKeyAliases[joinRelation] = relationFields.First(f => f.Field == joinRelation.ForeignField).FieldAlias;
                 }
+
+                var columns = fieldList
+                    .Select(field => new SqlColumnNameWithAlias(sqlQuerySpec.TableAlias + "." + field.Field.MappedName, field.Alias))
+                    .Union(
+                        fieldsByRelation.SelectMany(kv => kv.Value.Select(f => new SqlColumnNameWithAlias(f.TableAlias + "." + f.Field.MappedName, f.FieldAlias)))
+                    );
 
                 string sql = SqlDialect.SelectSql(
                     new SqlTableNameWithAlias(schema.MappedName, sqlQuerySpec.TableAlias),
-                    fieldList
-                        .Select(field => new SqlColumnNameWithAlias(sqlQuerySpec.TableAlias + "." + field.Field.MappedName, field.Alias))
-                        .Union(
-                            fieldsByRelation.SelectMany(kv => kv.Value.Select(f => new SqlColumnNameWithAlias(f.TableAlias + "." + f.Field.MappedName, f.FieldAlias)))
-                            )
-                        ,
+                    columns,
                     sqlQuerySpec.FilterSql,
                     joins,
                     sqlQuerySpec.SortExpressionSql,
                     sqlQuerySpec.Skip + 1,
-                    sqlQuerySpec.Take
+                    sqlQuerySpec.Take,
+                    distinct: projection?.Distinct ?? false
                     );
 
                 var records = ExecuteSqlReader(sql, sqlQuerySpec.SqlParameters ?? null).ToArray();
-
-                relatedEntities = records.Select(
-                    rec => prefetchRelations.ToDictionary(
-                                relation => relation, 
-                                relation => rec[foreignKeyAliases[relation]] == null ? // checks if related record was found
-                                    null 
-                                    : 
-                                    new SerializedEntity(fieldsByRelation[relation].ToDictionary(f => f.Field.MappedName, f => rec[f.FieldAlias].Convert(f.Field.FieldType)))
-                            )
-                        ).ToList();
+                
+                if (joinRelations.Any())
+                {
+                    relatedEntities = records.Select(
+                        rec => joinRelations.ToDictionary(
+                            relation => relation,
+                            relation => rec[foreignKeyAliases[relation]] == null ? // checks if related record was found
+                                null
+                                :
+                                new SerializedEntity(fieldsByRelation[relation].ToDictionary(f => f.Field.MappedName, f => rec[f.FieldAlias].Convert(f.Field.FieldType)))
+                        )
+                    ).ToList();
+                }
+                else
+                {
+                    relatedEntities = null;
+                }
 
                 return from record in records select new SerializedEntity(fieldList.ToDictionary(c => c.Field.MappedName, c => record[c.Alias].Convert(c.Field.FieldType)));
             }

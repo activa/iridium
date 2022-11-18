@@ -141,7 +141,7 @@ namespace Iridium.DB
 
             var relations = Schema.BuildPreloadRelationSet();
 
-            var objects = from o in DataProvider.GetObjects(querySpec.Native, Schema, null)
+            var objects = from o in DataProvider.GetObjects(querySpec.Native, Schema, null, null, out _)
                           let x = Ir.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance<T>(), o), relations)
                           where querySpec.Code == null || querySpec.Code.IsFilterMatch(x)
                           select x;
@@ -162,43 +162,28 @@ namespace Iridium.DB
 
         internal IEnumerable<T> List(QuerySpec filter, IEnumerable<LambdaExpression> relationLambdas, TableSchema.Relation parentRelation, object parentObject, IEnumerable<Action<object>> actions)
         {
-            IEnumerable<T> objects;
-
             var relations = Schema.BuildPreloadRelationSet(LambdaRelationFinder.FindRelations(relationLambdas, Schema));
 
-            if (filter.Projection is { RelationsReferenced: { } })
-            {
-                if (relations != null) 
-                    relations.UnionWith(filter.Projection.RelationsReferenced);
-                else
-                    relations = filter.Projection.RelationsReferenced;
-            }
+            var objects = DataProvider
+                .GetObjects(filter.Native, Schema, filter.Projection, relations, out var relatedEntities)
+                .Select(entity => Schema.UpdateObject(Activator.CreateInstance<T>(), entity));
 
-            var prefetchRelations = relations?.Where(r => r.IsToOne && r.LocalSchema == Schema).ToList();
-
-            if (prefetchRelations is { Count: > 0 } && DataProvider.SupportsRelationPrefetch)
+            if (relatedEntities != null)
             {
-                objects = DataProvider
-                    .GetObjectsWithPrefetch(filter.Native, Schema, filter.Projection, prefetchRelations, out var relatedEntities)
-                    .Select(entity => Schema.UpdateObject(Activator.CreateInstance<T>(), entity))
-                    .Zip(relatedEntities, (obj, relationEntities) =>
+                objects = objects.Zip(relatedEntities, (obj, relationEntities) =>
+                {
+                    foreach (var entity in relationEntities)
                     {
-                        foreach (var entity in relationEntities)
-                        {
-                            var relation = entity.Key;
+                        var relation = entity.Key;
 
-                            obj = relation.SetField(obj, entity.Value == null ? null : relation.ForeignSchema.UpdateObject(Activator.CreateInstance(relation.FieldType), entity.Value));
-                        }
+                        obj = relation.SetField(obj, entity.Value == null ? null : relation.ForeignSchema.UpdateObject(Activator.CreateInstance(relation.FieldType), entity.Value));
+                    }
 
-                        return obj;
-                    })
-                    .Select(item => Ir.WithLoadedRelations(item, relations));
-
+                    return obj;
+                });
             }
-            else
-            {
-                objects = from o in DataProvider.GetObjects(filter.Native, Schema, filter.Projection) select Ir.WithLoadedRelations(Schema.UpdateObject(Activator.CreateInstance<T>(), o), relations);
-            }
+
+            objects = objects.Select(item => Ir.WithLoadedRelations(item, relations));
 
             if (parentRelation?.ReverseRelation != null)
                 objects = from o in objects select parentRelation.ReverseRelation.SetField(o, parentObject);
@@ -247,7 +232,7 @@ namespace Iridium.DB
             if (filter.Native != null)
                 return DataProvider.DeleteObjects(filter.Native, Schema);
 
-            var objects = from o in DataProvider.GetObjects(null, Schema, null)
+            var objects = from o in DataProvider.GetObjects(null, Schema, null, null, out _)
                           let x = Schema.UpdateObject(Activator.CreateInstance<T>(), o)
                           where filter.Code.IsFilterMatch(x)
                           select x;
