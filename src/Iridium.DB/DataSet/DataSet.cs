@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -51,9 +52,16 @@ namespace Iridium.DB
             _parentObject = parentObject;
         }
 
-        private DataSet(DataSet<T,TImpl> baseDataSet, FilterSpec newFilterSpec = null, SortOrderSpec newSortSpec = null, IEnumerable<Expression<Func<T,object>>> additionalRelations = null, IEnumerable<Action<object>> additionalActions = null, ProjectionSpec projectionSpec = null)
+        private DataSet(
+            DataSet<T,TImpl> baseDataSet, 
+            FilterSpec newFilterSpec = null, 
+            SortOrderSpec newSortSpec = null, 
+            IEnumerable<Expression<Func<T,object>>> additionalRelations = null, 
+            IEnumerable<Action<object>> additionalActions = null, 
+            ProjectionSpec projectionSpec = null
+            )
         {
-            if (baseDataSet._newObjects != null && baseDataSet._newObjects.Count > 0)
+            if (baseDataSet._newObjects is { Count: > 0 })
                 throw new Exception("DataSet with added objects can't be chained");
 
             _repository = baseDataSet._repository;
@@ -323,6 +331,14 @@ namespace Iridium.DB
         public IProjectedDataSet<TResult,T> Select<TResult>(Expression<Func<T, TResult>> selector)
         {
             return new ProjectedDataSet<TResult, T>(new DataSet<T, TImpl>(this, projectionSpec: new ProjectionSpec(selector)), selector);
+        }
+
+        public IDataSet<T> Distinct()
+        {
+            if (_projection == null)
+                throw new Exception("Distinct() can only be called after Select()");
+
+            return new DataSet<T, TImpl>(this, projectionSpec: new ProjectionSpec(_projection, true));
         }
 
         public T First()

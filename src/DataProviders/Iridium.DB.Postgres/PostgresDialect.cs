@@ -48,15 +48,15 @@ namespace Iridium.DB.Postgres
             return "@" + parameterName;
         }
 
-        public override string SelectSql(SqlTableNameWithAlias tableName, IEnumerable<SqlExpressionWithAlias> columns, string sqlWhere, IEnumerable<SqlJoinDefinition> joins = null, string sqlSortExpression = null, int? start = null, int? numRecords = null, string afterSelect = null)
+        public override string SelectSql(SqlTableNameWithAlias tableName, IEnumerable<SqlExpressionWithAlias> columns, string sqlWhere, IEnumerable<SqlJoinDefinition> joins = null, string sqlSortExpression = null, int? start = null, int? numRecords = null, string afterSelect = null, bool distinct = false)
         {
             if (start == null && numRecords == null)
-                return base.SelectSql(tableName, columns, sqlWhere, joins, sqlSortExpression);
+                return base.SelectSql(tableName, columns, sqlWhere, joins, sqlSortExpression, distinct: distinct);
 
             if (start == null)
-                return base.SelectSql(tableName, columns, sqlWhere, joins, sqlSortExpression, numRecords: numRecords);
+                return base.SelectSql(tableName, columns, sqlWhere, joins, sqlSortExpression, numRecords: numRecords, distinct:distinct);
 
-            string sql = base.SelectSql(tableName, columns, sqlWhere, joins, sqlSortExpression, numRecords: numRecords);
+            string sql = base.SelectSql(tableName, columns, sqlWhere, joins, sqlSortExpression, numRecords: numRecords, distinct:distinct);
 
             if (start.Value > 1)
                 sql += " OFFSET " + (start-1);

@@ -81,6 +81,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestFixtures\MySqlTests.cs" />
     <Compile Include="TestFixtures\PostgresTests.cs" />
+    <Compile Include="TestFixtures\ProjectionTests.cs" />
     <Compile Include="TestFixtures\RelationTests.cs" />
     <Compile Include="TestFixture.cs" />
     <Compile Include="TestFixtures\SqlServerTests.cs" />

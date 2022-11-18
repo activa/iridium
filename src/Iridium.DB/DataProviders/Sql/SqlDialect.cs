@@ -45,12 +45,12 @@ namespace Iridium.DB
             Count
         }
 
-        public virtual string SelectSql(SqlTableNameWithAlias tableName, IEnumerable<SqlExpressionWithAlias> columns, string sqlWhere, IEnumerable<SqlJoinDefinition> joins = null, string sqlSortExpression = null, int? start = null, int? numRecords = null, string afterSelect = null)
+        public virtual string SelectSql(SqlTableNameWithAlias tableName, IEnumerable<SqlExpressionWithAlias> columns, string sqlWhere, IEnumerable<SqlJoinDefinition> joins = null, string sqlSortExpression = null, int? start = null, int? numRecords = null, string afterSelect = null, bool distinct = false)
         {
             var parts = new List<string>
             {
                 "select", 
-                string.Join(",", columns.Select(c => $"{(c.ShouldQuote ? QuoteField(c.Expression) : c.Expression)} as {c.Alias}")), 
+                (distinct ? "distinct " : "") + string.Join(",", columns.Select(c => $"{(c.ShouldQuote ? QuoteField(c.Expression) : c.Expression)} as {c.Alias}")), 
                 "from", 
                 QuoteTable(tableName.TableName)
             };

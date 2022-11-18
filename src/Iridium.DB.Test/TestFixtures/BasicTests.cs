@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
@@ -975,86 +974,5 @@ namespace Iridium.DB.Test
                 Assert.That(sqlProvider.SqlLogger, Is.Null);
             }
         }
-    }
-
-
-    [TestFixture("memory", Category = "memory")]
-    [TestFixture("sqlitemem", Category = "sqlite-mem")]
-    [TestFixture("sqlserver", Category = "sqlserver")]
-    [TestFixture("sqlite", Category = "sqlite")]
-    [TestFixture("mysql", Category = "mysql")]
-    [TestFixture("postgres", Category = "postgres")]
-    public class ProjectionTests : TestFixtureWithEmptyDB
-    {
-        public ProjectionTests(string driver) : base(driver)
-        {
-        }
-
-        [Test]
-        public void Test1()
-        {
-            var customers = InsertRecords<Customer>(100, (customer, i) =>
-            {
-                customer.Name = $"Customer {(char)('A' + 1)}";
-                customer.Age = i + 1;
-            });
-            var orders = InsertRecords<Order>(100, (order, i) =>
-            {
-                order.CustomerID = customers[i-1].CustomerID;
-                order.Remark = "xyz";
-            });
-
-            string s = "";
-
-            var loggingContext = DB.StartSqlLogging();
-
-            var filtererdCustomers = DB.Orders.OrderByDescending(c => c.Customer.Name);
-
-            var ids = filtererdCustomers.Select(c => new { age = c.Customer.Age  * 2, remark = c.Remark, customer = c.Customer}).ToList();
-
-            
-            DB.StopSqlLogging(loggingContext);
-
-            string sql = loggingContext.LogEntries.First().Sql;
-
-            Assert.That(NumFieldsQueried(sql), Is.EqualTo(2));
-        }
-
-        [Test]
-        public void Test2()
-        {
-            var customers = InsertRecords<Customer>(100, (customer, i) =>
-            {
-                customer.Name = $"Customer {(char)('A' + 1)}";
-                customer.Age = i + 1;
-            });
-
-            string s = "";
-
-            var loggingContext = DB.StartSqlLogging();
-
-            var filtererdCustomers = DB.Customers.OrderByDescending(c => c.Name);
-
-            var ids = filtererdCustomers.Select(c => new { c = c.Orders.ToList(), age = c.Age * 2, c.Name }).ToList();
-
-            DB.StopSqlLogging(loggingContext);
-
-            string sql = loggingContext.LogEntries.First().Sql;
-
-            Assert.That(NumFieldsQueried(sql), Is.EqualTo(2));
-        }
-
-        private int NumFieldsQueried(string sql)
-        {
-            int fromIndex = sql.IndexOf("from", StringComparison.OrdinalIgnoreCase);
-
-            if (fromIndex < 0)
-            {
-                return 0;
-            }
-
-            return Regex.Matches(sql.Substring(0, fromIndex), "\\.").Count;
-        }
-
     }
 }

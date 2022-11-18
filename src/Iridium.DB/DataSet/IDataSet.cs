@@ -25,7 +25,6 @@
 #endregion
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -49,6 +48,7 @@ namespace Iridium.DB
         IDataSet<T> Take(int n);
 
         IProjectedDataSet<TResult,T> Select<TResult>(Expression<Func<T, TResult>> selector);
+        IDataSet<T> Distinct();
 
         T First();
         T First(Expression<Func<T, bool>> filter);
@@ -187,32 +187,5 @@ namespace Iridium.DB
 
 
 
-    }
-
-    public interface IProjectedDataSet<T, TSource> : IEnumerable<T>
-    {
-    }
-
-    public class ProjectedDataSet<T,TSource> : IProjectedDataSet<T, TSource>
-    {
-        private IDataSet<TSource> _dataSet;
-        private Expression<Func<TSource, T>> _selector;
-
-        public ProjectedDataSet(IDataSet<TSource> dataSet, Expression<Func<TSource, T>> selector)
-        {
-            _dataSet = dataSet;
-            _selector = selector;
-        }
-
-        public IEnumerator<T> GetEnumerator()
-        {
-            return Enumerable.Select(_dataSet, _selector.Compile()).GetEnumerator();
-
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
     }
 }

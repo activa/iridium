@@ -120,7 +120,8 @@ namespace Iridium.DB
                     sqlQuerySpec.Joins,
                     sqlQuerySpec.SortExpressionSql,
                     sqlQuerySpec.Skip + 1,
-                    sqlQuerySpec.Take
+                    sqlQuerySpec.Take,
+                    distinct: projection?.Distinct ?? false
                     );
 
                 return from record in ExecuteSqlReader(sql, sqlQuerySpec.SqlParameters)
@@ -206,12 +207,15 @@ namespace Iridium.DB
 
                 var records = ExecuteSqlReader(sql, sqlQuerySpec.SqlParameters ?? null).ToArray();
 
-                relatedEntities  = records.Select(
+                relatedEntities = records.Select(
                     rec => prefetchRelations.ToDictionary(
                                 relation => relation, 
-                                relation => (rec[foreignKeyAliases[relation]] == null)  ? (SerializedEntity)null : new SerializedEntity(fieldsByRelation[relation].ToDictionary(f => f.Field.MappedName, f => rec[f.FieldAlias].Convert(f.Field.FieldType)))
+                                relation => rec[foreignKeyAliases[relation]] == null ? // checks if related record was found
+                                    null 
+                                    : 
+                                    new SerializedEntity(fieldsByRelation[relation].ToDictionary(f => f.Field.MappedName, f => rec[f.FieldAlias].Convert(f.Field.FieldType)))
                             )
-                        );
+                        ).ToList();
 
                 return from record in records select new SerializedEntity(fieldList.ToDictionary(c => c.Field.MappedName, c => record[c.Alias].Convert(c.Field.FieldType)));
             }
@@ -432,6 +436,7 @@ namespace Iridium.DB
                 var projectionFinder = new ProjectionExpressionParser(schema);
 
                 projectionInfo = projectionFinder.FindFields(((LambdaQueryExpression)projectionSpec.Expression).Expression);
+                projectionInfo.Distinct = projectionSpec.Distinct;
             }
 
             string sortSql = null;

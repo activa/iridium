@@ -33,13 +33,13 @@ namespace Iridium.DB.SqlServer
 {
     public class SqlServerDialect : SqlDialect
     {
-        public override string SelectSql(SqlTableNameWithAlias tableName, IEnumerable<SqlExpressionWithAlias> columns, string sqlWhere, IEnumerable<SqlJoinDefinition> joins = null, string sqlSortExpression = null, int? start = null, int? numRecords = null, string afterSelect = null)
+        public override string SelectSql(SqlTableNameWithAlias tableName, IEnumerable<SqlExpressionWithAlias> columns, string sqlWhere, IEnumerable<SqlJoinDefinition> joins = null, string sqlSortExpression = null, int? start = null, int? numRecords = null, string afterSelect = null, bool distinct = false)
         {
             if (start == null && numRecords == null)
-                return base.SelectSql(tableName, columns, sqlWhere, joins, sqlSortExpression);
+                return base.SelectSql(tableName, columns, sqlWhere, joins, sqlSortExpression, distinct:distinct);
 
             if (start == null)
-                return base.SelectSql(tableName, columns, sqlWhere, joins, sqlSortExpression, afterSelect: "TOP " + numRecords);
+                return base.SelectSql(tableName, columns, sqlWhere, joins, sqlSortExpression, afterSelect: "TOP " + numRecords, distinct:distinct);
 
             string subQueryAlias = SqlNameGenerator.NextTableAlias();
             string rowNumAlias = SqlNameGenerator.NextFieldAlias();

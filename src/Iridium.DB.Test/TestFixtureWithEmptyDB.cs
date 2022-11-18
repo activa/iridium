@@ -17,8 +17,6 @@ namespace Iridium.DB.Test
         [SetUp]
         public void SetupTest()
         {
-            Debug.WriteLine("PurgeAll");
-
             DB.PurgeAll();
         }
     }
