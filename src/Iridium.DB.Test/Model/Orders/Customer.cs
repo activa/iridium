@@ -12,5 +12,7 @@ namespace Iridium.DB.Test
         public ICollection<CustomerPaymentMethodLink> LinkedPaymentMethods { get; set; }
 		
         public IDataSet<Order> Orders { get; set; }
+
+        public const int NUM_MAPPED_FIELDS = 3;
     }
 }

@@ -58,6 +58,42 @@ namespace Iridium.DB.Test
         }
 
         [Test]
+        public void FullRecord()
+        {
+            var customers = DB.Customers.OrderBy(c => c.CustomerID);
+
+            using (var loggingContext = DB.StartSqlLogging())
+            {
+                var results = customers.Select(c => c).ToList();
+
+                Assert.That(results[0].Age, Is.EqualTo(2));
+                Assert.That(results[1].Age, Is.EqualTo(3));
+                Assert.That(results[0].Name, Is.EqualTo("Customer A"));
+                Assert.That(results.Count, Is.EqualTo(10));
+
+                Assert.That(NumFieldsQueried(loggingContext), Is.EqualTo(Customer.NUM_MAPPED_FIELDS));
+            }
+        }
+
+        [Test]
+        public void FullRecordInExpression()
+        {
+            var customers = DB.Customers.OrderBy(c => c.CustomerID);
+
+            using (var loggingContext = DB.StartSqlLogging())
+            {
+                var results = customers.Select(c => new Wrapper<Customer>(c)).ToList();
+
+                Assert.That(results[0].Obj.Age, Is.EqualTo(2));
+                Assert.That(results[1].Obj.Age, Is.EqualTo(3));
+                Assert.That(results[0].Obj.Name, Is.EqualTo("Customer A"));
+                Assert.That(results.Count, Is.EqualTo(10));
+
+                Assert.That(NumFieldsQueried(loggingContext), Is.EqualTo(Customer.NUM_MAPPED_FIELDS));
+            }
+        }
+
+        [Test]
         public void SingleField()
         {
             var orders = DB.Orders.OrderBy(o => o.OrderID);
@@ -156,89 +192,45 @@ namespace Iridium.DB.Test
                 Assert.That(results[1].Customer.Name, Is.EqualTo("Customer B"));
                 Assert.That(results.Count, Is.EqualTo(10));
 
-                Assert.That(NumFieldsQueried(loggingContext), Is.EqualTo(4)); // one extra field for the primary key of the related record
+                Assert.That(NumFieldsQueried(loggingContext), Is.EqualTo(Customer.NUM_MAPPED_FIELDS + 1)); // one extra field for the primary key of the related record
             }
         }
 
-
         [Test]
-        public void Test1()
+        public void SingleRelatedRecord()
         {
-            var orders = DB.Orders.OrderBy(c => c.Customer.Name);
+            var orders = DB.Orders.OrderBy(o => o.OrderID);
 
             using (var loggingContext = DB.StartSqlLogging())
             {
-                var ids = orders.Select(c => new { age = c.Customer.Age * 2, remark = c.Remark }).ToList();
+                var results = orders.Select(o => o.Customer).ToList();
 
-                Assert.That(ids[0].age, Is.EqualTo(4));
+                Assert.That(results[0].Name, Is.EqualTo("Customer A"));
+                Assert.That(results[0].Age, Is.EqualTo(2));
+                Assert.That(results[1].Name, Is.EqualTo("Customer B"));
+                Assert.That(results.Count, Is.EqualTo(10));
 
-                Assert.That(NumFieldsQueried(loggingContext), Is.EqualTo(3)); // one extra field for the primary key of the related record
+                Assert.That(NumFieldsQueried(loggingContext), Is.EqualTo(Customer.NUM_MAPPED_FIELDS)); // one extra field for the primary key of the related record
             }
-
-            using (var loggingContext = DB.StartSqlLogging())
-            {
-                var ids = orders.Select(c => new { age = c.Customer.Age * 2, remark = c.Remark, customer = c.Customer }).ToList();
-
-                int id = ids[0].customer.CustomerID;
-                string sql = loggingContext.LogEntries.First().Sql;
-
-                Assert.That(NumFieldsQueried(loggingContext), Is.EqualTo(4));
-            }
-
-            using (var loggingContext = DB.StartSqlLogging())
-            {
-                var ids = orders.WithRelations(c => c.Customer).Select(c => c).ToList();
-
-                Assert.That(ids[0].Customer.CustomerID, Is.EqualTo(1));
-                Assert.That(ids[0].Customer.Age, Is.EqualTo(2));
-
-                Assert.That(NumFieldsQueried(loggingContext), Is.EqualTo(8));
-            }
-
         }
 
         [Test]
-        public void Test2()
+        public void WithOneToMany()
         {
-            var filtererdCustomers = DB.Customers.OrderBy(c => c.Name);
-
+            var customers = DB.Customers.OrderBy(c => c.CustomerID);
+            
             using (var loggingContext = DB.StartSqlLogging())
             {
-                var recs = filtererdCustomers.Select(c => c.Name).ToList();
+                var recs = customers.Select(c => new { orders = c.Orders, age = c.Age * 2, name=c.Name }).ToList();
 
-                Assert.That(recs[0], Is.EqualTo("Customer A"));
+                Assert.That(loggingContext.LogEntries.Count, Is.EqualTo(1));
 
-                string sql = loggingContext.LogEntries.First().Sql;
-
-                Assert.That(NumFieldsQueried(loggingContext), Is.EqualTo(1));
-
-            }
-
-            using (var loggingContext = DB.StartSqlLogging())
-            {
-                var recs = filtererdCustomers.Select(c => new { orders = c.Orders, age = c.Age * 2, name=c.Name }).ToList();
-
-                string sql = loggingContext.LogEntries.Last().Sql;
-
-                Assert.That(recs[0].orders.Count, Is.EqualTo(1));
+                Assert.That(recs[0].orders.Count(), Is.EqualTo(1));
+                Assert.That(loggingContext.LogEntries.Count, Is.EqualTo(2));
 
 
                 Assert.That(NumFieldsQueried(loggingContext), Is.EqualTo(3));
             }
-
-            using (var loggingContext = DB.StartSqlLogging())
-            {
-                var recs = filtererdCustomers.OrderBy(c => c.CustomerID).Select(c => new Wrapper<Customer>(c)).ToList();
-
-                Assert.That(recs[0].Obj.CustomerID, Is.EqualTo(1));
-                Assert.That(recs[0].Obj.Name, Is.EqualTo("Customer A"));
-                Assert.That(recs[0].Obj.Age, Is.EqualTo(2));
-
-                string sql = loggingContext.LogEntries.First().Sql;
-
-                Assert.That(NumFieldsQueried(loggingContext), Is.EqualTo(3));
-            }
-
         }
 
         private int NumFieldsQueried(SqlLoggingContext loggingContext)

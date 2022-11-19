@@ -303,9 +303,10 @@ namespace Iridium.DB
             finally
             {
                 SQLitePCL.raw.sqlite3_finalize(stmt);
+
+                SqlLogger?.LogSql(sql, parameters?.ToDictionary(p => SqlDialect.CreateParameterExpression(p.Name), p => p.Value), stopwatch?.Elapsed ?? TimeSpan.Zero);
             }
 
-            SqlLogger?.LogSql(sql, parameters?.ToDictionary(p => SqlDialect.CreateParameterExpression(p.Name), p => p.Value), stopwatch?.Elapsed ?? TimeSpan.Zero);
         }
 
         public override void Purge(TableSchema schema)
