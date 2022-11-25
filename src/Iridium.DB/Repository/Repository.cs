@@ -160,7 +160,7 @@ namespace Iridium.DB
         }
 
 
-        internal IEnumerable<T> List(QuerySpec filter, IEnumerable<LambdaExpression> relationLambdas, TableSchema.Relation parentRelation, object parentObject, IEnumerable<Action<object>> actions)
+        internal IEnumerable<T> List(QuerySpec filter, IEnumerable<LambdaExpression> relationLambdas, TableSchema.Relation parentRelation, object parentObject, List<Action<object>> actions)
         {
             var relations = Schema.BuildPreloadRelationSet(LambdaRelationFinder.FindRelations(relationLambdas, Schema));
 
@@ -170,16 +170,35 @@ namespace Iridium.DB
 
             if (relatedEntities != null)
             {
-                objects = objects.Zip(relatedEntities, (obj, relationEntities) =>
+                objects = objects.Zip(relatedEntities, (rootObj, relationEntities) =>
                 {
+                    Dictionary<TableSchema, object> objectsBySchema = null;
+
                     foreach (var entity in relationEntities)
                     {
                         var relation = entity.Key;
+                        var record = entity.Value;
 
-                        obj = relation.SetField(obj, entity.Value == null ? null : relation.ForeignSchema.UpdateObject(Activator.CreateInstance(relation.FieldType), entity.Value));
+                        if (objectsBySchema == null || !objectsBySchema.TryGetValue(relation.LocalSchema, out var obj))
+                            obj = rootObj;
+
+                        if (record == null)
+                        {
+                            relation.SetField(obj, null);
+                        }
+                        else
+                        {
+                            var relationObject = relation.ForeignSchema.UpdateObject(Activator.CreateInstance(relation.FieldType), record);
+
+                            relation.SetField(obj, relationObject);
+
+                            objectsBySchema ??= new Dictionary<TableSchema, object>();
+
+                            objectsBySchema[relation.ForeignSchema] = relationObject;
+                        }
                     }
 
-                    return obj;
+                    return rootObj;
                 });
             }
 
@@ -229,18 +248,10 @@ namespace Iridium.DB
 
         internal bool Delete(QuerySpec filter)
         {
-            if (filter.Native != null)
-                return DataProvider.DeleteObjects(filter.Native, Schema);
+            if (filter.Code != null)
+                throw new Exception("Delete filter not supported");
 
-            var objects = from o in DataProvider.GetObjects(null, Schema, null, null, out _)
-                          let x = Schema.UpdateObject(Activator.CreateInstance<T>(), o)
-                          where filter.Code.IsFilterMatch(x)
-                          select x;
-
-            foreach (var o in objects.ToArray())
-                DataProvider.DeleteObject(Schema.SerializeObject(o), Schema);
-
-            return true;
+            return DataProvider.DeleteObjects(filter.Native, Schema);
         }
     }
 

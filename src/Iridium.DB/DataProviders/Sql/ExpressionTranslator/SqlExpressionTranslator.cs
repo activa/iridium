@@ -49,11 +49,11 @@ namespace Iridium.DB
             public readonly HashSet<SqlJoinDefinition> Joins = new HashSet<SqlJoinDefinition>();
         }
 
-        private readonly SafeDictionary<Expression, ExpressionMetaData> _metaData = new SafeDictionary<Expression, ExpressionMetaData>();
-        private readonly Dictionary<ParameterExpression, Dictionary<object, string>> _relationAliases = new Dictionary<ParameterExpression, Dictionary<object, string>>();
-        private readonly Stack<SubQuery> _subQueries = new Stack<SubQuery>();
+        private readonly SafeDictionary<Expression, ExpressionMetaData> _metaData = new();
+        private readonly Dictionary<ParameterExpression, Dictionary<object, string>> _relationAliases = new();
+        private readonly Stack<SubQuery> _subQueries = new();
         private ParameterExpression _rootIterator;
-        private readonly Dictionary<ParameterExpression, ParameterExpression> _rootIterators = new Dictionary<ParameterExpression, ParameterExpression>();
+        private readonly Dictionary<ParameterExpression, ParameterExpression> _rootIterators = new();
         private readonly SqlDialect _sqlDialect;
         private readonly string _tableAlias;
         private readonly TableSchema _schema;
@@ -74,7 +74,7 @@ namespace Iridium.DB
 
         private SubQuery CurrentQuery => _subQueries.Peek();
 
-        public QueryParameterCollection SqlParameters { get; } = new QueryParameterCollection();
+        public QueryParameterCollection SqlParameters { get; } = new();
 
         public HashSet<SqlJoinDefinition> Joins => CurrentQuery.Joins;
 
@@ -119,7 +119,7 @@ namespace Iridium.DB
                 var relation = parentMetaData.Schema.Relations[memberName];
                 var leftAlias = _relationAliases[iterator][parentMetaData.Key];
 
-                if (relation != null && relation.IsToOne)
+                if (relation is { IsToOne: true })
                 {
                     if (!_relationAliases[iterator].ContainsKey(relation))
                     {
@@ -143,50 +143,6 @@ namespace Iridium.DB
 
             return null;
         }
-
-        // public void TranslateProjection(QueryExpression queryExpression)
-        // {
-        //     var lambda = ((LambdaQueryExpression)queryExpression).Expression;
-        //
-        //     PrepareForNewExpression(lambda.Parameters[0], _tableAlias, _schema);
-        //
-        //     try
-        //     {
-        //         Translate(lambda);
-        //     }
-        //     catch (SqlExpressionTranslatorException)
-        //     {
-        //         return null; // we couldn't translate the given expression
-        //     }
-        //
-        //     Expression expression = lambda;
-        //
-        //     List<string> fields = new List<string>();
-        //
-        //     for (;;)
-        //     {
-        //         expression = PartialEvaluator.Eval(expression);
-        //
-        //         if (expression.NodeType == ExpressionType.MemberAccess)
-        //         {
-        //             fields.Add(TranslateMember((MemberExpression)expression));
-        //         }
-        //         else
-        //         {
-        //             
-        //         }
-        //     }
-        //
-        //     try
-        //     {
-        //         return Translate(lambda);
-        //     }
-        //     catch (SqlExpressionTranslatorException)
-        //     {
-        //         return null; // we couldn't translate the given expression
-        //     }
-        // }
-        //
 
         public string Translate(QueryExpression queryExpression)
         {
@@ -313,7 +269,7 @@ namespace Iridium.DB
                     case "Trim":
                         return string.Format(_sqlDialect.SqlFunction(SqlDialect.Function.Trim), stringArguments[0]);
                 }
-                
+
                 throw new SqlExpressionTranslatorException(node.ToString());
             }
 
@@ -422,6 +378,11 @@ namespace Iridium.DB
                     return fnName;
             }
 
+            if (node.Member.DeclaringType.IsConstructedGenericType && node.Member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>) && node.Member.Name == "Value")
+            {
+                return Translate(node.Expression);
+            }
+
             if (Translate(node.Expression) != null)
                 throw new SqlExpressionTranslatorException(node.ToString());
 
@@ -509,7 +470,7 @@ namespace Iridium.DB
                     op = "-";
                     break;
                 default:
-                    throw new SqlExpressionTranslatorException(expression.ToString());
+                    return null;
             }
 
             return $"({Translate(expression.Left)} {op} {Translate(expression.Right)})";

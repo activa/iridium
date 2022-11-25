@@ -600,6 +600,46 @@ namespace Iridium.DB.Test
             Assert.That(filtererdCustomers[2].Age, Is.EqualTo(10));
         }
 
+        [Test]
+        public void IsAnyOfIntWithNullableValue()
+        {
+            var customers = InsertRecords<Customer>(100, (customer, i) =>
+            {
+                customer.Name = $"Customer {i + 1}";
+
+                if (i % 2 == 0)
+                    customer.Age = i;
+                else
+                    customer.Age = null;
+            });
+
+            int[] ages = new[] { 4, 6, 8 };
+
+            var filtererdCustomers = DB.Customers.Where(c => c.Age != null).Where(c => c.Age.Value.IsAnyOf(ages)).OrderBy(c => c.CustomerID).ToArray();
+
+            Assert.That(filtererdCustomers.Length, Is.EqualTo(3));
+
+            Assert.That(filtererdCustomers[0].Age, Is.EqualTo(4));
+            Assert.That(filtererdCustomers[1].Age, Is.EqualTo(6));
+            Assert.That(filtererdCustomers[2].Age, Is.EqualTo(8));
+        }
+
+        [Test]
+        public void DateTimeDateRefernceInFilter()
+        {
+            var customers = InsertRecords<Order>(10, (order, i) =>
+            {
+                order.CustomerID = 1;
+                order.OrderDate = DateTime.Now;
+            });
+
+            DateTime? date = DateTime.Now;
+
+            var filtererdOrders = DB.Orders.Where(o => o.OrderDate.Date == date.Value.Date).ToArray();
+
+            Assert.That(filtererdOrders.Length, Is.EqualTo(10));
+        }
+
 
         [Test]
         public void IsAnyOfIntEnumerable()

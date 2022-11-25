@@ -77,6 +77,12 @@ namespace Iridium.DB
             {
                 return FieldInfo.Inspector().GetValue(target);
             }
+#if DEBUG
+            public override string ToString()
+            {
+                return $"<Field:{FieldName}>";
+            }
+#endif
         }
 
         public class Field : FieldOrRelation

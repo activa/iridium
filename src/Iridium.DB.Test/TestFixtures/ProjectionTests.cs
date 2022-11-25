@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Org.BouncyCastle.Security;
 
 namespace Iridium.DB.Test
 {
@@ -49,11 +50,19 @@ namespace Iridium.DB.Test
                 customer.Age = i + 1;
             });
 
-            InsertRecords<Order>(10, (order, i) =>
+            var orders = InsertRecords<Order>(10, (order, i) =>
             {
                 order.CustomerID = customers[i - 1].CustomerID;
                 order.Remark = "xyz" + i;
                 order.SalesPersonID = salesPeople[i - 1].ID;
+            });
+
+            var orderItems = InsertRecords<OrderItem>(100, (item, i) =>
+            {
+                item.Description = "Item" + i;
+                item.Price = i * 100.0;
+                item.Qty = (short)i;
+                item.OrderID = orders[(i-1)%10].OrderID;
             });
         }
 
@@ -90,6 +99,22 @@ namespace Iridium.DB.Test
                 Assert.That(results.Count, Is.EqualTo(10));
 
                 Assert.That(NumFieldsQueried(loggingContext), Is.EqualTo(Customer.NUM_MAPPED_FIELDS));
+            }
+        }
+
+        [Test]
+        public void FullRecordInStaticExpression()
+        {
+            var customers = DB.Customers.OrderBy(c => c.CustomerID);
+
+            using (var loggingContext = DB.StartSqlLogging())
+            {
+                var results = customers.Select(c => StaticClass.Service.Get(c.CustomerID)).ToList();
+
+                Assert.That(results[0].CustomerID, Is.EqualTo(1));
+                Assert.That(results.Count, Is.EqualTo(10));
+
+                Assert.That(NumFieldsQueried(loggingContext), Is.EqualTo(1));
             }
         }
 
@@ -157,6 +182,23 @@ namespace Iridium.DB.Test
                 Assert.That(results.Count, Is.EqualTo(10));
 
                 Assert.That(NumFieldsQueried(loggingContext), Is.EqualTo(2)); // one extra field for the primary key of the related record
+            }
+        }
+
+        [Test]
+        public void SingleFieldFromDeepRelation()
+        {
+            var items = DB.OrderItems.OrderBy(o => o.OrderItemID);
+
+            using (var loggingContext = DB.StartSqlLogging())
+            {
+                var results = items.Select(item => item.Order.Customer.Name).ToList();
+
+                Assert.That(results[0], Is.EqualTo("Customer A"));
+                Assert.That(results[1], Is.EqualTo("Customer B"));
+                Assert.That(results.Count, Is.EqualTo(100));
+
+                Assert.That(NumFieldsQueried(loggingContext), Is.EqualTo(3)); // one extra field for each relation
             }
         }
 
@@ -309,5 +351,15 @@ namespace Iridium.DB.Test
 
 
 
+    }
+
+    public static class StaticClass
+    {
+        public class Svc
+        {
+            public Customer Get(int customerId) => new Customer() { CustomerID = customerId };
+        }
+
+        public static Svc Service => new Svc();
     }
 }

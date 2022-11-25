@@ -100,38 +100,8 @@ namespace Iridium.DB
             if (aggregate == Aggregate.Any)
                 return record != null;
             
-            return record[valueAlias];
+            return record?[valueAlias];
         }
-
-        // public IEnumerable<SerializedEntity> GetObjects(INativeQuerySpec filter, TableSchema schema, ProjectionInfo projection)
-        // {
-        //     try
-        //     {
-        //         SqlQuerySpec sqlQuerySpec = ((SqlQuerySpec) filter) ?? new SqlQuerySpec {FilterSql = null, TableAlias = SqlNameGenerator.NextTableAlias()};
-        //
-        //         var fieldList = (from f in projection.Fields(schema) select new { Field = f, Alias = SqlNameGenerator.NextFieldAlias() }).ToArray();
-        //
-        //         var columns = fieldList.Select(field => new SqlColumnNameWithAlias(sqlQuerySpec.TableAlias + "." + field.Field.MappedName, field.Alias)).ToArray();
-        //
-        //         string sql = SqlDialect.SelectSql(
-        //             new SqlTableNameWithAlias(schema.MappedName, sqlQuerySpec.TableAlias),
-        //             columns,
-        //             sqlQuerySpec.FilterSql,
-        //             sqlQuerySpec.Joins,
-        //             sqlQuerySpec.SortExpressionSql,
-        //             sqlQuerySpec.Skip + 1,
-        //             sqlQuerySpec.Take,
-        //             distinct: projection?.Distinct ?? false
-        //             );
-        //
-        //         return from record in ExecuteSqlReader(sql, sqlQuerySpec.SqlParameters)
-        //             select new SerializedEntity(fieldList.ToDictionary(c => c.Field.MappedName, c => record[c.Alias].Convert(c.Field.FieldType)));
-        //     }
-        //     finally
-        //     {
-        //         SqlNameGenerator.Reset();
-        //     }
-        // }
 
         private class PrefetchFieldDefinition
         {
@@ -147,8 +117,7 @@ namespace Iridium.DB
                 SqlQuerySpec sqlQuerySpec = ((SqlQuerySpec)filter) ?? new SqlQuerySpec { FilterSql = null, TableAlias = SqlNameGenerator.NextTableAlias() };
 
                 var projectionRelations = new ReadOnlySet<TableSchema.Relation>(projection?.RelationsReferenced);
-                var toOneRelations = new ReadOnlySet<TableSchema.Relation>(prefetchRelations?.Where(r => r.IsToOne && r.LocalSchema == schema));
-                var toManyRelations = new ReadOnlySet<TableSchema.Relation>(prefetchRelations?.Where(r => !r.IsToOne && r.LocalSchema == schema));
+                var toOneRelations = new ReadOnlySet<TableSchema.Relation>(prefetchRelations?.Where(r => r.IsToOne/* && r.LocalSchema == schema*/));
 
                 var joinRelations = projectionRelations.Union(toOneRelations);
 
@@ -161,12 +130,23 @@ namespace Iridium.DB
                 var fieldsByRelation = new Dictionary<TableSchema.Relation, PrefetchFieldDefinition[]>();
                 var foreignKeyAliases = new Dictionary<TableSchema.Relation, string>();
 
+                var tableAliases = new Dictionary<TableSchema, string>()
+                {
+                    { schema, sqlQuerySpec.TableAlias }
+                };
+
+                foreach (var joinSchema in joinRelations.SelectMany(r => new[] {r.LocalSchema, r.ForeignSchema}))
+                {
+                    if (!tableAliases.ContainsKey(joinSchema))
+                        tableAliases.Add(joinSchema, SqlNameGenerator.NextTableAlias());
+                }
+
                 foreach (var joinRelation in joinRelations)
                 {
                     var sqlJoin = new SqlJoinDefinition
                     (
-                        new SqlJoinPart(schema, joinRelation.LocalField, sqlQuerySpec.TableAlias),
-                        new SqlJoinPart(joinRelation.ForeignSchema, joinRelation.ForeignField, SqlNameGenerator.NextTableAlias()),
+                        new SqlJoinPart(joinRelation.LocalSchema, joinRelation.LocalField, tableAliases[joinRelation.LocalSchema]),
+                        new SqlJoinPart(joinRelation.ForeignSchema, joinRelation.ForeignField, tableAliases[joinRelation.ForeignSchema]),
                         SqlJoinType.LeftOuter
                     );
 

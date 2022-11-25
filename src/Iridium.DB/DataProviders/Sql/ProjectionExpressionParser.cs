@@ -49,6 +49,9 @@ namespace Iridium.DB
             var leftExpression = memberExpression.Expression;
             var memberName = memberExpression.Member.Name;
 
+            if (leftExpression == null) // static member
+                return memberExpression;
+
             if (leftExpression.NodeType == ExpressionType.Convert)
                 leftExpression = ((UnaryExpression)leftExpression).Operand;
 

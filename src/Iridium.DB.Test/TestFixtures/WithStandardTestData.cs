@@ -270,8 +270,6 @@ namespace Iridium.DB.Test
             Assert.That(orderItems[0].Product, Is.Null);
             Assert.That(orderItems[2].Product.ProductID, Is.EqualTo(orderItems[2].ProductID));
             Assert.That(orderItems[0].Order.Customer.CustomerID, Is.EqualTo(orderItems[0].Order.CustomerID));
-
-            //TODO: check query stats
         }
 
 
